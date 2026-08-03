@@ -1,0 +1,4 @@
+interface:
+  display_name: 'All Things MCP Brand System'
+  short_description: 'Apply the All Things MCP visual identity'
+  default_prompt: 'Use $brand-system to design this artifact in the All Things MCP identity.'

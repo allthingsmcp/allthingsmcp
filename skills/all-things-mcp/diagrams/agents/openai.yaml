@@ -1,0 +1,4 @@
+interface:
+  display_name: 'All Things MCP Diagrams'
+  short_description: 'Create clear branded MCP technical diagrams'
+  default_prompt: 'Use $diagrams to create an All Things MCP technical diagram.'

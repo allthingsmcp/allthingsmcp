@@ -1,0 +1,20 @@
+name: Content correction or request
+description: Report outdated material, an error, or a missing guide
+title: 'Content: '
+labels: [content]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page URL
+  - type: textarea
+    id: issue
+    attributes:
+      label: What should change?
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Primary sources
+      description: Link the official specification or implementation documentation when relevant.

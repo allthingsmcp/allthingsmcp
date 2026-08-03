@@ -1,0 +1,87 @@
+---
+title: 'MCP Architecture: Hosts, Clients, Servers, and Primitives'
+description: Understand the participant boundaries, session model, capability negotiation, and primitives that make up an MCP system.
+contentType: guide
+section: learn
+authors: [All Things MCP Editors]
+status: draft
+tags: [architecture, clients, servers, primitives]
+updatedAt: 2026-08-03
+difficulty: intermediate
+estimatedMinutes: 18
+specVersion: 2025-11-25
+lastVerified: 2026-08-03
+prerequisites: [What Is MCP? A Practical Introduction]
+---
+
+An MCP architecture diagram becomes useful when it shows ownership, not merely boxes. The host, client, and server do different jobs, and a production design should preserve those boundaries.
+
+## Host: the application boundary
+
+The host is the application a person uses. It creates and manages MCP clients, coordinates model access, and decides how capability requests appear in the product. A host can connect to multiple servers by creating multiple client instances.
+
+The host is also where broad product policy belongs. User consent, workspace selection, approval interfaces, and cross-server coordination are application concerns even when protocol messages carry the resulting actions.
+
+## Client: one protocol relationship
+
+An MCP client is created by the host and maintains a connection to one server. This one-client-to-one-server relationship gives the host an isolation boundary. A problem or capability on one server connection does not need to become shared state across every integration.
+
+The client handles protocol duties such as initialization, version negotiation, capability negotiation, request correlation, and notifications. For HTTP transports, later requests also carry the negotiated protocol version header.
+
+## Server: a focused capability surface
+
+The server exposes capabilities for a particular domain. It may run as a local process over standard input/output or as a remote service over Streamable HTTP. The transport changes deployment and security concerns, but the participant relationship remains client-server.
+
+A server can expose three primary kinds of server feature:
+
+- **Resources** are addressable context that clients can read.
+- **Prompts** are reusable templates with optional arguments.
+- **Tools** are operations that may have side effects and return structured results.
+
+These primitives are not interchangeable. If an application only needs to read stable context, a resource is usually clearer than a tool whose name implies an action. A prompt packages interaction guidance; it is not a hidden function call.
+
+## Initialization is architecture, not ceremony
+
+The [lifecycle specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle) requires initialization to be the first client-server interaction. The client sends its requested protocol version, capabilities, and implementation information. The server responds with the version it will use, its capabilities, and implementation information. The client then sends an initialized notification.
+
+This exchange creates a session contract. Implementations should not invoke an optional feature simply because a software package contains a method for it; the feature must have been negotiated for the connection.
+
+## Client-side features reverse the direction
+
+MCP is not only a client calling server functions. Negotiated client capabilities allow servers to request help from the host side:
+
+- **Roots** communicate relevant filesystem or URI boundaries.
+- **Sampling** lets a server request model generation through the client.
+- **Elicitation** lets a server request additional information from a user through the client.
+
+These features should not erase the host’s control. The host decides how requests are surfaced, what requires consent, and what policies apply.
+
+## Draw trust boundaries separately
+
+Protocol topology and trust topology are related but different. A remote server may rely on an external authorization server and several downstream APIs. The access token presented to the MCP server must be intended for that server; it must not be passed through to downstream services. The server may need a separate credential when acting as a client to an upstream API.
+
+For production architecture, draw at least:
+
+1. The user and host application.
+2. Each client-to-server connection.
+3. Process or network boundaries.
+4. Authorization and protected-resource boundaries.
+5. External data services and credential ownership.
+
+## A review checklist
+
+<Checklist
+  items={[
+    'Each client is associated with one server connection',
+    'Optional features are capability-negotiated',
+    'Host policy is not delegated accidentally',
+    'Transport and trust boundaries are both visible',
+    'Downstream credentials are separate from MCP access tokens',
+  ]}
+/>
+
+<MetadataPanel>
+
+Verified against MCP `2025-11-25` on 2026-08-03. Primary sources: [architecture](https://modelcontextprotocol.io/specification/2025-11-25/architecture), [lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle), and the server feature specifications.
+
+</MetadataPanel>

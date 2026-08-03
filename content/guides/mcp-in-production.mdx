@@ -1,0 +1,79 @@
+---
+title: 'MCP in Production: What Changes After the Demo'
+description: The architecture, security, reliability, and observability work required to move an MCP integration beyond a local demo.
+contentType: guide
+section: operate
+authors: [All Things MCP Editors]
+status: draft
+tags: [production, operations, reliability, security]
+updatedAt: 2026-08-03
+difficulty: advanced
+estimatedMinutes: 22
+specVersion: 2025-11-25
+lastVerified: 2026-08-03
+prerequisites: [MCP Architecture, MCP Authorization Explained]
+---
+
+A local MCP demo proves that two implementations can exchange protocol messages. Production asks a different question: can the system remain understandable, secure, and recoverable when identities, networks, versions, failures, and human decisions become real?
+
+## Make the connection inventory explicit
+
+Start by listing every host, client, server, transport, and external service. Record who operates each boundary and where credentials live. A host can manage many clients, but each client maintains a relationship with one server. That relationship is a natural unit for policy, telemetry, timeouts, and failure isolation.
+
+For remote servers, separate the authorization server from the protected MCP server in the architecture even if they share an operator. Show downstream APIs separately and document which credential the MCP server uses for each one.
+
+## Treat initialization as a compatibility gate
+
+Client and server agree on a protocol version and capabilities during initialization. Log the negotiated version and capability sets as low-cardinality session metadata. Reject unsupported combinations early rather than discovering them halfway through a tool call.
+
+Deployment pipelines should test supported version combinations and keep compatibility statements narrower than package-version ranges. A server that starts successfully is not necessarily compatible with every client feature.
+
+## Define operational limits outside the happy path
+
+Every remote request needs timeouts, cancellation behavior, bounded retries, and size limits. Retries are safest for reads or explicitly idempotent operations. A repeated side-effecting tool call can duplicate work unless the application provides an idempotency strategy.
+
+Rate limits should distinguish connection setup, discovery, reads, and actions. A single global threshold can allow expensive operations to dominate cheap health or discovery traffic.
+
+## Observe the protocol without collecting secrets
+
+Useful telemetry answers:
+
+- Which protocol version and capabilities were negotiated?
+- Which method failed, at which boundary, and with which error class?
+- How long did the server, upstream API, and user-approval step each take?
+- Was a request cancelled, timed out, rate-limited, or rejected by policy?
+
+Do not log access tokens, authorization codes, prompt content, resource contents, tool arguments, or elicited user data by default. Use stable request correlation identifiers and structured error categories. High-cardinality payloads belong in carefully governed diagnostic workflows, not general metrics.
+
+## Put humans around consequential tools
+
+The tools specification recommends that applications preserve a human’s ability to deny tool invocations. In production, the right interface depends on consequence: a read-only lookup may need little friction, while deleting data, publishing content, or spending money requires explicit, comprehensible approval.
+
+Tool descriptions and schemas are part of this safety surface. Names should be unambiguous, inputs constrained, and results clear enough for the host to present. The server must still enforce authorization and validate inputs; model intent is not an access-control decision.
+
+## Design graceful degradation
+
+A failed server should not make the entire host unusable. The host can mark that capability unavailable, preserve unrelated connections, and explain a recovery action. If discovery succeeds but one optional capability fails, isolate the failure rather than assuming the full session is corrupt.
+
+Backups and disaster recovery apply to server state and any external systems the server controls. They are not provided by MCP itself.
+
+## Production readiness checklist
+
+<Checklist
+  items={[
+    'Connection and trust boundaries documented',
+    'Protocol versions and capabilities tested',
+    'Authorization metadata and token audience validated',
+    'Timeouts, cancellation, limits, and retry policy defined',
+    'No secrets or user payloads in default telemetry',
+    'Consequential actions use appropriate human approval',
+    'Runbooks cover dependency and partial-capability failures',
+    'Rollback and recovery procedures tested',
+  ]}
+/>
+
+<MetadataPanel>
+
+Verified on 2026-08-03 against MCP `2025-11-25`, including [Lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle), [Authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization), [Transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports), and [Tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools). Operational recommendations are identified as All Things MCP guidance.
+
+</MetadataPanel>

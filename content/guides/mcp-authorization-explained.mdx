@@ -1,0 +1,85 @@
+---
+title: MCP Authorization Explained
+description: A precise guide to protected MCP servers, authorization-server discovery, resource indicators, PKCE, and token boundaries.
+contentType: guide
+section: security
+authors: [All Things MCP Editors]
+status: draft
+tags: [authorization, oauth, security, http]
+updatedAt: 2026-08-03
+difficulty: intermediate
+estimatedMinutes: 18
+specVersion: 2025-11-25
+lastVerified: 2026-08-03
+prerequisites: [MCP Architecture]
+---
+
+MCP authorization protects remote, HTTP-based MCP servers. It reuses OAuth standards, but the roles and discovery path are easy to misunderstand if the authorization server and MCP server are treated as one box.
+
+## Start with the roles
+
+For an authorized remote connection:
+
+- The protected MCP server acts as an OAuth resource server.
+- The MCP client acts as an OAuth client on behalf of a resource owner.
+- The authorization server authenticates the user when necessary and issues access tokens.
+
+The authorization server may be deployed with the MCP server or operated separately. The protocol relationship is what matters: the client discovers which authorization server is associated with the protected MCP resource.
+
+<Callout title="Authorization is transport-specific">
+
+Authorization is optional in MCP. The specification defines the flow for HTTP-based transports. Standard-input/output implementations should obtain credentials from their environment rather than run this HTTP authorization flow.
+
+</Callout>
+
+## Discovery begins at the protected resource
+
+The [current authorization specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization) requires MCP servers to publish OAuth 2.0 Protected Resource Metadata. That document identifies at least one authorization server.
+
+A server can point clients to the metadata through a `WWW-Authenticate` challenge on a `401 Unauthorized` response or serve it at the appropriate well-known URI. The client then discovers authorization-server metadata. Current clients must support OAuth Authorization Server Metadata and OpenID Connect Discovery mechanisms described by the specification.
+
+This ordering prevents a client from inventing authorization endpoints from the MCP server URL. The resource tells the client which issuer or authorization service protects it.
+
+## The resource parameter binds the request
+
+MCP clients include the OAuth `resource` parameter in authorization and token requests. The value identifies the canonical MCP server URI for which the token is requested.
+
+The MCP server must accept only tokens intended for itself. Audience or resource validation is not a cosmetic check: it prevents a token issued for one service from being reused against another.
+
+## PKCE protects the authorization code
+
+Clients use the authorization-code flow with Proof Key for Code Exchange (PKCE). The client creates a verifier, sends its derived challenge with the authorization request, and presents the verifier when exchanging the returned code. An intercepted authorization code is not sufficient without the verifier.
+
+Redirect URIs and client registration depend on client type and authorization-server support. The current specification supports several client identification paths, including preregistration, OAuth Client ID Metadata Documents, and optional Dynamic Client Registration for compatibility.
+
+## Tokens stop at the MCP server
+
+An MCP access token is issued for the protected MCP server. If that server calls an upstream API, it acts as a separate OAuth client and obtains an appropriate upstream credential. Passing the inbound MCP token through to the downstream API is explicitly forbidden because it breaks audience boundaries and creates confused-deputy risks.
+
+The server should validate the token before returning protected data or executing protected actions. The client should store credentials securely and avoid placing access tokens in URLs.
+
+## Scope is a conversation, not a shopping list
+
+The current revision adds clearer guidance for incremental authorization. A protected resource can challenge the client with required scope information. Clients should request the minimal scope set needed and step up when an operation genuinely requires more.
+
+This is both a security and user-experience requirement: authorization should explain the capability being granted at the point it becomes necessary.
+
+## Implementation checklist
+
+<Checklist
+  items={[
+    'Publish Protected Resource Metadata',
+    'Support required authorization-server discovery',
+    'Use resource indicators in authorization and token requests',
+    'Use PKCE for authorization-code protection',
+    'Validate token audience at the MCP server',
+    'Never pass the MCP token to an upstream API',
+    'Request minimal scopes and support step-up challenges',
+  ]}
+/>
+
+<MetadataPanel>
+
+Verified on 2026-08-03 against MCP `2025-11-25` [Authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization) and the corresponding [Security Best Practices](https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices).
+
+</MetadataPanel>

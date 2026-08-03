@@ -1,0 +1,10 @@
+node_modules
+.pnpm-store
+.next
+.source
+next-env.d.ts
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+skills/all-things-mcp/brand-system/assets/references

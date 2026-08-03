@@ -1,0 +1,81 @@
+---
+title: 'What Is MCP? A Practical Introduction'
+description: A working mental model for Model Context Protocol, what it standardizes, and where it fits in an AI application.
+contentType: guide
+section: learn
+authors: [All Things MCP Editors]
+status: draft
+tags: [fundamentals, architecture, protocol]
+updatedAt: 2026-08-03
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-08-03
+---
+
+Model Context Protocol (MCP) is an application-level protocol for connecting AI applications to external capabilities and context. It gives clients and servers a shared language for discovering features, exchanging structured messages, and managing a session.
+
+The useful idea is not “one API for every tool.” MCP standardizes the boundary around a connection: how the participants introduce themselves, agree on a protocol version and capabilities, and exchange requests, responses, notifications, and structured content.
+
+<Callout title="The shortest useful definition">
+
+MCP is a stateful, JSON-RPC-based protocol between a client inside an AI host and a server that exposes capabilities.
+
+</Callout>
+
+## The problem MCP addresses
+
+Without a shared protocol, every application-to-integration pairing needs custom discovery, message formats, error handling, and lifecycle behavior. A calendar integration built for one assistant may not be reusable by another. An application may also need a different adapter for a local process than for a remotely hosted service.
+
+MCP creates a common protocol boundary. It does not make every underlying API identical, and it does not decide which capabilities a user should trust. It gives implementations an interoperable way to describe and use those capabilities.
+
+## The three participants to remember
+
+The [official architecture](https://modelcontextprotocol.io/specification/2025-11-25/architecture) uses a host-client-server model:
+
+- The **host** is the AI application. It coordinates user experience, model access, permissions, and one or more MCP clients.
+- An **MCP client** is a protocol participant created by the host. Each client maintains a connection to one server.
+- An **MCP server** exposes capabilities such as resources, prompts, and tools.
+
+That separation matters. The host owns application policy and user experience. The client owns one protocol relationship. The server owns the capability surface it exposes.
+
+## What moves across the connection
+
+MCP messages are encoded using JSON-RPC 2.0. The protocol defines a connection lifecycle and optional capabilities. During initialization, client and server agree on a protocol version and declare what they support. Normal operation should only use capabilities that were successfully negotiated.
+
+Server features include:
+
+- **Resources**, which expose contextual data that clients can read.
+- **Prompts**, which expose reusable prompt templates and arguments.
+- **Tools**, which expose operations that a model may invoke through the client.
+
+Client features can include roots, sampling, and elicitation. These reverse the direction of some interactions: a server can ask the client for model sampling or user input only when the corresponding capability is available.
+
+## What MCP does not do
+
+MCP does not choose a model, provide a universal authorization policy, or guarantee that an integration is safe. The protocol defines mechanisms and boundaries; the host, server, authorization infrastructure, and operator still have implementation responsibilities.
+
+It also does not require every server to expose tools. A server can expose only the capabilities that make sense for its domain, and those capabilities are negotiated at session start.
+
+## A practical request path
+
+Imagine a desktop coding assistant connected to a repository server:
+
+1. The host creates an MCP client for the repository server.
+2. Client and server initialize the session and negotiate capabilities.
+3. The client asks the server to list available tools or resources.
+4. The host presents or uses that information according to its product policy.
+5. When the model chooses a tool, the client sends the corresponding request.
+6. The server validates the request, performs the operation, and returns structured content or an error.
+
+The model is not a protocol participant by itself. The host and client mediate what the model can see and invoke.
+
+## Where to go next
+
+Read **MCP Architecture** for the boundaries between hosts, clients, and servers. Then build one minimal server and inspect the initialization exchange before adding authentication, gateways, or production infrastructure.
+
+<MetadataPanel>
+
+Verified against the current MCP protocol revision `2025-11-25` on 2026-08-03. Primary sources: [architecture](https://modelcontextprotocol.io/specification/2025-11-25/architecture) and [lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle).
+
+</MetadataPanel>

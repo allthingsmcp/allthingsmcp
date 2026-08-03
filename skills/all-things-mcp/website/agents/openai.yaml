@@ -1,0 +1,4 @@
+interface:
+  display_name: 'All Things MCP Website'
+  short_description: 'Build and maintain the MCP knowledge platform'
+  default_prompt: 'Use $website to build or update the All Things MCP website.'
