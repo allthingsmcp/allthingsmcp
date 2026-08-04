@@ -17,6 +17,7 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "content:validate": "node --import tsx scripts/validate-content.ts",
+    "brand:generate": "tsx scripts/generate-brand-assets.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

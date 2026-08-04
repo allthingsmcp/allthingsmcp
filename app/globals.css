@@ -145,9 +145,6 @@ p {
   height: auto;
   display: block;
 }
-.logo-image--inverse {
-  filter: invert(1) grayscale(1) brightness(4);
-}
 .desktop-nav {
   display: flex;
   align-items: stretch;

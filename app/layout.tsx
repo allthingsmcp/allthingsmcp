@@ -28,10 +28,39 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.siteUrl),
   title: { default: 'All Things MCP', template: '%s · All Things MCP' },
   description: siteConfig.description,
+  icons: {
+    icon: [
+      { url: '/brand/favicon.svg', type: 'image/svg+xml' },
+      { url: '/brand/favicon-32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    shortcut: '/brand/favicon.svg',
+    apple: [
+      {
+        url: '/brand/apple-touch-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
+    ],
+  },
   openGraph: {
     title: 'All Things MCP',
     description: siteConfig.description,
     type: 'website',
+    siteName: 'All Things MCP',
+    images: [
+      {
+        url: '/brand/social-card.png',
+        width: 1200,
+        height: 630,
+        alt: 'All Things MCP — Learn. Build. Ship with MCP.',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'All Things MCP',
+    description: siteConfig.description,
+    images: ['/brand/social-card.png'],
   },
 };
 
