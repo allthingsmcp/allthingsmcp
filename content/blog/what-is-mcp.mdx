@@ -1,0 +1,68 @@
+---
+title: 'What Is MCP? A Practical Introduction'
+description: A working mental model for Model Context Protocol, what it standardizes, and where it fits in an AI application.
+contentType: article
+section: blog
+blogTopic: concepts
+authors: [All Things MCP Editors]
+status: published
+tags: [fundamentals, architecture, protocol]
+publishedAt: 2026-08-30
+updatedAt: 2026-08-30
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2026-07-28
+lastVerified: 2026-08-30
+---
+
+Model Context Protocol (MCP) is an open, JSON-RPC-based protocol for connecting AI applications to external context and capabilities. It gives hosts, clients, and servers a shared language for describing and using resources, prompts, and tools.
+
+<Callout title="The shortest useful definition">
+
+MCP is a stateless protocol boundary between a client inside an AI host and a server that exposes context or capabilities.
+
+</Callout>
+
+## The problem MCP addresses
+
+Without a shared protocol, every application-to-integration pairing needs custom discovery, message formats, error handling, and compatibility logic. MCP standardizes that boundary without pretending every underlying API is identical.
+
+The July 2026 protocol core is stateless. Each request is self-contained and carries protocol, capability, and implementation metadata. A client can call `server/discover` before another request when it wants the server's supported versions and capabilities up front.
+
+## The three participants
+
+- The **host** is the AI application. It owns product policy, model access, consent, and user experience.
+- An **MCP client** is the protocol participant inside the host that communicates with a server.
+- An **MCP server** exposes resources, prompts, tools, or other supported features.
+
+The model is not an independent protocol participant. The host and client mediate what the model can see and invoke.
+
+## What moves between client and server
+
+MCP uses JSON-RPC 2.0 messages. Servers may expose:
+
+- **Resources** for contextual data.
+- **Prompts** for reusable message templates and workflows.
+- **Tools** for operations the model can request through the host.
+
+The core also supports elicitation for additional user input. Long-running Tasks and interactive MCP Apps live in opt-in extensions rather than being assumed parts of every connection.
+
+## A practical request path
+
+Imagine a coding assistant using a repository server:
+
+1. The host creates a client for the server.
+2. The client optionally discovers supported versions and capabilities.
+3. A self-contained request lists or calls a capability.
+4. The host applies product policy and presents consequential actions for approval.
+5. The server validates the request and returns a complete result, an input-required result, or an error.
+
+## What MCP does not do
+
+MCP does not choose a model, provide a universal authorization policy, or guarantee an integration is safe. It defines interoperable mechanisms. Hosts, servers, authorization infrastructure, and operators still own trust decisions and operational controls.
+
+<MetadataPanel>
+
+Verified against MCP `2026-07-28` on 2026-08-30. Primary source: [official specification](https://modelcontextprotocol.io/specification/2026-07-28).
+
+</MetadataPanel>

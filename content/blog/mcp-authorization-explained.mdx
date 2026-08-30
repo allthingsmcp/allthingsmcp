@@ -1,0 +1,68 @@
+---
+title: MCP Authorization Explained
+description: A precise explanation of protected MCP servers, authorization discovery, resource indicators, PKCE, and issuer boundaries.
+contentType: article
+section: blog
+blogTopic: security
+authors: [All Things MCP Editors]
+status: published
+tags: [authorization, oauth, security, http]
+publishedAt: 2026-08-30
+updatedAt: 2026-08-30
+difficulty: intermediate
+estimatedMinutes: 18
+specVersion: 2026-07-28
+lastVerified: 2026-08-30
+prerequisites: [MCP Architecture]
+---
+
+MCP authorization protects remote HTTP servers. It builds on OAuth, but the MCP server, authorization server, issuer, client identity, and downstream APIs remain distinct trust boundaries.
+
+<Callout title="Authorization is transport-specific">
+
+The standardized authorization flow applies to HTTP-based transports. Local standard-input/output deployments should obtain credentials from their environment instead of starting this browser-based flow.
+
+</Callout>
+
+## Begin with the protected resource
+
+The MCP server acts as an OAuth resource server and publishes Protected Resource Metadata. That metadata identifies the authorization servers that can issue tokens for the resource. A `401 Unauthorized` response can direct a client to this metadata through `WWW-Authenticate`.
+
+The client then retrieves authorization-server metadata and follows the supported authorization flow. Discovery starts with the protected resource so the client does not invent an authorization endpoint from the server URL.
+
+## Bind tokens to the intended resource and issuer
+
+Clients use the OAuth `resource` parameter so authorization and token requests identify the canonical MCP resource. The MCP server must reject tokens that are not intended for it.
+
+The 2026 revision further requires clients to validate the authorization-server issuer returned with an authorization response before redeeming a code. Client credentials are also bound to the issuer that minted them and must not be reused across authorization servers.
+
+## Protect the authorization code
+
+Authorization-code clients use PKCE. The verifier protects against redemption of an intercepted code. Redirect URIs and client metadata must still be validated according to client type.
+
+Client ID Metadata Documents are the preferred direction for client identity. Dynamic Client Registration remains available for compatibility but is formally deprecated in the July 2026 revision.
+
+## Tokens stop at the MCP server
+
+An MCP access token is for the protected MCP resource. When that server calls an upstream API, it acts as another client and uses a credential intended for that service. Passing the inbound MCP token downstream breaks audience boundaries and creates confused-deputy risk.
+
+## Request only the authority required
+
+Clients should request the smallest useful scope set and respond to step-up challenges when an operation needs more. The user experience should explain why new authority is needed at the moment it becomes relevant.
+
+<Checklist
+  items={[
+    'Publish Protected Resource Metadata',
+    'Validate authorization-server issuer before code redemption',
+    'Use resource indicators and validate token audience',
+    'Use PKCE for authorization-code protection',
+    'Prefer Client ID Metadata Documents for client identity',
+    'Never forward the MCP token to an upstream API',
+  ]}
+/>
+
+<MetadataPanel>
+
+Verified on 2026-08-30 against MCP `2026-07-28` [Authorization](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) and [Key Changes](https://modelcontextprotocol.io/specification/2026-07-28/changelog).
+
+</MetadataPanel>

@@ -5,6 +5,7 @@ import { Menu, Search, X } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Logo } from '@/components/logo';
+import { siteConfig } from '@/lib/config';
 import { primaryNav } from '@/lib/site-data';
 import { cn } from '@/lib/utils';
 
@@ -42,9 +43,9 @@ export function SiteHeader() {
           </Link>
           <Link
             className="button button--primary newsletter-button"
-            href="#newsletter"
+            href={siteConfig.substackUrl}
           >
-            Newsletter
+            Subscribe
           </Link>
           <button
             className="menu-button"
@@ -65,11 +66,7 @@ export function SiteHeader() {
           aria-label="Mobile navigation"
         >
           <div className="shell mobile-nav__inner">
-            {[
-              ...primaryNav,
-              { label: 'Tools', href: '/tools' },
-              { label: 'Glossary', href: '/glossary' },
-            ].map((item) => (
+            {primaryNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -79,7 +76,8 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <Link href="/contribute">Contribute</Link>
+            <Link href={siteConfig.substackUrl}>Subscribe</Link>
+            <Link href="/about">About</Link>
           </div>
         </nav>
       )}

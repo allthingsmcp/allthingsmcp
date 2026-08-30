@@ -4,6 +4,8 @@ Thank you for helping make MCP knowledge clearer and more reliable. You may open
 
 ## Content changes
 
+Choose the model by reader intent: use a Guide when the reader will accomplish an outcome through ordered steps, a Blog post for explanation or analysis, and Spec Watch for protocol changes and their client, server, and production impact. Learn, Build, Operate, and Security are Guide categories—not independent sections.
+
 1. Find the appropriate collection under `content/`.
 2. Copy a nearby document and update every frontmatter field.
 3. Use ordinary Markdown where possible. Reviewed MDX components are documented in `skills/all-things-mcp/website/references/content-contracts.md`.

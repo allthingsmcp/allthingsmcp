@@ -1,0 +1,65 @@
+---
+title: 'MCP Architecture: Hosts, Clients, Servers, and Primitives'
+description: Understand the participant boundaries, stateless request model, discovery, and primitives that make up an MCP system.
+contentType: article
+section: blog
+blogTopic: architecture
+authors: [All Things MCP Editors]
+status: published
+tags: [architecture, clients, servers, primitives]
+publishedAt: 2026-08-30
+updatedAt: 2026-08-30
+difficulty: intermediate
+estimatedMinutes: 18
+specVersion: 2026-07-28
+lastVerified: 2026-08-30
+prerequisites: [What Is MCP? A Practical Introduction]
+---
+
+An MCP architecture diagram becomes useful when it shows ownership. The host, client, and server do different jobs, and production systems add authorization, gateways, observability, and upstream services around those boundaries.
+
+## Host: the application boundary
+
+The host is the application a person uses. It coordinates model access, creates clients, and decides how capability requests appear in the product. Consent, workspace selection, approval interfaces, and cross-server policy belong here.
+
+## Client: the protocol participant
+
+The client translates host intent into MCP requests and interprets results. In the July 2026 revision, it does not establish a protocol-level session or complete an initialization handshake. Every request carries the metadata needed to interpret it.
+
+Clients may call `server/discover` to learn server identity, protocol versions, and capabilities before sending other requests. Discovery is useful for compatibility checks, but ordinary requests remain self-contained.
+
+## Server: a focused capability surface
+
+The server exposes features for a domain. The three primary server primitives remain resources, prompts, and tools. A server can also support discovery, elicitation patterns, subscriptions, or negotiated extensions.
+
+For Streamable HTTP, `Mcp-Method` and `Mcp-Name` headers let gateways route, meter, and authorize without parsing request bodies. List responses can include cache hints, which makes deterministic ordering operationally useful.
+
+## Stateless protocol, stateful application
+
+Removing `Mcp-Session-Id` does not prohibit application state. A server that needs continuity can mint an explicit handle and return it to the caller. Future requests pass that handle as visible application data rather than relying on hidden transport state.
+
+This changes the production topology: compatible requests can land on any server instance behind a normal load balancer, while application state is managed explicitly.
+
+## Server-to-client interaction becomes multi-round-trip
+
+The 2026 revision replaces held-open server-initiated requests with Multi Round-Trip Requests. A server can return an `input_required` result containing input requests, and the client retries the original operation with corresponding responses.
+
+## Draw trust boundaries separately
+
+Protocol topology and trust topology are related but different. A remote MCP server may rely on an authorization server and downstream APIs. The access token for the MCP server must not be passed through to those APIs; the server needs credentials intended for each upstream service.
+
+<Checklist
+  items={[
+    'Host policy and server capabilities are drawn separately',
+    'Every request carries the required protocol metadata',
+    'Discovery is optional for clients and supported by servers',
+    'Application state uses explicit handles rather than transport sessions',
+    'Authorization and downstream credential boundaries are visible',
+  ]}
+/>
+
+<MetadataPanel>
+
+Verified against MCP `2026-07-28` on 2026-08-30. Sources: [specification](https://modelcontextprotocol.io/specification/2026-07-28) and [key changes](https://modelcontextprotocol.io/specification/2026-07-28/changelog).
+
+</MetadataPanel>

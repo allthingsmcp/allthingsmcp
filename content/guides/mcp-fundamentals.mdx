@@ -1,0 +1,61 @@
+---
+title: MCP Fundamentals
+description: Build a durable mental model of MCP participants, self-contained requests, server features, and trust boundaries.
+contentType: guide
+section: guides
+guideCategory: learn
+outcome: Explain the MCP architecture and trace a self-contained request from an AI host to a server capability.
+authors: [All Things MCP Editors]
+status: published
+tags: [guide, fundamentals, architecture]
+publishedAt: 2026-08-30
+updatedAt: 2026-08-30
+difficulty: beginner
+estimatedMinutes: 35
+specVersion: 2026-07-28
+lastVerified: 2026-08-30
+steps:
+  - id: define-the-boundary
+    title: Define the protocol boundary
+    estimatedMinutes: 6
+  - id: identify-participants
+    title: Identify hosts, clients, and servers
+    estimatedMinutes: 8
+  - id: classify-capabilities
+    title: Classify resources, prompts, and tools
+    estimatedMinutes: 8
+  - id: trace-a-request
+    title: Trace a self-contained request
+    estimatedMinutes: 8
+  - id: check-trust-boundaries
+    title: Check the trust boundaries
+    estimatedMinutes: 5
+---
+
+Use this guide before choosing an SDK. The outcome is a protocol mental model you can carry into implementation reviews.
+
+## Define the protocol boundary
+
+MCP standardizes messages between a client inside an AI host and a server exposing context or capabilities. It does not standardize the server's underlying database or API, and it does not replace product policy.
+
+## Identify hosts, clients, and servers
+
+The host owns the user experience and model access. The client speaks MCP on the host's behalf. The server exposes a focused capability surface. Write those responsibilities beside every box in your first architecture diagram.
+
+## Classify resources, prompts, and tools
+
+Use a resource for addressable context, a prompt for a reusable message workflow, and a tool for an operation. Avoid hiding reads inside action-shaped tools when a resource communicates the intent more clearly.
+
+## Trace a self-contained request
+
+In MCP `2026-07-28`, each request carries its protocol and client metadata. Trace one `tools/list` or `resources/read` request from the host, through the client, to the server and back. Add optional discovery only when the client needs capabilities up front.
+
+## Check the trust boundaries
+
+Mark where user consent, authorization, credentials, untrusted tool descriptions, and external APIs enter the design. Protocol compatibility does not make a server trustworthy.
+
+<MetadataPanel>
+
+Verified against the [MCP `2026-07-28` specification](https://modelcontextprotocol.io/specification/2026-07-28) on 2026-08-30.
+
+</MetadataPanel>

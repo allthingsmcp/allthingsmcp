@@ -1,121 +1,78 @@
 import Link from 'next/link';
-import { ArrowRight, FileText } from 'lucide-react';
-import { DirectoryHero } from '@/components/directory-hero';
+import { ArrowRight, Radio } from 'lucide-react';
 import { NewsletterPanel } from '@/components/newsletter-panel';
 import { StatusBadge } from '@/components/status-badge';
-import { Button } from '@/components/ui/button';
+import type { SpecWatchFrontmatter } from '@/lib/content-schema';
+import { canonicalContentUrl, pagesByType } from '@/lib/content';
 
 export default function SpecWatchPage() {
+  const entries = pagesByType('spec-release', 'spec-proposal');
+  const latest = entries[0];
+  const data = latest?.data as SpecWatchFrontmatter | undefined;
   return (
-    <main id="main-content">
-      <DirectoryHero
-        eyebrow="Spec Watch"
-        title="Track what changes in MCP"
-        description="Independent analysis of specification releases, proposals, implementation impact, and migration guidance—so you can build with confidence."
-      >
-        <div className="button-row">
-          <Button href="#latest">View latest release</Button>
-          <Button href="#proposals" variant="secondary">
-            Explore proposals
-          </Button>
+    <main id="main-content" className="spec-page">
+      <section className="shell publication-hero">
+        <p className="eyebrow">Spec Watch</p>
+        <h1>What changed in MCP—and why it matters.</h1>
+        <p>
+          Independent analysis of releases, proposals, migration work, and
+          implementation impact.
+        </p>
+      </section>
+      <section className="shell spec-current">
+        <div className="spec-current__marker">
+          <Radio />
+          <span>Current stable revision</span>
+          <strong>2026-07-28</strong>
         </div>
-      </DirectoryHero>
-      <div
-        className="shell release-timeline"
-        role="img"
-        aria-label="Specification lifecycle from stable release through draft and proposed work"
-      >
-        {[
-          ['2025-03-26', 'Stable', 'green'],
-          ['2025-06-18', 'Stable', 'blue'],
-          ['Next draft', 'Draft', 'orange'],
-          ['Future', 'Proposed', 'violet'],
-        ].map(([date, status, tone], index) => (
-          <div key={date}>
-            <span
-              className={
-                index < 2 ? 'timeline-dot timeline-dot--solid' : 'timeline-dot'
-              }
-            />
-            <b>{date}</b>
-            <StatusBadge tone={tone as 'green' | 'blue' | 'orange' | 'violet'}>
-              {status}
-            </StatusBadge>
-          </div>
-        ))}
-      </div>
-      <section className="section-block" id="latest">
-        <div className="shell spec-grid">
-          <article className="release-card">
+        {latest && data && (
+          <article>
             <div>
-              <p className="eyebrow">Reference fixture</p>
-              <StatusBadge tone="green">Stable</StatusBadge>
+              <p className="eyebrow">Latest analysis</p>
+              <StatusBadge tone="green">{data.releaseStatus}</StatusBadge>
             </div>
-            <h2>MCP specification release</h2>
-            <p>
-              This representative entry demonstrates the release template.
-              Official dates and version-specific analysis will be published
-              only after technical review.
-            </p>
-            <a
-              href="https://modelcontextprotocol.io/specification/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              View official specification <ArrowRight />
-            </a>
-            <hr />
-            <div className="release-columns">
+            <h2>{data.title}</h2>
+            <p>{data.description}</p>
+            <div className="spec-impact-preview">
               <div>
-                <h3>What changed</h3>
-                <ul>
-                  <li>Protocol changes summarized with primary sources</li>
-                  <li>
-                    Behavioral changes separated from editorial clarifications
-                  </li>
-                  <li>Compatibility notes recorded by implementation area</li>
-                </ul>
+                <span>Client</span>
+                <p>{data.clientImpact[0]}</p>
               </div>
               <div>
-                <h3>Why it matters</h3>
-                <p>
-                  Release notes focus on concrete effects for client developers,
-                  server developers, and operators.
-                </p>
+                <span>Server</span>
+                <p>{data.serverImpact[0]}</p>
+              </div>
+              <div>
+                <span>Production</span>
+                <p>{data.productionImpact[0]}</p>
               </div>
             </div>
+            <Link href={canonicalContentUrl(latest)}>
+              Read the impact analysis <ArrowRight />
+            </Link>
           </article>
-          <div id="proposals">
-            <div className="section-heading">
-              <h2>Active proposals</h2>
-              <Link href="/contribute">
-                Suggest coverage <ArrowRight />
-              </Link>
-            </div>
-            <div className="proposal-list">
-              {[
-                'Structured content',
-                'Capability discovery',
-                'Authorization profiles',
-              ].map((title, index) => (
-                <article key={title}>
-                  <FileText />
-                  <div>
-                    <h3>{title}</h3>
-                    <p>
-                      Tracking fixture for proposal analysis and implementation
-                      impact.
-                    </p>
-                    <span>Affected areas: clients, servers, capabilities</span>
-                  </div>
-                  <StatusBadge tone={index === 1 ? 'orange' : 'violet'}>
-                    {index === 1 ? 'Draft' : 'Proposed'}
-                  </StatusBadge>
-                </article>
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
+      </section>
+      <section className="shell spec-method">
+        <p className="eyebrow">How we analyze a release</p>
+        <h2>Changes become useful when their consequences are clear.</h2>
+        <ol>
+          <li>
+            <span>01</span>
+            <strong>What changed</strong>
+            <p>The normative behavior and its primary sources.</p>
+          </li>
+          <li>
+            <span>02</span>
+            <strong>Who is affected</strong>
+            <p>Client, server, gateway, and operator responsibilities.</p>
+          </li>
+          <li>
+            <span>03</span>
+            <strong>What to do</strong>
+            <p>Concrete migration and compatibility checks.</p>
+          </li>
+        </ol>
       </section>
       <div className="shell">
         <NewsletterPanel />

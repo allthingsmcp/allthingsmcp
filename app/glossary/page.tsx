@@ -1,4 +1,5 @@
-import { Search } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, Search } from 'lucide-react';
 import { DirectoryHero } from '@/components/directory-hero';
 import { NewsletterPanel } from '@/components/newsletter-panel';
 import { StatusBadge } from '@/components/status-badge';
@@ -111,6 +112,14 @@ export default function GlossaryPage() {
                 >
                   {category}
                 </StatusBadge>
+                {term === 'Client' && (
+                  <Link
+                    href="/glossary/client"
+                    aria-label="Read the Client definition"
+                  >
+                    <ArrowRight />
+                  </Link>
+                )}
               </article>
             ))}
           </div>

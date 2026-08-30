@@ -1,19 +1,48 @@
 ---
-title: MCP Protocol Revision 2025-11-25
-description: A representative Spec Watch entry for the current protocol revision and its primary implementation-impact areas.
+title: MCP Protocol Revision 2026-07-28
+description: The July 2026 MCP revision makes the core stateless and adds discovery, routing headers, cache hints, extensions, and authorization hardening.
 contentType: spec-release
 section: spec-watch
 authors: [All Things MCP Editors]
 status: published
-tags: [specification, release]
-publishedAt: 2026-08-03
-updatedAt: 2026-08-03
-officialSource: https://modelcontextprotocol.io/specification/2025-11-25/
+tags: [specification, release, migration]
+publishedAt: 2026-08-30
+updatedAt: 2026-08-30
+officialSource: https://modelcontextprotocol.io/specification/2026-07-28
+releaseDate: 2026-07-28
 releaseStatus: stable
+changes:
+  - Removes protocol-level sessions and the initialization handshake.
+  - Adds server discovery and self-contained request metadata.
+  - Adds MCP routing headers and cache hints for list and read results.
+  - Introduces Multi Round-Trip Requests and a formal extensions model.
+  - Hardens issuer validation and deprecates Dynamic Client Registration.
+clientImpact:
+  - Clients must send required metadata on every request and handle resultType.
+  - Clients should validate authorization issuers and adopt Client ID Metadata Documents.
+serverImpact:
+  - Servers must support discovery and stop depending on protocol session identifiers.
+  - HTTP servers must expose routing headers and return compatible result metadata.
+productionImpact:
+  - Stateless routing reduces the need for sticky sessions or shared protocol session state.
+  - Gateways can route and apply policy using method and capability headers.
+recommendedActions:
+  - Inventory dependencies on initialization, session IDs, and deprecated client features.
+  - Upgrade compatible SDKs and test every supported client and server pairing.
+  - Review authorization issuer, client identity, and token audience validation.
+references:
+  - label: Official specification
+    url: https://modelcontextprotocol.io/specification/2026-07-28
+  - label: Key changes
+    url: https://modelcontextprotocol.io/specification/2026-07-28/changelog
+  - label: Release announcement
+    url: https://blog.modelcontextprotocol.io/posts/2026-07-28/
 ---
 
-The current protocol revision is `2025-11-25`. Its published changelog highlights authorization discovery, incremental scope consent, metadata icons, tool-name guidance, elicitation updates, polling behavior, and JSON Schema 2020-12 as the default schema dialect.
+MCP `2026-07-28` is a breaking revision centered on a stateless protocol core. The change is more than a transport optimization: it alters request metadata, discovery, interaction patterns, routing, caching, and the boundary between the core and extensions.
 
-## Why it matters
+## What developers need to do
 
-Implementers should review feature-specific changes rather than treating a version label as a complete compatibility claim. Authorization and schema behavior deserve particular attention when moving from the prior revision.
+Start with code that assumes an initialization exchange or an `Mcp-Session-Id`. Then review server-to-client requests, response result types, gateway behavior, client identity, and authorization issuer validation.
+
+Do not claim July 2026 compatibility from a package version alone. Test the exact client, server, transport, and extension combinations you support.

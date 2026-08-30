@@ -5,57 +5,30 @@ import { siteConfig } from '@/lib/config';
 
 const groups = [
   {
-    title: 'Learn',
+    title: 'Explore',
     links: [
-      ['Overview', '/learn'],
-      ['Learning paths', '/learn#paths'],
-      ['Core concepts', '/learn#concepts'],
+      ['Guides', '/guides'],
+      ['Blog', '/blog'],
+      ['Spec Watch', '/spec-watch'],
       ['Glossary', '/glossary'],
     ],
   },
   {
-    title: 'Build',
+    title: 'Guide paths',
     links: [
-      ['Servers', '/build'],
-      ['Clients', '/build'],
-      ['Tools and resources', '/build'],
-      ['Tutorials', '/library/tutorials'],
-    ],
-  },
-  {
-    title: 'Operate',
-    links: [
-      ['Deployment', '/operate'],
-      ['Gateways', '/operate'],
-      ['Registries', '/ecosystem'],
-      ['Observability', '/operate'],
-    ],
-  },
-  {
-    title: 'Security',
-    links: [
-      ['Authorization', '/security'],
-      ['Identity', '/security'],
-      ['Threat modelling', '/security'],
-      ['Best practices', '/security'],
-    ],
-  },
-  {
-    title: 'Ecosystem',
-    links: [
-      ['Servers', '/ecosystem'],
-      ['Clients', '/ecosystem'],
-      ['SDKs', '/ecosystem'],
-      ['Developer tools', '/tools'],
+      ['Learn MCP', '/guides#learn'],
+      ['Build with MCP', '/guides#build'],
+      ['Operate MCP', '/guides#operate'],
+      ['Secure MCP', '/guides#security'],
     ],
   },
   {
     title: 'Project',
     links: [
       ['About', '/about'],
-      ['Newsletter', '#newsletter'],
-      ['Contribute', '/contribute'],
       ['Independence', '/independence'],
+      ['Editorial policy', '/editorial-policy'],
+      ['Contribute', '/contribute'],
     ],
   },
 ] as const;
@@ -63,7 +36,7 @@ const groups = [
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      <div className="shell footer-grid">
+      <div className="shell focused-footer-grid">
         {groups.map((group) => (
           <div className="footer-group-pair" key={group.title}>
             <section className="footer-group footer-group--desktop">
@@ -88,12 +61,13 @@ export function SiteFooter() {
             </details>
           </div>
         ))}
+        <div className="footer-manifesto">
+          <Logo inverse />
+          <p>Independent guides, analysis, and practical knowledge for MCP.</p>
+        </div>
       </div>
       <div className="shell footer-bottom">
-        <div>
-          <Logo inverse />
-          <p>Independent. Developer-first. MCP focused.</p>
-        </div>
+        <p>© 2026 All Things MCP</p>
         <div className="footer-social">
           <Link
             href={siteConfig.githubRepo}
@@ -108,7 +82,7 @@ export function SiteFooter() {
             <Rss />
           </Link>
         </div>
-        <p>© 2026 All Things MCP</p>
+        <p>Independent. Developer-first. MCP focused.</p>
       </div>
     </footer>
   );

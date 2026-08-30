@@ -1,6 +1,6 @@
 # All Things MCP
 
-An independent, developer-first knowledge platform for learning, building, securing, and operating Model Context Protocol systems.
+An independent, developer-first publication and learning platform organized around outcome-driven Guides, technical Blog analysis, and Spec Watch.
 
 ## Local development
 

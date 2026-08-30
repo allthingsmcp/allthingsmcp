@@ -1,10 +1,9 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
+import { notFound, redirect } from 'next/navigation';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ContentMeta } from '@/components/content-meta';
 import { getMDXComponents } from '@/components/mdx';
 import type { ContentFrontmatter } from '@/lib/content-schema';
+import { canonicalContentUrl } from '@/lib/content';
 import { source } from '@/lib/source';
 
 export function generateStaticParams() {
@@ -21,48 +20,20 @@ export default async function LibraryPage({
     process.env.VERCEL_ENV === 'production' ||
     (!process.env.VERCEL_ENV && process.env.NODE_ENV === 'production');
   if (!slug?.length) {
-    const pages = source
-      .getPages()
-      .filter(
-        (page) =>
-          !production ||
-          (page.data as { status?: string }).status === 'published',
-      );
-    return (
-      <main id="main-content">
-        <div className="shell">
-          <Breadcrumbs items={[{ label: 'Library' }]} />
-        </div>
-        <section className="shell directory-hero">
-          <p className="eyebrow">Library</p>
-          <h1>The MCP field guide</h1>
-          <p>
-            Guides, tutorials, lessons, terms, releases, projects, and
-            tools—authored in Git and reviewed in public.
-          </p>
-        </section>
-        <section className="section-block section-block--tight">
-          <div className="shell library-list">
-            {pages.map((page) => (
-              <Link href={page.url} key={page.url}>
-                <span>
-                  {(page.data as { contentType?: string }).contentType ??
-                    'Page'}
-                </span>
-                <h2>{page.data.title}</h2>
-                <p>{page.data.description}</p>
-                <ArrowRight />
-              </Link>
-            ))}
-          </div>
-        </section>
-      </main>
-    );
+    redirect('/guides');
   }
   const page = source.getPage(slug);
   if (!page) notFound();
   const data = page.data as typeof page.data & ContentFrontmatter;
   if (production && data.status === 'draft') notFound();
+  if (
+    data.contentType === 'guide' ||
+    data.contentType === 'article' ||
+    data.contentType.startsWith('spec-') ||
+    data.contentType === 'glossary'
+  ) {
+    redirect(canonicalContentUrl(page));
+  }
   const MDX = page.data.body;
   return (
     <main id="main-content">

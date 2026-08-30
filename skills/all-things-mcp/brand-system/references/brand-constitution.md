@@ -8,7 +8,7 @@ All Things MCP is an independent developer field guide: technically exact, calm,
 
 - Canvas: `#ffffff`; subtle surface: `#f7f9fc`; dark surface: `#071426`.
 - Text: `#091225`; secondary text: `#3e4c66`; muted text: `#66738c`.
-- Action blue: `#0a55ff`; deep blue: `#0439bf`; pale blue: `#edf3ff`.
+- Action blue: `#2563eb`; deep blue: `#1d4ed8`; pale blue: `#eff6ff`.
 - Semantic green: `#0b9f5a`; violet: `#7047eb`; orange: `#ee7a2d`.
 - Border: `#dde3ed`; stronger border: `#c9d2e1`.
 - Radii: 6px controls, 10px cards, 14px major panels.
@@ -30,6 +30,7 @@ All Things MCP is an independent developer field guide: technically exact, calm,
 - Use `Header → Main → Footer` consistently.
 - Desktop grids may become lists, accordions, or horizontal scrollers on mobile; never merely scale them down.
 - Use hairline dividers and generous section spacing to make dense material calm.
+- Prefer open editorial sections, alternating surfaces, and full-width diagrams. Do not put every idea inside a bordered card.
 
 ## Components
 

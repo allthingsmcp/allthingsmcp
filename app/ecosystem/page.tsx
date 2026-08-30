@@ -1,8 +1,11 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react';
 import { DirectoryHero } from '@/components/directory-hero';
 import { NewsletterPanel } from '@/components/newsletter-panel';
 import { StatusBadge } from '@/components/status-badge';
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 const projects = [
   {

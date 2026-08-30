@@ -14,6 +14,36 @@ const isoDate = z
     'Use a real calendar date',
   );
 
+export const guideCategories = [
+  'learn',
+  'build',
+  'operate',
+  'security',
+] as const;
+export type GuideCategory = (typeof guideCategories)[number];
+
+export const blogTopics = [
+  'concepts',
+  'architecture',
+  'security',
+  'production',
+  'ecosystem',
+  'opinion',
+] as const;
+export type BlogTopic = (typeof blogTopics)[number];
+
+export const guideStepSchema = z.object({
+  id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  title: z.string().min(3),
+  estimatedMinutes: z.number().int().positive().optional(),
+});
+export type GuideStep = z.infer<typeof guideStepSchema>;
+
+export const officialReferenceSchema = z.object({
+  label: z.string().min(2),
+  url: z.string().url(),
+});
+
 export const contentTypes = [
   'guide',
   'article',
@@ -32,6 +62,8 @@ export const contentSchema = pageSchema
     description: z.string().min(24),
     contentType: z.enum(contentTypes),
     section: z.enum([
+      'guides',
+      'blog',
       'learn',
       'build',
       'operate',
@@ -50,6 +82,11 @@ export const contentSchema = pageSchema
     specVersion: isoDate.optional(),
     lastVerified: isoDate.optional(),
     prerequisites: z.array(z.string()).optional(),
+    guideCategory: z.enum(guideCategories).optional(),
+    outcome: z.string().min(20).optional(),
+    steps: z.array(guideStepSchema).min(1).optional(),
+    blogTopic: z.enum(blogTopics).optional(),
+    substackUrl: z.string().url().optional(),
     language: z.string().optional(),
     sdk: z.string().optional(),
     sdkVersion: z.string().optional(),
@@ -70,7 +107,14 @@ export const contentSchema = pageSchema
     relatedTerms: z.array(z.string()).optional(),
     lessonOrder: z.number().int().positive().optional(),
     officialSource: z.string().url().optional(),
+    releaseDate: isoDate.optional(),
     releaseStatus: z.enum(['stable', 'draft', 'proposed']).optional(),
+    changes: z.array(z.string().min(8)).min(1).optional(),
+    clientImpact: z.array(z.string().min(8)).min(1).optional(),
+    serverImpact: z.array(z.string().min(8)).min(1).optional(),
+    productionImpact: z.array(z.string().min(8)).min(1).optional(),
+    recommendedActions: z.array(z.string().min(8)).min(1).optional(),
+    references: z.array(officialReferenceSchema).min(1).optional(),
     projectType: z
       .enum([
         'server',
@@ -93,9 +137,53 @@ export const contentSchema = pageSchema
       });
     }
 
-    if (
-      ['guide', 'article', 'tutorial', 'lesson'].includes(value.contentType)
-    ) {
+    if (value.contentType === 'guide') {
+      for (const field of [
+        'guideCategory',
+        'outcome',
+        'difficulty',
+        'estimatedMinutes',
+        'specVersion',
+        'lastVerified',
+        'steps',
+      ] as const) {
+        if (value[field] === undefined) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [field],
+            message: `Guides require ${field}`,
+          });
+        }
+      }
+      const ids = value.steps?.map((step) => step.id) ?? [];
+      if (new Set(ids).size !== ids.length) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['steps'],
+          message: 'Guide step IDs must be unique',
+        });
+      }
+    }
+
+    if (value.contentType === 'article') {
+      for (const field of [
+        'blogTopic',
+        'difficulty',
+        'estimatedMinutes',
+        'specVersion',
+        'lastVerified',
+      ] as const) {
+        if (value[field] === undefined) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [field],
+            message: `Technical Blog posts require ${field}`,
+          });
+        }
+      }
+    }
+
+    if (['tutorial', 'lesson'].includes(value.contentType)) {
       for (const field of [
         'difficulty',
         'estimatedMinutes',
@@ -119,16 +207,29 @@ export const contentSchema = pageSchema
         message: 'Glossary terms require a category',
       });
     }
-    if (
-      value.contentType.startsWith('spec-') &&
-      (!value.officialSource || !value.releaseStatus)
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['officialSource'],
-        message: 'Spec Watch entries require source and status',
-      });
+
+    if (value.contentType.startsWith('spec-')) {
+      for (const field of [
+        'officialSource',
+        'releaseDate',
+        'releaseStatus',
+        'changes',
+        'clientImpact',
+        'serverImpact',
+        'productionImpact',
+        'recommendedActions',
+        'references',
+      ] as const) {
+        if (value[field] === undefined) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [field],
+            message: `Spec Watch entries require ${field}`,
+          });
+        }
+      }
     }
+
     if (
       value.contentType === 'ecosystem' &&
       (!value.projectType || !value.reviewStatus)
@@ -149,6 +250,25 @@ export const contentSchema = pageSchema
   });
 
 export type ContentFrontmatter = z.infer<typeof contentSchema>;
+export type GuideFrontmatter = ContentFrontmatter & {
+  contentType: 'guide';
+  guideCategory: GuideCategory;
+  outcome: string;
+  steps: GuideStep[];
+};
+export type BlogPostFrontmatter = ContentFrontmatter & {
+  contentType: 'article';
+  blogTopic: BlogTopic;
+};
+export type SpecWatchFrontmatter = ContentFrontmatter & {
+  contentType: 'spec-release' | 'spec-proposal';
+  changes: string[];
+  clientImpact: string[];
+  serverImpact: string[];
+  productionImpact: string[];
+  recommendedActions: string[];
+  references: Array<{ label: string; url: string }>;
+};
 
 export function isStale(lastVerified: string | undefined, now = new Date()) {
   if (!lastVerified) return false;

@@ -1,204 +1,245 @@
 import Link from 'next/link';
-import { ArrowRight, BookOpen, Code2, Rocket, ShieldCheck } from 'lucide-react';
-import { ContentCard } from '@/components/content-card';
+import {
+  ArrowDown,
+  ArrowRight,
+  BookOpen,
+  FileText,
+  Hammer,
+  Radio,
+  ServerCog,
+  ShieldCheck,
+} from 'lucide-react';
+import {
+  KnowledgeBridgeVisual,
+  ProductionArchitectureVisual,
+} from '@/components/architecture-visuals';
 import { NewsletterPanel } from '@/components/newsletter-panel';
 import { ProtocolVisual } from '@/components/protocol-visual';
 import { Button } from '@/components/ui/button';
 
-const paths = [
+const journey = [
   {
-    title: "I'm new to MCP",
-    description: 'Start with fundamentals and core concepts.',
-    href: '/learn',
-    label: 'Begin with MCP',
+    title: 'Understand',
+    description: 'Core concepts, architecture, and durable mental models.',
+    href: '/guides#learn',
     icon: BookOpen,
-    tone: 'blue',
   },
   {
-    title: "I'm building with MCP",
-    description: 'Learn to build servers, clients, and tools.',
-    href: '/build',
-    label: 'Build something',
-    icon: Code2,
-    tone: 'green',
+    title: 'Build',
+    description: 'Servers, clients, tools, resources, and integrations.',
+    href: '/guides#build',
+    icon: Hammer,
   },
   {
-    title: "I'm shipping to production",
-    description: 'Deploy, scale, and operate MCP systems.',
-    href: '/operate',
-    label: 'Operate MCP',
-    icon: Rocket,
-    tone: 'violet',
+    title: 'Operate',
+    description: 'Deployment, gateways, observability, and reliability.',
+    href: '/guides#operate',
+    icon: ServerCog,
   },
   {
-    title: "I'm focused on security",
-    description: 'Secure MCP systems with best practices.',
-    href: '/security',
-    label: 'Explore security',
+    title: 'Secure',
+    description: 'Authorization, identity, permissions, and threat modelling.',
+    href: '/guides#security',
     icon: ShieldCheck,
-    tone: 'orange',
+  },
+];
+
+const startingPoints = [
+  {
+    eyebrow: 'Guide · Learn',
+    title: 'MCP Fundamentals',
+    href: '/guides/mcp-fundamentals',
+  },
+  {
+    eyebrow: 'Guide · Build',
+    title: 'Build a Minimal MCP Server',
+    href: '/guides/build-a-minimal-mcp-server',
+  },
+  {
+    eyebrow: 'Blog · Architecture',
+    title: 'MCP Architecture',
+    href: '/blog/mcp-architecture',
+  },
+  {
+    eyebrow: 'Spec Watch',
+    title: 'MCP Protocol Revision 2026-07-28',
+    href: '/spec-watch/current-protocol',
   },
 ];
 
 export default function HomePage() {
   return (
-    <main id="main-content">
-      <div className="announcement">
-        <div className="shell">
-          <span>New</span>
-          <p>
-            MCP specification coverage now tracks version and verification
-            dates.
-          </p>
-          <Link href="/spec-watch">
-            See what changed <ArrowRight />
-          </Link>
-        </div>
-      </div>
-      <section className="shell home-hero">
-        <div className="home-hero__copy">
+    <main id="main-content" className="focused-home">
+      <section className="shell focused-hero">
+        <div className="focused-hero__copy">
           <p className="eyebrow">Independent · developer-first</p>
           <h1>
-            Learn, build,
-            <br />
-            and ship with <span>MCP.</span>
+            MCP, explained
+            <span>from first principles</span>
+            to production.
           </h1>
           <p>
-            Independent guides, tools, and architecture for the Model Context
-            Protocol ecosystem.
+            All Things MCP turns the Model Context Protocol specification into
+            practical knowledge developers can use—from fundamentals and
+            architecture to production and security.
           </p>
           <div className="button-row">
-            <Button href="/learn">Start learning</Button>
-            <Button href="/build" variant="secondary">
-              Explore the docs
+            <Button href="/guides/mcp-fundamentals">Start with MCP</Button>
+            <Button href="/guides" variant="secondary">
+              Explore Guides
             </Button>
           </div>
         </div>
-        <div className="home-hero__visual">
+        <div className="focused-hero__visual">
           <ProtocolVisual />
         </div>
       </section>
-      <section className="section-block">
+
+      <section className="editorial-section why-section">
+        <div className="shell why-layout">
+          <div>
+            <p className="eyebrow">Why All Things MCP exists</p>
+            <h2>
+              The specification tells you what MCP is.
+              <span>
+                Building real systems requires understanding how it fits
+                together.
+              </span>
+            </h2>
+            <p>
+              Production introduces authorization, gateways, deployment,
+              observability, evolving versions, and real trust decisions. We
+              bridge the gap between specification language and working systems.
+            </p>
+          </div>
+          <KnowledgeBridgeVisual />
+        </div>
+      </section>
+
+      <section className="editorial-section journey-section">
         <div className="shell">
-          <div className="section-heading">
-            <h2>Choose your path</h2>
+          <div className="editorial-heading">
+            <p className="eyebrow">The MCP journey</p>
+            <h2>Wherever you are with MCP, we’ll help you move forward.</h2>
           </div>
-          <div className="path-grid">
-            {paths.map(({ icon: Icon, ...path }) => (
-              <Link
-                className={`path-card path-card--${path.tone}`}
-                href={path.href}
-                key={path.title}
-              >
-                <span>
+          <div className="journey-rail">
+            {journey.map(({ icon: Icon, ...item }, index) => (
+              <div className="journey-item" key={item.title}>
+                <Link href={item.href}>
+                  <span className="journey-number">0{index + 1}</span>
                   <Icon />
-                </span>
-                <h3>{path.title}</h3>
-                <p>{path.description}</p>
-                <b>
-                  {path.label} <ArrowRight />
-                </b>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                  <b>
+                    Explore this path <ArrowRight />
+                  </b>
+                </Link>
+                {index < journey.length - 1 && (
+                  <ArrowDown className="journey-arrow" aria-hidden="true" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="editorial-section architecture-section">
+        <div className="shell">
+          <div className="architecture-intro">
+            <p className="eyebrow">Beyond the demo</p>
+            <h2>Understand the full MCP system.</h2>
+            <p>
+              The protocol is only one layer. See how clients, gateways,
+              servers, authorization, observability, and data services shape
+              production behavior.
+            </p>
+          </div>
+          <ProductionArchitectureVisual />
+        </div>
+      </section>
+
+      <section className="editorial-section product-section">
+        <div className="shell">
+          <div className="editorial-heading">
+            <p className="eyebrow">Three ways to use All Things MCP</p>
+            <h2>Do the work. Understand the context. Track the protocol.</h2>
+          </div>
+          <div className="product-showcases">
+            <Link
+              href="/guides"
+              className="product-showcase product-showcase--guides"
+            >
+              <BookOpen />
+              <span>Guides</span>
+              <h3>Learn by doing.</h3>
+              <p>
+                Outcome-driven, step-by-step paths from fundamentals to secure
+                production systems.
+              </p>
+              <b>
+                Browse Guides <ArrowRight />
+              </b>
+            </Link>
+            <Link
+              href="/blog"
+              className="product-showcase product-showcase--blog"
+            >
+              <FileText />
+              <span>Blog</span>
+              <h3>Understand the bigger picture.</h3>
+              <p>
+                Technical analysis, architecture explainers, and independent
+                perspective.
+              </p>
+              <b>
+                Read the Blog <ArrowRight />
+              </b>
+            </Link>
+            <Link
+              href="/spec-watch"
+              className="product-showcase product-showcase--spec"
+            >
+              <Radio />
+              <span>Spec Watch</span>
+              <h3>Know what changed—and why.</h3>
+              <p>
+                Specification releases translated into concrete developer
+                impact.
+              </p>
+              <b>
+                Follow Spec Watch <ArrowRight />
+              </b>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="editorial-section starting-section">
+        <div className="shell">
+          <div className="editorial-heading">
+            <p className="eyebrow">Curated starting points</p>
+            <h2>Start exploring.</h2>
+          </div>
+          <div className="starting-list">
+            {startingPoints.map((item, index) => (
+              <Link href={item.href} key={item.title}>
+                <span>0{index + 1}</span>
+                <div>
+                  <small>{item.eyebrow}</small>
+                  <h3>{item.title}</h3>
+                </div>
+                <ArrowRight />
               </Link>
             ))}
           </div>
         </div>
       </section>
-      <section className="section-block section-block--subtle">
-        <div className="shell home-columns">
-          <div>
-            <div className="section-heading">
-              <h2>Popular guides</h2>
-              <Link href="/library">
-                View all <ArrowRight />
-              </Link>
-            </div>
-            <div className="stack-list">
-              {[
-                {
-                  title: 'What is MCP?',
-                  description:
-                    'Understand the protocol through a practical mental model.',
-                  icon: 'book',
-                  meta: '10 min · Beginner',
-                  href: '/library/guides/what-is-mcp',
-                },
-                {
-                  title: 'MCP architecture',
-                  description:
-                    'Hosts, clients, servers, and primitives in context.',
-                  icon: 'network',
-                  meta: '18 min · Intermediate',
-                  href: '/library/guides/mcp-architecture',
-                },
-                {
-                  title: 'MCP authorization explained',
-                  description:
-                    'Roles, boundaries, grants, and protected resources.',
-                  icon: 'shield',
-                  meta: '18 min · Intermediate',
-                  href: '/library/guides/mcp-authorization-explained',
-                },
-              ].map((item) => (
-                <ContentCard key={item.title} item={item} />
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="section-heading">
-              <h2>Featured tools</h2>
-              <Link href="/tools">
-                View all <ArrowRight />
-              </Link>
-            </div>
-            <div className="stack-list">
-              {[
-                {
-                  title: 'Authorization Flow Explorer',
-                  description:
-                    'A planned interactive guide to authorization flows.',
-                  icon: 'shield',
-                  badge: 'Planned',
-                },
-                {
-                  title: 'Architecture Visualizer',
-                  description:
-                    'A planned canvas for MCP topology and boundaries.',
-                  icon: 'network',
-                  badge: 'Planned',
-                },
-                {
-                  title: 'Tool Description Linter',
-                  description: 'A planned review surface for tool metadata.',
-                  icon: 'check',
-                  badge: 'Planned',
-                },
-              ].map((item) => (
-                <ContentCard key={item.title} item={item} />
-              ))}
-            </div>
-          </div>
-          <aside className="ecosystem-snapshot">
-            <p className="eyebrow">Ecosystem snapshot</p>
-            <h2>Explore by project type</h2>
-            {[
-              'Servers',
-              'Clients',
-              'SDKs',
-              'Gateways',
-              'Registries',
-              'Developer tools',
-            ].map((item, index) => (
-              <Link href="/ecosystem" key={item}>
-                <span>{item}</span>
-                <b>{[12, 8, 7, 4, 3, 9][index]}</b>
-              </Link>
-            ))}
-          </aside>
+
+      <section className="newsletter-close">
+        <div className="shell">
+          <NewsletterPanel dark />
         </div>
       </section>
-      <div className="shell">
-        <NewsletterPanel />
-      </div>
     </main>
   );
 }

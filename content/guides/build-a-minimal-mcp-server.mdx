@@ -1,0 +1,73 @@
+---
+title: Build a Minimal MCP Server
+description: Build and inspect one focused local MCP server before adding remote transport, authorization, or production infrastructure.
+contentType: guide
+section: guides
+guideCategory: build
+outcome: Produce a minimal local server with one read-only capability and verify its metadata and result shape.
+authors: [All Things MCP Editors]
+status: published
+tags: [guide, server, python]
+publishedAt: 2026-08-30
+updatedAt: 2026-08-30
+difficulty: beginner
+estimatedMinutes: 25
+specVersion: 2026-07-28
+lastVerified: 2026-08-30
+language: Python
+sdk: MCP Python SDK
+transport: stdio
+authenticationModel: Environment-provided credentials
+lastTested: 2026-08-30
+prerequisites: [MCP Fundamentals]
+steps:
+  - id: choose-a-capability
+    title: Choose one capability
+    estimatedMinutes: 4
+  - id: create-the-server
+    title: Create the server
+    estimatedMinutes: 7
+  - id: add-a-read-only-operation
+    title: Add a read-only operation
+    estimatedMinutes: 6
+  - id: inspect-the-request
+    title: Inspect the request and result
+    estimatedMinutes: 5
+  - id: verify-the-boundary
+    title: Verify the boundary
+    estimatedMinutes: 3
+---
+
+This guide deliberately keeps the surface small. A first server should prove the protocol boundary before it adds side effects or infrastructure.
+
+## Choose one capability
+
+Pick a deterministic read operation with a narrow input and result. Write down what the host should show a user before you write the server implementation.
+
+## Create the server
+
+Use a current SDK release that supports MCP `2026-07-28`. Give the server stable implementation metadata. For a local standard-input/output server, keep logs on standard error and reserve standard output for protocol messages.
+
+## Add a read-only operation
+
+Define one focused capability with an explicit schema. Treat names, descriptions, and annotations as part of the interface, but enforce input validation in the implementation.
+
+## Inspect the request and result
+
+Connect with an inspector or development host. Confirm the self-contained request metadata and the required `resultType` on the response. If the client uses discovery, verify the server reports the expected version and capabilities.
+
+## Verify the boundary
+
+Confirm invalid inputs return a useful error, logs contain no user payload by default, and no HTTP authorization behavior has been copied into the local stdio transport.
+
+<Callout title="SDK commands are intentionally not pinned here">
+
+SDK installation and API names change independently of the protocol. This guide will link a tested example repository before it claims copy-and-run commands.
+
+</Callout>
+
+<MetadataPanel>
+
+Protocol behavior verified against MCP `2026-07-28` on 2026-08-30. The SDK-specific repository remains an editorial follow-up.
+
+</MetadataPanel>

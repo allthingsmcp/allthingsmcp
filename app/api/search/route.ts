@@ -1,4 +1,6 @@
 import { createSearchAPI } from 'fumadocs-core/search/server';
+import type { ContentFrontmatter } from '@/lib/content-schema';
+import { canonicalContentUrl } from '@/lib/content';
 import { source } from '@/lib/source';
 
 const production =
@@ -14,11 +16,20 @@ export const { GET } = createSearchAPI('advanced', {
         !production ||
         (page.data as { status?: string }).status === 'published',
     )
+    .filter((page) =>
+      [
+        'guide',
+        'article',
+        'spec-release',
+        'spec-proposal',
+        'glossary',
+      ].includes((page.data as ContentFrontmatter).contentType),
+    )
     .map((page) => ({
-      id: page.url,
+      id: canonicalContentUrl(page),
       title: page.data.title,
       description: page.data.description,
-      url: page.url,
+      url: canonicalContentUrl(page),
       structuredData: page.data.structuredData,
     })),
 });

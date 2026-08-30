@@ -25,6 +25,7 @@ export function SearchPage() {
   const [term, setTerm] = useState('');
   const [results, setResults] = useState<SearchHit[]>([]);
   const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState('All');
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -40,6 +41,14 @@ export function SearchPage() {
     setLoading(false);
   }
 
+  const visibleResults = results.filter((result) => {
+    if (filter === 'All') return true;
+    if (filter === 'Guides') return result.url.startsWith('/guides/');
+    if (filter === 'Blog') return result.url.startsWith('/blog/');
+    if (filter === 'Spec Watch') return result.url.startsWith('/spec-watch/');
+    return result.url.startsWith('/glossary/');
+  });
+
   return (
     <main id="main-content" className="search-page">
       <div className="shell">
@@ -48,13 +57,13 @@ export function SearchPage() {
         <form onSubmit={submit} className="search-form">
           <Search />
           <label className="sr-only" htmlFor="global-search">
-            Search guides, terms, and projects
+            Search Guides, Blog, Spec Watch, and Glossary
           </label>
           <input
             id="global-search"
             value={term}
             onChange={(event) => setTerm(event.target.value)}
-            placeholder="Search guides, terms, and projects"
+            placeholder="Search MCP guides and analysis"
             autoFocus
           />
           <button type="submit">Search</button>
@@ -63,18 +72,14 @@ export function SearchPage() {
           <button>
             <SlidersHorizontal /> Filters
           </button>
-          {[
-            'All',
-            'Learn',
-            'Build',
-            'Operate',
-            'Security',
-            'Ecosystem',
-            'Spec Watch',
-            'Tools',
-            'Glossary',
-          ].map((item, index) => (
-            <button className={index === 0 ? 'is-selected' : ''} key={item}>
+          {['All', 'Guides', 'Blog', 'Spec Watch', 'Glossary'].map((item) => (
+            <button
+              type="button"
+              onClick={() => setFilter(item)}
+              aria-pressed={filter === item}
+              className={filter === item ? 'is-selected' : ''}
+              key={item}
+            >
               {item}
             </button>
           ))}
@@ -99,7 +104,13 @@ export function SearchPage() {
               </p>
             </div>
           )}
-          {results.map((result, index) => (
+          {!loading && results.length > 0 && visibleResults.length === 0 && (
+            <div className="search-empty">
+              <h2>No results in {filter}</h2>
+              <p>Choose another content type or broaden your search.</p>
+            </div>
+          )}
+          {visibleResults.map((result, index) => (
             <Link
               href={result.url}
               className="search-result"

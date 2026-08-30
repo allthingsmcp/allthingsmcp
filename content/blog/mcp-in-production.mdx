@@ -1,0 +1,69 @@
+---
+title: 'MCP in Production: What Changes After the Demo'
+description: The architecture, security, reliability, and observability work required to move an MCP integration beyond a local demo.
+contentType: article
+section: blog
+blogTopic: production
+authors: [All Things MCP Editors]
+status: published
+tags: [production, operations, reliability, security]
+publishedAt: 2026-08-30
+updatedAt: 2026-08-30
+difficulty: advanced
+estimatedMinutes: 22
+specVersion: 2026-07-28
+lastVerified: 2026-08-30
+prerequisites: [MCP Architecture, MCP Authorization Explained]
+---
+
+A local MCP demo proves two implementations can exchange messages. Production asks whether requests remain understandable, secure, observable, and recoverable when identities, networks, failures, and human decisions become real.
+
+## Design for self-contained requests
+
+MCP `2026-07-28` removes protocol sessions and the initialization handshake. Each request carries its protocol version, client capabilities, and identifying metadata. Servers can advertise their supported versions and capabilities through `server/discover`.
+
+That makes ordinary horizontal scaling simpler: compatible requests can land on any instance. Application state still needs an explicit design—usually a durable store or a server-minted handle passed in later requests.
+
+## Give gateways protocol-aware signals
+
+Streamable HTTP requests expose method and tool names in required `Mcp-Method` and `Mcp-Name` headers. Gateways, WAFs, and rate limiters can make routing and policy decisions without inspecting JSON bodies.
+
+Treat these headers as inputs to policy, not proof of authorization. The server must still validate tokens, arguments, and permissions.
+
+## Bound retries and long-running work
+
+Every remote request needs timeouts, cancellation behavior, size limits, and an explicit retry policy. Repeating a side-effecting tool call can duplicate work unless the operation provides an idempotency strategy.
+
+Multi Round-Trip Requests represent requests that need more input. Long-running work can use the opt-in Tasks extension. Production clients must distinguish complete, input-required, asynchronous, and failed outcomes.
+
+## Observe metadata, not secrets
+
+Useful telemetry records protocol version, method, tool name, latency, error class, policy outcome, and dependency timing. Do not log access tokens, authorization codes, prompt content, resources, tool arguments, or elicited user data by default.
+
+Cache hints on list and read results can reduce unnecessary calls. Observe cache effectiveness and invalidation behavior rather than assuming every catalog must be fetched per request.
+
+## Put people around consequential actions
+
+Tool descriptions and annotations are untrusted inputs unless the server itself is trusted. Hosts should present clear review and approval interfaces for consequential actions. Servers must enforce authorization independently of model intent.
+
+## Plan the version migration
+
+The July 2026 release is a breaking revision. Test each supported client and server combination, remove dependencies on session IDs and initialization, update request metadata and headers, and review deprecated features before claiming compatibility.
+
+<Checklist
+  items={[
+    'Requests are self-contained and version-aware',
+    'Application state uses explicit durable handles',
+    'Gateways understand required MCP routing headers',
+    'Authorization issuer, resource, and token audience are validated',
+    'Retries, input-required results, and tasks have distinct policies',
+    'Default telemetry excludes secrets and user payloads',
+    'Migration tests cover supported protocol revisions',
+  ]}
+/>
+
+<MetadataPanel>
+
+Verified on 2026-08-30 against MCP `2026-07-28`, including the [Specification](https://modelcontextprotocol.io/specification/2026-07-28) and [Key Changes](https://modelcontextprotocol.io/specification/2026-07-28/changelog). Operational recommendations are All Things MCP guidance.
+
+</MetadataPanel>

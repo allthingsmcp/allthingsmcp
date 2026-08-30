@@ -2,14 +2,14 @@
 
 Every document requires `title`, `description`, `authors`, `status`, `tags`, and `updatedAt`. Published content also requires `publishedAt`.
 
-Technical content requires `difficulty`, `estimatedMinutes`, `specVersion`, and `lastVerified`.
+## Principal models
 
-Supported `contentType` values:
+- Guide: `guideCategory`, `outcome`, `difficulty`, `estimatedMinutes`, ordered unique `steps`, `specVersion`, `lastVerified`, and optional prerequisites.
+- Blog post: `blogTopic`, `difficulty`, `estimatedMinutes`, `specVersion`, `lastVerified`, and optional `substackUrl`.
+- Spec Watch: `releaseDate`, `releaseStatus`, `officialSource`, structured changes, client/server/production impacts, recommended actions, and primary references.
 
-- `guide`, `article`, `tutorial`, `learning-path`, `lesson`
-- `glossary`, `spec-release`, `spec-proposal`
-- `ecosystem`, `tool`
+Guide categories are `learn`, `build`, `operate`, and `security`. Blog topics are `concepts`, `architecture`, `security`, `production`, `ecosystem`, and `opinion`.
 
-Use ISO `YYYY-MM-DD` dates. Use stable, lowercase, hyphenated slugs. Add `prerequisites` only when genuinely required. Tutorial fields may include language, SDK, SDK version, transport, authentication model, repository, and last-tested date.
+Use ISO `YYYY-MM-DD` dates and globally unique lowercase filenames. Each Guide step needs a stable lowercase ID and a matching level-two MDX heading. Update `lastVerified` only after checking the stated specification revision.
 
-Contributed MDX may use: `Callout`, `Steps`, `Tabs`, `Checklist`, `CardGrid`, `MetadataPanel`, and `ProtocolDiagram`. Do not import components or execute JavaScript inside content.
+Supported MDX components are `Callout`, `Steps`, `Tabs`, `Checklist`, `CardGrid`, `MetadataPanel`, and `ProtocolDiagram`. Imports, exports, and executable JavaScript are forbidden.

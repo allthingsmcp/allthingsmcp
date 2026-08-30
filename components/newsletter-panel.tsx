@@ -2,14 +2,22 @@ import { Mail } from 'lucide-react';
 import { AnalyticsLink } from '@/components/analytics-link';
 import { siteConfig } from '@/lib/config';
 
-export function NewsletterPanel({ compact = false }: { compact?: boolean }) {
+export function NewsletterPanel({
+  compact = false,
+  dark = false,
+}: {
+  compact?: boolean;
+  dark?: boolean;
+}) {
   return (
     <section
-      className={
-        compact
-          ? 'newsletter-panel newsletter-panel--compact'
-          : 'newsletter-panel'
-      }
+      className={[
+        'newsletter-panel',
+        compact && 'newsletter-panel--compact',
+        dark && 'newsletter-panel--dark',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       id="newsletter"
       aria-labelledby="newsletter-title"
     >
@@ -17,10 +25,14 @@ export function NewsletterPanel({ compact = false }: { compact?: boolean }) {
         <Mail aria-hidden="true" />
       </div>
       <div className="newsletter-copy">
-        <h2 id="newsletter-title">Stay up to date with MCP</h2>
+        <h2 id="newsletter-title">
+          {dark
+            ? "MCP moves fast. We'll help you keep up."
+            : 'Stay up to date with MCP'}
+        </h2>
         <p>
-          Get independent guides, specification updates, and ecosystem notes in
-          your inbox.
+          Get new guides, technical analysis, and important specification
+          changes delivered to your inbox.
         </p>
       </div>
       <div className="newsletter-form">

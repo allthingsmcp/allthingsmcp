@@ -1,5 +1,9 @@
 # Editorial and technical style
 
+## Choose the right format
+
+A Guide promises an outcome and uses ordered, testable steps. A Blog post helps the reader understand a concept or decision. Spec Watch explains what changed, who is affected, and what developers should do. Do not label a concept explainer as a Guide.
+
 ## Voice
 
 Be direct, independent, and useful. Explain what a mechanism does before why it matters. Avoid hype, unexplained acronyms, and claims such as “secure,” “official,” or “verified” without evidence.

@@ -17,3 +17,9 @@
 - Green highlight: current step or successful verification.
 
 Never encode meaning by color alone. Use labels, line styles, or shapes. Avoid crossed edges, ornamental gradients, faux 3D, and unlabeled arrows. Keep node text short and explain nuance in nearby prose.
+
+## Publication patterns
+
+- Knowledge bridge: Specification → All Things MCP → Working system.
+- Production rail: Host/application → MCP client → gateway → MCP server, with authorization, observability, policy, and external data shown as supporting boundaries.
+- Desktop diagrams read left-to-right. Mobile diagrams must recompose top-to-bottom rather than scale down.

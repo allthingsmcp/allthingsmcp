@@ -15,6 +15,7 @@ Read `references/architecture.md` before changing platform structure and `refere
 4. Allow only reviewed MDX components from `components/mdx.tsx`; reject imports, exports, and executable expressions in contributions.
 5. Exclude drafts in production and expose them in local/preview builds.
 6. Use the shared shell and templates; do not create page-specific lookalike components.
-7. Mark incomplete tools as `planned` and ecosystem fixtures as `not-reviewed`.
-8. Do not send search queries, email addresses, or user-entered content to analytics.
-9. Run formatting, lint, types, content validation, unit tests, build, and proportional browser checks.
+7. Keep Guides, Blog, and Spec Watch as the only primary products. Treat Learn, Build, Operate, and Security as Guide categories.
+8. Keep deferred Tools and Ecosystem surfaces unlinked and noindexed; mark incomplete tools as `planned` and ecosystem fixtures as `not-reviewed`.
+9. Do not send search queries, email addresses, or user-entered content to analytics.
+10. Run formatting, lint, types, content validation, unit tests, build, and proportional browser checks.

@@ -1,4 +1,5 @@
-import { HubPage } from '@/components/hub-page';
-export default function Page() {
-  return <HubPage hubKey="operate" />;
+import { redirect } from 'next/navigation';
+
+export default function OperateRedirect() {
+  redirect('/guides#operate');
 }

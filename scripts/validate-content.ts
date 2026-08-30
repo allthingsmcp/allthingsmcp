@@ -41,14 +41,22 @@ for (const file of files) {
   }
 
   const slug = path
-    .relative(path.join(root, 'content'), file)
+    .basename(file)
     .replace(/\.(md|mdx)$/, '')
-    .toLowerCase()
-    .split(path.sep)
-    .join('/');
+    .toLowerCase();
   const duplicate = slugs.get(slug);
   if (duplicate) errors.push(`${relative}: duplicate slug with ${duplicate}`);
   slugs.set(slug, relative);
+
+  if (result.success && result.data.contentType === 'guide') {
+    for (const step of result.data.steps ?? []) {
+      if (!parsed.content.includes(`## ${step.title}`)) {
+        errors.push(
+          `${relative}: guide step "${step.title}" needs a matching level-two heading`,
+        );
+      }
+    }
+  }
 
   if (/^(?:import|export)\s/m.test(parsed.content))
     errors.push(`${relative}: MDX imports and exports are not allowed`);

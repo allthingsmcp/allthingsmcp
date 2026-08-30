@@ -1,7 +1,10 @@
+import type { Metadata } from 'next';
 import { DirectoryHero } from '@/components/directory-hero';
 import { ContentCard } from '@/components/content-card';
 import { NewsletterPanel } from '@/components/newsletter-panel';
 import { toolFixtures } from '@/lib/site-data';
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default function ToolsPage() {
   return (

@@ -52,7 +52,7 @@ export const metadata: Metadata = {
         url: '/brand/social-card.png',
         width: 1200,
         height: 630,
-        alt: 'All Things MCP — Learn. Build. Ship with MCP.',
+        alt: 'All Things MCP — independent guides, analysis, and Spec Watch.',
       },
     ],
   },
@@ -68,6 +68,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${geist.variable} ${inter.variable} ${mono.variable}`}
     >
       <body>
