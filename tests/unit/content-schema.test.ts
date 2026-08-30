@@ -31,6 +31,17 @@ describe('content contract', () => {
     expect(contentSchema.safeParse(invalid).success).toBe(false);
   });
 
+  it('requires a topic for blog posts', () => {
+    const invalid = {
+      ...base,
+      contentType: 'article' as const,
+      section: 'blog' as const,
+    };
+    const valid = { ...invalid, blogTopic: 'architecture' as const };
+    expect(contentSchema.safeParse(invalid).success).toBe(false);
+    expect(contentSchema.safeParse(valid).success).toBe(true);
+  });
+
   it('rejects impossible calendar dates', () => {
     expect(
       contentSchema.safeParse({ ...base, updatedAt: '2026-02-31' }).success,

@@ -36,6 +36,7 @@ export const contentSchema = pageSchema
       'build',
       'operate',
       'security',
+      'blog',
       'ecosystem',
       'spec-watch',
       'tools',
@@ -49,6 +50,17 @@ export const contentSchema = pageSchema
     estimatedMinutes: z.number().int().positive().optional(),
     specVersion: isoDate.optional(),
     lastVerified: isoDate.optional(),
+    blogTopic: z
+      .enum([
+        'concepts',
+        'architecture',
+        'security',
+        'production',
+        'ecosystem',
+        'opinion',
+      ])
+      .optional(),
+    substackUrl: z.string().url().optional(),
     prerequisites: z.array(z.string()).optional(),
     language: z.string().optional(),
     sdk: z.string().optional(),
@@ -110,6 +122,14 @@ export const contentSchema = pageSchema
           });
         }
       }
+    }
+
+    if (value.contentType === 'article' && !value.blogTopic) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['blogTopic'],
+        message: 'Blog posts require blogTopic',
+      });
     }
 
     if (value.contentType === 'glossary' && !value.glossaryCategory) {

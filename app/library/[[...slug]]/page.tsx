@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ContentMeta } from '@/components/content-meta';
@@ -63,6 +63,9 @@ export default async function LibraryPage({
   if (!page) notFound();
   const data = page.data as typeof page.data & ContentFrontmatter;
   if (production && data.status === 'draft') notFound();
+  if (data.contentType === 'article') {
+    redirect(`/blog/${slug.at(-1)}`);
+  }
   const MDX = page.data.body;
   return (
     <main id="main-content">

@@ -1,4 +1,5 @@
 import { createSearchAPI } from 'fumadocs-core/search/server';
+import type { ContentFrontmatter } from '@/lib/content-schema';
 import { source } from '@/lib/source';
 
 const production =
@@ -14,11 +15,18 @@ export const { GET } = createSearchAPI('advanced', {
         !production ||
         (page.data as { status?: string }).status === 'published',
     )
-    .map((page) => ({
-      id: page.url,
-      title: page.data.title,
-      description: page.data.description,
-      url: page.url,
-      structuredData: page.data.structuredData,
-    })),
+    .map((page) => {
+      const data = page.data as ContentFrontmatter;
+      const url =
+        data.contentType === 'article'
+          ? `/blog/${page.slugs.at(-1)}`
+          : page.url;
+      return {
+        id: url,
+        title: page.data.title,
+        description: page.data.description,
+        url,
+        structuredData: page.data.structuredData,
+      };
+    }),
 });

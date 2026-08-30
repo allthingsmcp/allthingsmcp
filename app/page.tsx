@@ -1,42 +1,40 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, BookOpen, Code2, Rocket, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BookOpen, FileText, RadioTower } from 'lucide-react';
 import { ContentCard } from '@/components/content-card';
 import { NewsletterPanel } from '@/components/newsletter-panel';
-import { ProtocolVisual } from '@/components/protocol-visual';
 import { Button } from '@/components/ui/button';
 
 const paths = [
   {
-    title: "I'm new to MCP",
-    description: 'Start with fundamentals and core concepts.',
-    href: '/learn',
-    label: 'Begin with MCP',
+    eyebrow: 'Guides',
+    title: 'Build with MCP.',
+    description:
+      'Follow practical, step-by-step guidance from first concepts to production systems.',
+    href: '/guides',
+    label: 'Browse guides',
     icon: BookOpen,
-    tone: 'blue',
+    featured: true,
   },
   {
-    title: "I'm building with MCP",
-    description: 'Learn to build servers, clients, and tools.',
-    href: '/build',
-    label: 'Build something',
-    icon: Code2,
-    tone: 'green',
+    eyebrow: 'Blog',
+    title: 'Understand the system.',
+    description:
+      'Read technical analysis, architecture explainers, and independent perspectives.',
+    href: '/blog',
+    label: 'Read the blog',
+    icon: FileText,
+    featured: false,
   },
   {
-    title: "I'm shipping to production",
-    description: 'Deploy, scale, and operate MCP systems.',
-    href: '/operate',
-    label: 'Operate MCP',
-    icon: Rocket,
-    tone: 'violet',
-  },
-  {
-    title: "I'm focused on security",
-    description: 'Secure MCP systems with best practices.',
-    href: '/security',
-    label: 'Explore security',
-    icon: ShieldCheck,
-    tone: 'orange',
+    eyebrow: 'Spec Watch',
+    title: 'Track the protocol.',
+    description:
+      'See specification releases translated into concrete developer impact.',
+    href: '/spec-watch',
+    label: 'Follow Spec Watch',
+    icon: RadioTower,
+    featured: false,
   },
 ];
 
@@ -57,42 +55,60 @@ export default function HomePage() {
       </div>
       <section className="shell home-hero">
         <div className="home-hero__copy">
-          <p className="eyebrow">Independent · developer-first</p>
           <h1>
             Learn, build,
             <br />
             and ship with <span>MCP.</span>
           </h1>
           <p>
-            Independent guides, tools, and architecture for the Model Context
-            Protocol ecosystem.
+            Practical guides, technical analysis, and specification updates for
+            people building with the Model Context Protocol.
           </p>
           <div className="button-row">
-            <Button href="/learn">Start learning</Button>
-            <Button href="/build" variant="secondary">
+            <Button href="/guides#learn">Start learning</Button>
+            <Button href="/guides#build" variant="secondary">
               Explore the docs
             </Button>
           </div>
         </div>
         <div className="home-hero__visual">
-          <ProtocolVisual />
+          <Image
+            className="home-hero__image"
+            src="/images/mcp-ecosystem-hero.png"
+            alt="MCP ecosystem diagram connecting hosts, clients, servers, tools, prompts, and resources around a secure protocol core."
+            width={1448}
+            height={1086}
+            sizes="(max-width: 760px) calc(100vw - 56px), (max-width: 1100px) 50vw, 620px"
+            priority
+          />
         </div>
       </section>
       <section className="section-block">
         <div className="shell">
-          <div className="section-heading">
-            <h2>Choose your path</h2>
+          <div className="path-intro">
+            <p className="eyebrow">Three ways to use All Things MCP</p>
+            <p>
+              Follow practical guides, explore the ideas behind MCP, and stay
+              current as the specification evolves.
+            </p>
           </div>
-          <div className="path-grid">
+          <div className="path-grid product-path-grid">
             {paths.map(({ icon: Icon, ...path }) => (
               <Link
-                className={`path-card path-card--${path.tone}`}
+                className={[
+                  'path-card',
+                  'product-path-card',
+                  path.featured && 'product-path-card--featured',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
                 href={path.href}
                 key={path.title}
               >
                 <span>
                   <Icon />
                 </span>
+                <small>{path.eyebrow}</small>
                 <h3>{path.title}</h3>
                 <p>{path.description}</p>
                 <b>
@@ -108,35 +124,27 @@ export default function HomePage() {
           <div>
             <div className="section-heading">
               <h2>Popular guides</h2>
-              <Link href="/library">
+              <Link href="/guides">
                 View all <ArrowRight />
               </Link>
             </div>
             <div className="stack-list">
               {[
                 {
-                  title: 'What is MCP?',
+                  title: 'Build a minimal MCP server',
                   description:
-                    'Understand the protocol through a practical mental model.',
-                  icon: 'book',
-                  meta: '10 min · Beginner',
-                  href: '/library/guides/what-is-mcp',
+                    'Create and inspect a focused server in small steps.',
+                  icon: 'code',
+                  meta: '25 min · Beginner',
+                  href: '/library/tutorials/minimal-server',
                 },
                 {
-                  title: 'MCP architecture',
+                  title: 'Hosts, clients, and servers',
                   description:
-                    'Hosts, clients, servers, and primitives in context.',
+                    'Understand the ownership and connection boundaries.',
                   icon: 'network',
-                  meta: '18 min · Intermediate',
-                  href: '/library/guides/mcp-architecture',
-                },
-                {
-                  title: 'MCP authorization explained',
-                  description:
-                    'Roles, boundaries, grants, and protected resources.',
-                  icon: 'shield',
-                  meta: '18 min · Intermediate',
-                  href: '/library/guides/mcp-authorization-explained',
+                  meta: '12 min · Beginner',
+                  href: '/library/lessons/participants',
                 },
               ].map((item) => (
                 <ContentCard key={item.title} item={item} />
@@ -145,55 +153,72 @@ export default function HomePage() {
           </div>
           <div>
             <div className="section-heading">
-              <h2>Featured tools</h2>
-              <Link href="/tools">
+              <h2>Latest from the blog</h2>
+              <Link href="/blog">
                 View all <ArrowRight />
               </Link>
             </div>
             <div className="stack-list">
               {[
                 {
-                  title: 'Authorization Flow Explorer',
+                  title: 'What is MCP?',
                   description:
-                    'A planned interactive guide to authorization flows.',
-                  icon: 'shield',
-                  badge: 'Planned',
+                    'A practical mental model for the protocol and where it fits.',
+                  icon: 'book',
+                  meta: 'Concepts · 10 min',
+                  href: '/blog/what-is-mcp',
                 },
                 {
-                  title: 'Architecture Visualizer',
+                  title: 'MCP architecture',
                   description:
-                    'A planned canvas for MCP topology and boundaries.',
+                    'Hosts, clients, servers, sessions, and primitives in context.',
                   icon: 'network',
-                  badge: 'Planned',
+                  meta: 'Architecture · 18 min',
+                  href: '/blog/mcp-architecture',
                 },
                 {
-                  title: 'Tool Description Linter',
-                  description: 'A planned review surface for tool metadata.',
-                  icon: 'check',
-                  badge: 'Planned',
+                  title: 'MCP in production',
+                  description:
+                    'What changes when identities, networks, and failures become real.',
+                  icon: 'rocket',
+                  meta: 'Production · 22 min',
+                  href: '/blog/mcp-in-production',
                 },
               ].map((item) => (
                 <ContentCard key={item.title} item={item} />
               ))}
             </div>
           </div>
-          <aside className="ecosystem-snapshot">
-            <p className="eyebrow">Ecosystem snapshot</p>
-            <h2>Explore by project type</h2>
-            {[
-              'Servers',
-              'Clients',
-              'SDKs',
-              'Gateways',
-              'Registries',
-              'Developer tools',
-            ].map((item, index) => (
-              <Link href="/ecosystem" key={item}>
-                <span>{item}</span>
-                <b>{[12, 8, 7, 4, 3, 9][index]}</b>
+          <div>
+            <div className="section-heading">
+              <h2>Latest from Spec Watch</h2>
+              <Link href="/spec-watch">
+                View all <ArrowRight />
               </Link>
-            ))}
-          </aside>
+            </div>
+            <Link
+              className="spec-watch-feature"
+              href="/library/spec-watch/current-protocol"
+            >
+              <div className="spec-watch-feature__meta">
+                <span>Tracked revision</span>
+                <b>Stable</b>
+              </div>
+              <h3>MCP Protocol Revision 2025-11-25</h3>
+              <p>
+                Review the changes that affect authorization, schemas,
+                elicitation, metadata, and polling behavior.
+              </p>
+              <ul>
+                <li>What changed</li>
+                <li>Why it matters</li>
+                <li>What implementers should review</li>
+              </ul>
+              <strong>
+                Read the release analysis <ArrowRight />
+              </strong>
+            </Link>
+          </div>
         </div>
       </section>
       <div className="shell">
