@@ -1,0 +1,46 @@
+---
+title: Build a Minimal MCP Server
+description: Build a small Python MCP server, expose a typed tool, and inspect the connection from a real development client.
+contentType: guide
+section: build
+authors: [All Things MCP Editors]
+status: published
+tags: [guide, server, python, hands-on]
+publishedAt: 2026-08-03
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 55
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+outcome: Build and inspect a working local MCP server that exposes one typed, deterministic tool over the standard input and output transport.
+prerequisites:
+  - Python 3.10 or newer
+  - Basic Python and command-line familiarity
+  - uv installed for Python project management
+guideResources:
+  - title: Official MCP Python SDK
+    url: https://github.com/modelcontextprotocol/python-sdk
+  - title: MCP Inspector
+    url: https://github.com/modelcontextprotocol/inspector
+  - title: MCP architecture specification
+    url: https://modelcontextprotocol.io/specification/2025-11-25/architecture
+guideSteps:
+  - id: prepare-your-environment
+    title: Prepare your environment
+    description: Create an isolated Python project and install the official MCP SDK and development tools.
+    estimatedMinutes: 10
+  - id: create-the-server
+    title: Create the server
+    description: Define the smallest FastMCP server that can start over the local stdio transport.
+    estimatedMinutes: 10
+  - id: add-a-tool
+    title: Add a typed tool
+    description: Expose one deterministic addition tool with a narrow schema and a useful description.
+    estimatedMinutes: 15
+  - id: inspect-the-connection
+    title: Inspect the connection
+    description: Launch the server with MCP Inspector and verify initialization, discovery, and invocation.
+    estimatedMinutes: 20
+---
+
+This Guide is intentionally small. It proves the protocol lifecycle and one capability before introducing remote transports, authorization, persistence, or deployment infrastructure.

@@ -59,12 +59,22 @@ export default async function LibraryPage({
       </main>
     );
   }
+  const legacyPath = slug.join('/');
+  if (legacyPath === 'tutorials/minimal-server') {
+    redirect('/guides/build-a-minimal-mcp-server');
+  }
   const page = source.getPage(slug);
   if (!page) notFound();
   const data = page.data as typeof page.data & ContentFrontmatter;
   if (production && data.status === 'draft') notFound();
   if (data.contentType === 'article') {
     redirect(`/blog/${slug.at(-1)}`);
+  }
+  if (data.contentType === 'guide') {
+    redirect(`/guides/${slug.at(-1)}`);
+  }
+  if (data.contentType === 'guide-step' && data.guideSlug && data.guideStepId) {
+    redirect(`/guides/${data.guideSlug}/${data.guideStepId}`);
   }
   const MDX = page.data.body;
   return (

@@ -20,7 +20,13 @@ export const { GET } = createSearchAPI('advanced', {
       const url =
         data.contentType === 'article'
           ? `/blog/${page.slugs.at(-1)}`
-          : page.url;
+          : data.contentType === 'guide'
+            ? `/guides/${page.slugs.at(-1)}`
+            : data.contentType === 'guide-step' &&
+                data.guideSlug &&
+                data.guideStepId
+              ? `/guides/${data.guideSlug}/${data.guideStepId}`
+              : page.url;
       return {
         id: url,
         title: page.data.title,

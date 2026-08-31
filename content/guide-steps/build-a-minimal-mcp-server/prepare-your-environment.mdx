@@ -1,0 +1,54 @@
+---
+title: Prepare Your Environment
+description: Create an isolated Python project and install the official MCP SDK and its development command-line tools.
+contentType: guide-step
+section: build
+guideSlug: build-a-minimal-mcp-server
+guideStepId: prepare-your-environment
+guideStepOrder: 1
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, python, setup]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+Start with an isolated project so the server has an explicit dependency boundary and a reproducible launch command.
+
+## Create the project
+
+Run these commands in a terminal:
+
+```bash title="Terminal"
+uv init mcp-server-demo
+cd mcp-server-demo
+uv add "mcp[cli]"
+```
+
+The `cli` extra installs the development commands used later in this Guide.
+
+## Confirm the SDK is available
+
+```bash title="Terminal"
+uv run mcp version
+```
+
+You should see the installed SDK version rather than a command-not-found error.
+
+<Checklist
+  items={[
+    'The project has a pyproject.toml file',
+    'The MCP SDK is recorded as a dependency',
+    'uv run mcp version completes successfully',
+  ]}
+/>
+
+<MetadataPanel>
+  Installation commands follow the [official MCP Python SDK
+  documentation](https://github.com/modelcontextprotocol/python-sdk). Commit the
+  generated lockfile when this project becomes more than a local experiment.
+</MetadataPanel>

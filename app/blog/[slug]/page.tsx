@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { authors as authorProfiles } from 'collections/server';
+import { ArticleAuthors } from '@/components/article-authors';
+import { ArticleToc } from '@/components/article-toc';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ContentMeta } from '@/components/content-meta';
 import { getMDXComponents } from '@/components/mdx';
@@ -53,6 +56,19 @@ export default async function BlogPostPage({
     (!process.env.VERCEL_ENV && process.env.NODE_ENV === 'production');
   if (production && data.status === 'draft') notFound();
   const MDX = page.data.body;
+  const resolvedAuthors = data.authors.flatMap((name) => {
+    const profile = authorProfiles.find((author) => author.name === name);
+    return profile
+      ? [
+          {
+            name: profile.name,
+            role: profile.role,
+            image: profile.image,
+            url: profile.url,
+          },
+        ]
+      : [];
+  });
 
   return (
     <main id="main-content">
@@ -62,33 +78,31 @@ export default async function BlogPostPage({
         />
       </div>
       <div className="shell article-layout blog-article-layout">
+        <ArticleToc items={page.data.toc} />
         <article className="article blog-article">
           <header>
             <p className="eyebrow">{data.blogTopic} · Blog</p>
             <h1>{data.title}</h1>
             <p className="article-deck">{data.description}</p>
-            <ContentMeta data={data} path={`${page.slugs.join('/')}.mdx`} />
+            <ContentMeta
+              data={data}
+              path={`${page.slugs.join('/')}.mdx`}
+              showAuthors={false}
+            />
+            <ArticleAuthors authors={resolvedAuthors} />
             {data.substackUrl && (
               <Link className="text-link" href={data.substackUrl}>
                 Read the Substack edition <ExternalLink aria-hidden="true" />
               </Link>
             )}
           </header>
-          <div className="prose">
+          <div className="prose" id="article-content">
             <MDX components={getMDXComponents()} />
           </div>
           <Link className="blog-back-link" href="/blog">
             <ArrowLeft aria-hidden="true" /> Back to the blog
           </Link>
         </article>
-        <aside className="article-toc">
-          <p>In this article</p>
-          {page.data.toc.map((item) => (
-            <a href={item.url} key={item.url}>
-              {item.title}
-            </a>
-          ))}
-        </aside>
       </div>
     </main>
   );

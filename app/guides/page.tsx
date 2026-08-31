@@ -17,8 +17,6 @@ export const metadata: Metadata = {
     'Practical guides for learning, building, operating, and securing MCP systems.',
 };
 
-const guideContentTypes = new Set(['guide', 'tutorial', 'lesson']);
-
 export default function GuidesPage() {
   const production =
     process.env.VERCEL_ENV === 'production' ||
@@ -29,7 +27,7 @@ export default function GuidesPage() {
     .filter((page) => {
       const data = page.data as ContentFrontmatter;
       return (
-        guideContentTypes.has(data.contentType) &&
+        data.contentType === 'guide' &&
         ['learn', 'build', 'operate', 'security'].includes(data.section) &&
         (!production || data.status === 'published')
       );
@@ -43,7 +41,8 @@ export default function GuidesPage() {
         difficulty: data.difficulty,
         estimatedMinutes: data.estimatedMinutes,
         contentType: data.contentType,
-        href: page.url,
+        steps: data.guideSteps?.length,
+        href: `/guides/${page.slugs.at(-1)}`,
       } as GuideDirectoryItem;
     })
     .sort((a, b) => {

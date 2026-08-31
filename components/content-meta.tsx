@@ -13,9 +13,11 @@ import { siteConfig } from '@/lib/config';
 export function ContentMeta({
   data,
   path,
+  showAuthors = true,
 }: {
   data: ContentFrontmatter;
   path: string;
+  showAuthors?: boolean;
 }) {
   const editUrl = `${siteConfig.githubRepo}/edit/main/content/${path}`;
   const reportUrl = `${siteConfig.githubRepo}/issues/new?template=content.yml&title=${encodeURIComponent(`Content: ${data.title}`)}`;
@@ -38,7 +40,7 @@ export function ContentMeta({
             Spec {data.specVersion}
           </span>
         )}
-        <span>By {data.authors.join(', ')}</span>
+        {showAuthors && <span>By {data.authors.join(', ')}</span>}
       </div>
       {isStale(data.lastVerified) && (
         <div className="stale-warning">

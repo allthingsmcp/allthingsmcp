@@ -102,11 +102,12 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
     () => Array.from(new Set(posts.map((post) => post.topic))),
     [posts],
   );
-  const featured = posts[0];
-  const visiblePosts =
+  const postsForTopic =
     activeTopic === 'all'
-      ? posts.slice(1)
+      ? posts
       : posts.filter((post) => post.topic === activeTopic);
+  const featured = postsForTopic[0];
+  const visiblePosts = postsForTopic.slice(1);
 
   if (!posts.length) {
     return (
@@ -125,7 +126,7 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
   return (
     <div className="shell blog-layout">
       <div className="blog-main">
-        {activeTopic === 'all' && featured && (
+        {featured && (
           <Link className="blog-feature" href={featured.href}>
             <BlogCover topic={featured.topic} />
             <div className="blog-feature__copy">

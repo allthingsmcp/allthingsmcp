@@ -1,0 +1,64 @@
+---
+title: Plan the Outcome
+description: Decide whether your contribution is a Guide, define the result a reader will produce, and outline the shortest useful sequence.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-guide
+guideStepId: plan-the-outcome
+guideStepOrder: 1
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, contributing, planning]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+An ATM Guide helps a reader **produce or verify an outcome**. It is not simply an article divided into pages.
+
+| Choose a Guide when…                                          | Choose a Blog post when…                                     |
+| ------------------------------------------------------------- | ------------------------------------------------------------ |
+| The reader will build, configure, test, or diagnose something | The reader needs an explanation, analysis, or opinion        |
+| Steps must happen in a useful order                           | Sections can stand alone without completion state            |
+| Each step has an observable checkpoint                        | The conclusion is understanding rather than a working result |
+
+## Write the outcome first
+
+Use a concrete sentence that begins with a verb. A strong outcome names both the artifact and the evidence that it works.
+
+> Build a local MCP server with one typed tool, then verify discovery and invocation with MCP Inspector.
+
+Avoid broad outcomes such as “learn about MCP servers.” They do not tell the reader when the Guide is complete.
+
+## Outline the shortest useful sequence
+
+<Steps
+  items={[
+    {
+      title: 'Establish the starting state',
+      description:
+        'State the tools, access, and knowledge the reader needs before step one.',
+    },
+    {
+      title: 'Move one meaningful action at a time',
+      description:
+        'Give each step a single purpose that can be completed and checked.',
+    },
+    {
+      title: 'End with evidence',
+      description: 'Make the final step prove that the promised outcome works.',
+    },
+  ]}
+/>
+
+<Checklist
+  items={[
+    'The outcome starts with an action verb',
+    'The reader can tell exactly when the Guide is complete',
+    'Every planned step contributes directly to the outcome',
+    'The sequence can be followed without hidden prerequisites',
+  ]}
+/>

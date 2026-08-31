@@ -1,0 +1,49 @@
+---
+title: Create the Server
+description: Define the smallest FastMCP application that can start cleanly over the local standard input and output transport.
+contentType: guide-step
+section: build
+guideSlug: build-a-minimal-mcp-server
+guideStepId: create-the-server
+guideStepOrder: 2
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, python, server]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+Create `server.py` in the project root. Keep the first version deliberately small:
+
+```python title="server.py" lineNumbers
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("mcp-server-demo")
+
+
+if __name__ == "__main__":
+    mcp.run()
+```
+
+## Why this is enough to start
+
+`FastMCP` owns the protocol server and its capability registry. Calling `mcp.run()` without a transport argument uses stdio, which is appropriate when a local host launches the server as a subprocess.
+
+Keep the run call behind the `__main__` guard. Development tools import the module to find the `mcp` object, and importing it must not start a second server process.
+
+<Callout title="Keep stdout reserved for MCP" type="warning">
+  Do not print diagnostic messages to stdout in a stdio server. Protocol
+  messages use that stream. Send diagnostics through logging or stderr instead.
+</Callout>
+
+## Check the file before continuing
+
+```bash title="Terminal"
+uv run python -m py_compile server.py
+```
+
+No output means Python parsed the file successfully.

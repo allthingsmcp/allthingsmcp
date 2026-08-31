@@ -135,16 +135,8 @@ export default function HomePage() {
                   description:
                     'Create and inspect a focused server in small steps.',
                   icon: 'code',
-                  meta: '25 min · Beginner',
-                  href: '/library/tutorials/minimal-server',
-                },
-                {
-                  title: 'Hosts, clients, and servers',
-                  description:
-                    'Understand the ownership and connection boundaries.',
-                  icon: 'network',
-                  meta: '12 min · Beginner',
-                  href: '/library/lessons/participants',
+                  meta: '4 steps · 55 min · Beginner',
+                  href: '/guides/build-a-minimal-mcp-server',
                 },
               ].map((item) => (
                 <ContentCard key={item.title} item={item} />

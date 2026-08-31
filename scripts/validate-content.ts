@@ -27,6 +27,16 @@ const knownLibraryUrls = new Set(
   ),
 );
 const errors: string[] = [];
+const guides = new Map<
+  string,
+  { file: string; steps: Array<{ id: string }> }
+>();
+const guideSteps: Array<{
+  file: string;
+  guideSlug: string;
+  stepId: string;
+  order: number;
+}> = [];
 
 for (const file of files) {
   const relative = path.relative(root, file);
@@ -38,6 +48,24 @@ for (const file of files) {
       errors.push(
         `${relative}: ${issue.path.join('.') || 'frontmatter'} — ${issue.message}`,
       );
+  } else if (result.data.contentType === 'guide') {
+    const guideSlug = path.basename(file).replace(/\.(md|mdx)$/, '');
+    guides.set(guideSlug, {
+      file: relative,
+      steps: result.data.guideSteps ?? [],
+    });
+  } else if (
+    result.data.contentType === 'guide-step' &&
+    result.data.guideSlug &&
+    result.data.guideStepId &&
+    result.data.guideStepOrder
+  ) {
+    guideSteps.push({
+      file: relative,
+      guideSlug: result.data.guideSlug,
+      stepId: result.data.guideStepId,
+      order: result.data.guideStepOrder,
+    });
   }
 
   const slug = path
@@ -75,6 +103,39 @@ for (const file of files) {
     const target = match[1].split('#')[0].replace(/\/$/, '');
     if (target.startsWith('/library/') && !knownLibraryUrls.has(target))
       errors.push(`${relative}: broken internal reference ${target}`);
+  }
+}
+
+for (const step of guideSteps) {
+  const guide = guides.get(step.guideSlug);
+  if (!guide) {
+    errors.push(`${step.file}: unknown parent guide ${step.guideSlug}`);
+    continue;
+  }
+  const manifestIndex = guide.steps.findIndex(
+    (item) => item.id === step.stepId,
+  );
+  if (manifestIndex === -1) {
+    errors.push(
+      `${step.file}: step ${step.stepId} is missing from ${guide.file}'s guideSteps`,
+    );
+  } else if (step.order !== manifestIndex + 1) {
+    errors.push(
+      `${step.file}: guideStepOrder must be ${manifestIndex + 1} to match ${guide.file}`,
+    );
+  }
+}
+
+for (const [guideSlug, guide] of guides) {
+  for (const step of guide.steps) {
+    if (
+      !guideSteps.some(
+        (candidate) =>
+          candidate.guideSlug === guideSlug && candidate.stepId === step.id,
+      )
+    ) {
+      errors.push(`${guide.file}: missing guide-step document for ${step.id}`);
+    }
   }
 }
 

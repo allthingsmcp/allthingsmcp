@@ -16,6 +16,7 @@ const isoDate = z
 
 export const contentTypes = [
   'guide',
+  'guide-step',
   'article',
   'tutorial',
   'learning-path',
@@ -26,6 +27,38 @@ export const contentTypes = [
   'ecosystem',
   'tool',
 ] as const;
+
+export const guideStepSchema = z.object({
+  id: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use a lowercase hyphenated ID'),
+  title: z.string().min(3),
+  description: z.string().min(16),
+  estimatedMinutes: z.number().int().positive().optional(),
+});
+
+const guideStepsSchema = z
+  .array(guideStepSchema)
+  .min(2)
+  .superRefine((steps, ctx) => {
+    const seen = new Set<string>();
+    for (const [index, step] of steps.entries()) {
+      if (seen.has(step.id)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [index, 'id'],
+          message: 'Guide step IDs must be unique',
+        });
+      }
+      seen.add(step.id);
+    }
+  });
+
+export const guideResourceSchema = z.object({
+  title: z.string().min(2),
+  url: z.string().url(),
+});
 
 export const contentSchema = pageSchema
   .extend({
@@ -61,6 +94,12 @@ export const contentSchema = pageSchema
       ])
       .optional(),
     substackUrl: z.string().url().optional(),
+    outcome: z.string().min(24).optional(),
+    guideSteps: guideStepsSchema.optional(),
+    guideResources: z.array(guideResourceSchema).optional(),
+    guideSlug: z.string().min(1).optional(),
+    guideStepId: z.string().min(1).optional(),
+    guideStepOrder: z.number().int().positive().optional(),
     prerequisites: z.array(z.string()).optional(),
     language: z.string().optional(),
     sdk: z.string().optional(),
@@ -106,7 +145,9 @@ export const contentSchema = pageSchema
     }
 
     if (
-      ['guide', 'article', 'tutorial', 'lesson'].includes(value.contentType)
+      ['guide', 'guide-step', 'article', 'tutorial', 'lesson'].includes(
+        value.contentType,
+      )
     ) {
       for (const field of [
         'difficulty',
@@ -122,6 +163,28 @@ export const contentSchema = pageSchema
           });
         }
       }
+    }
+
+    if (
+      value.contentType === 'guide' &&
+      (!value.outcome || !value.guideSteps)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['guideSteps'],
+        message: 'Guides require an outcome and at least two ordered steps',
+      });
+    }
+
+    if (
+      value.contentType === 'guide-step' &&
+      (!value.guideSlug || !value.guideStepId || !value.guideStepOrder)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['guideStepId'],
+        message: 'Guide steps require a guide slug, step ID, and step order',
+      });
     }
 
     if (value.contentType === 'article' && !value.blogTopic) {
@@ -169,6 +232,8 @@ export const contentSchema = pageSchema
   });
 
 export type ContentFrontmatter = z.infer<typeof contentSchema>;
+export type GuideStep = z.infer<typeof guideStepSchema>;
+export type GuideResource = z.infer<typeof guideResourceSchema>;
 
 export function isStale(lastVerified: string | undefined, now = new Date()) {
   if (!lastVerified) return false;

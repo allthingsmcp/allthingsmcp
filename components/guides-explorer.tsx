@@ -13,6 +13,7 @@ export type GuideDirectoryItem = {
   category: GuideCategory;
   difficulty?: 'beginner' | 'intermediate' | 'advanced';
   estimatedMinutes?: number;
+  steps?: number;
   contentType: string;
   href: string;
 };
@@ -132,6 +133,9 @@ export function GuidesExplorer({ guides }: { guides: GuideDirectoryItem[] }) {
                       {guide.difficulty && guide.estimatedMinutes && ' · '}
                       {guide.estimatedMinutes &&
                         `${guide.estimatedMinutes} min`}
+                      {guide.estimatedMinutes && guide.steps && ' · '}
+                      {guide.steps &&
+                        `${guide.steps} ${guide.steps === 1 ? 'step' : 'steps'}`}
                       {!guide.difficulty && formatLabel(guide.contentType)}
                     </span>
                     <ArrowRight aria-hidden="true" />
