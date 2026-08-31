@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Rss } from 'lucide-react';
 import { Logo } from '@/components/logo';
+import { SearchDialogTrigger } from '@/components/search-dialog';
 import { siteConfig } from '@/lib/config';
 
 function GitHubMark() {
@@ -46,21 +47,33 @@ export function SiteFooter() {
             <section className="footer-group footer-group--desktop">
               <h2>{group.title}</h2>
               <div>
-                {group.links.map(([label, href]) => (
-                  <Link key={label} href={href}>
-                    {label}
-                  </Link>
-                ))}
+                {group.links.map(([label, href]) =>
+                  label === 'Search' ? (
+                    <SearchDialogTrigger key={label}>
+                      Search
+                    </SearchDialogTrigger>
+                  ) : (
+                    <Link key={label} href={href}>
+                      {label}
+                    </Link>
+                  ),
+                )}
               </div>
             </section>
             <details className="footer-group footer-group--mobile">
               <summary>{group.title}</summary>
               <div>
-                {group.links.map(([label, href]) => (
-                  <Link key={label} href={href}>
-                    {label}
-                  </Link>
-                ))}
+                {group.links.map(([label, href]) =>
+                  label === 'Search' ? (
+                    <SearchDialogTrigger key={label}>
+                      Search
+                    </SearchDialogTrigger>
+                  ) : (
+                    <Link key={label} href={href}>
+                      {label}
+                    </Link>
+                  ),
+                )}
               </div>
             </details>
           </div>

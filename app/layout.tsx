@@ -3,6 +3,7 @@ import { Geist, Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { NextProvider } from 'fumadocs-core/framework/next';
 import { PrivacyAnalytics } from '@/components/privacy-analytics';
+import { SearchDialogProvider } from '@/components/search-dialog';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { siteConfig } from '@/lib/config';
@@ -72,10 +73,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <body>
         <NextProvider>
-          <SiteHeader />
-          {children}
-          <SiteFooter />
-          <PrivacyAnalytics />
+          <SearchDialogProvider>
+            <SiteHeader />
+            {children}
+            <SiteFooter />
+            <PrivacyAnalytics />
+          </SearchDialogProvider>
         </NextProvider>
       </body>
     </html>

@@ -13,7 +13,6 @@ const routes = [
   '/spec-watch',
   '/tools',
   '/glossary',
-  '/search',
   '/contribute',
 ];
 
@@ -46,7 +45,12 @@ test('mobile navigation exposes the focused destinations', async ({
     page
       .getByRole('navigation', { name: 'Mobile navigation' })
       .getByRole('link'),
-  ).toHaveText(['Guides', 'Blog', 'Spec Watch', 'Newsletter', 'Search']);
+  ).toHaveText(['Guides', 'Blog', 'Spec Watch', 'Newsletter']);
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Mobile navigation' })
+      .getByRole('button', { name: 'Search' }),
+  ).toBeVisible();
 });
 
 test('desktop navigation reflects the focused content model', async ({
@@ -171,17 +175,70 @@ test('footer prioritizes content, newsletter, and search', async ({
       .locator('summary')
       .click();
   }
-  for (const label of [
-    'Guides',
-    'Blog',
-    'Spec Watch',
-    'Newsletter',
-    'Search',
-  ]) {
+  for (const label of ['Guides', 'Blog', 'Spec Watch', 'Newsletter']) {
     await expect(
       footer.getByRole('link', { name: label, exact: true }),
     ).toBeVisible();
   }
+  await expect(
+    footer.getByRole('button', { name: 'Search', exact: true }),
+  ).toBeVisible();
+});
+
+test('global search opens in context and returns canonical results', async ({
+  page,
+}) => {
+  await page.goto('/blog');
+  await page.getByRole('button', { name: 'Search All Things MCP' }).click();
+
+  const dialog = page.getByRole('dialog', { name: 'Search All Things MCP' });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('searchbox').fill('minimal MCP server');
+
+  const result = dialog.getByRole('link', {
+    name: /Build a Minimal MCP Server/,
+  });
+  await expect(result).toHaveAttribute(
+    'href',
+    '/guides/build-a-minimal-mcp-server',
+  );
+  await result.click();
+  await expect(page).toHaveURL(/\/guides\/build-a-minimal-mcp-server$/);
+  await expect(dialog).not.toBeVisible();
+});
+
+test('command shortcut and legacy search URL open the search overlay', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.keyboard.press('ControlOrMeta+KeyK');
+  await expect(
+    page.getByRole('dialog', { name: 'Search All Things MCP' }),
+  ).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  await page.goto('/search');
+  await expect(page).toHaveURL(/\/$/);
+  await expect(
+    page.getByRole('dialog', { name: 'Search All Things MCP' }),
+  ).toBeVisible();
+});
+
+test('search overlay has no serious accessibility violations', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Search All Things MCP' }).click();
+
+  const results = await new AxeBuilder({ page })
+    .include('.search-dialog')
+    .disableRules(['color-contrast'])
+    .analyze();
+  expect(
+    results.violations.filter((violation) =>
+      ['critical', 'serious'].includes(violation.impact ?? ''),
+    ),
+  ).toEqual([]);
 });
 
 test('blog is an editorial surface with topic filtering', async ({ page }) => {

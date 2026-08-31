@@ -3,7 +3,9 @@
 - Runtime: Node 22+, Next.js App Router, React, TypeScript.
 - Styling: Tailwind CSS plus CSS custom properties in `app/globals.css`.
 - Content: Fumadocs MDX compiled from `content/`; schemas live in `lib/content-schema.ts` and `source.config.ts`.
-- Search: Fumadocs Core server-side Orama endpoint at `/api/search`.
+- Search: Fumadocs Core server-side search at `/api/search`, presented through
+  the global command overlay. `/search` is compatibility-only and opens the
+  overlay on the current shell rather than rendering a standalone search page.
 - Deployment: Vercel; `main` is production and pull requests receive previews.
 - Newsletter: branded wrapper around a configurable official Substack embed with a direct link fallback.
 - Analytics: Vercel Web Analytics may be enabled by environment; event payloads must contain no user text or PII.
