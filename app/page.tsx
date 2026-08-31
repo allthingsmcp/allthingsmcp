@@ -14,7 +14,6 @@ const paths = [
     href: '/guides',
     label: 'Browse guides',
     icon: BookOpen,
-    featured: true,
   },
   {
     eyebrow: 'Blog',
@@ -24,7 +23,6 @@ const paths = [
     href: '/blog',
     label: 'Read the blog',
     icon: FileText,
-    featured: false,
   },
   {
     eyebrow: 'Spec Watch',
@@ -34,7 +32,6 @@ const paths = [
     href: '/spec-watch',
     label: 'Follow Spec Watch',
     icon: RadioTower,
-    featured: false,
   },
 ];
 
@@ -95,13 +92,7 @@ export default function HomePage() {
           <div className="path-grid product-path-grid">
             {paths.map(({ icon: Icon, ...path }) => (
               <Link
-                className={[
-                  'path-card',
-                  'product-path-card',
-                  path.featured && 'product-path-card--featured',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+                className="path-card product-path-card"
                 href={path.href}
                 key={path.title}
               >

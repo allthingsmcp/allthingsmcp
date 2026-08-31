@@ -559,6 +559,11 @@ a.content-card:hover {
   min-height: 310px;
   flex-direction: column;
   padding: 30px;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
 }
 .product-path-card small {
   margin-top: 38px;
@@ -580,19 +585,39 @@ a.content-card:hover {
   margin-top: auto;
   padding-top: 32px;
 }
-.path-card.product-path-card--featured {
+.path-card.product-path-card:focus-visible {
   border-color: var(--blue);
   background: var(--blue);
   color: white;
+  outline: 3px solid rgba(10, 85, 255, 0.28);
+  outline-offset: 3px;
+  transform: translateY(-2px);
 }
-.path-card.product-path-card--featured > span {
+.path-card.product-path-card:focus-visible > span {
   background: rgba(255, 255, 255, 0.16);
   color: white;
 }
-.path-card.product-path-card--featured small,
-.path-card.product-path-card--featured p,
-.path-card.product-path-card--featured b {
+.path-card.product-path-card:focus-visible small,
+.path-card.product-path-card:focus-visible p,
+.path-card.product-path-card:focus-visible b {
   color: white;
+}
+@media (hover: hover) {
+  .path-card.product-path-card:hover {
+    border-color: var(--blue);
+    background: var(--blue);
+    color: white;
+    transform: translateY(-2px);
+  }
+  .path-card.product-path-card:hover > span {
+    background: rgba(255, 255, 255, 0.16);
+    color: white;
+  }
+  .path-card.product-path-card:hover small,
+  .path-card.product-path-card:hover p,
+  .path-card.product-path-card:hover b {
+    color: white;
+  }
 }
 .path-card {
   padding: 24px;
