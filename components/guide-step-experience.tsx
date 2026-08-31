@@ -2,6 +2,7 @@
 
 import { useMemo, type ReactNode } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,6 +13,8 @@ import {
 } from 'lucide-react';
 import type { GuideStep } from '@/lib/content-schema';
 import { useGuideProgress } from '@/components/use-guide-progress';
+import { InteractiveGuideProvider } from '@/components/interactive-guide-context';
+import type { InteractiveGuideId } from '@/lib/interactive-guides';
 
 type StepPageData = {
   title: string;
@@ -29,6 +32,7 @@ export function GuideStepExperience({
   page,
   actions,
   children,
+  interactiveGuideId,
 }: {
   guideSlug: string;
   guideTitle: string;
@@ -37,13 +41,29 @@ export function GuideStepExperience({
   page: StepPageData;
   actions: ReactNode;
   children: ReactNode;
+  interactiveGuideId?: InteractiveGuideId;
 }) {
+  const router = useRouter();
   const stepIds = useMemo(() => steps.map((step) => step.id), [steps]);
   const progress = useGuideProgress(guideSlug, stepIds);
   const activeIndex = steps.findIndex((step) => step.id === activeStep.id);
   const nextStep = steps[activeIndex + 1];
   const previousStep = steps[activeIndex - 1];
   const isComplete = progress.completed.includes(activeStep.id);
+  const usesInteractiveCompletion =
+    !!interactiveGuideId && activeStep.id !== 'what-is-mcp';
+  const articleContent = interactiveGuideId ? (
+    <InteractiveGuideProvider
+      activeStepId={activeStep.id}
+      guideId={interactiveGuideId}
+      onComplete={progress.complete}
+      onResetAutoSteps={progress.reset}
+    >
+      {children}
+    </InteractiveGuideProvider>
+  ) : (
+    children
+  );
 
   return (
     <div className="shell guide-step-layout">
@@ -60,6 +80,23 @@ export function GuideStepExperience({
             <span style={{ width: `${progress.percent}%` }} />
           </div>
         </div>
+        <label className="guide-step-mobile-selector">
+          <span>Current step</span>
+          <select
+            aria-label="Choose Guide step"
+            onChange={(event) =>
+              router.push(`/guides/${guideSlug}/${event.target.value}`)
+            }
+            value={activeStep.id}
+          >
+            {steps.map((step, index) => (
+              <option key={step.id} value={step.id}>
+                {index + 1}. {step.title}
+                {progress.completed.includes(step.id) ? ' — Complete' : ''}
+              </option>
+            ))}
+          </select>
+        </label>
         <ol>
           {steps.map((step, index) => {
             const completed = progress.completed.includes(step.id);
@@ -96,27 +133,29 @@ export function GuideStepExperience({
           </div>
         </header>
 
-        <div className="prose guide-step-prose">{children}</div>
+        <div className="prose guide-step-prose">{articleContent}</div>
 
-        <div className="guide-step-completion">
-          <div>
-            <p className="eyebrow">Step {activeIndex + 1}</p>
-            <h2>{isComplete ? 'Step completed' : 'Ready to continue?'}</h2>
-            <p>
-              {isComplete
-                ? 'Your progress is saved in this browser.'
-                : 'Mark this step complete when you have finished the checks above.'}
-            </p>
+        {!usesInteractiveCompletion && (
+          <div className="guide-step-completion">
+            <div>
+              <p className="eyebrow">Step {activeIndex + 1}</p>
+              <h2>{isComplete ? 'Step completed' : 'Ready to continue?'}</h2>
+              <p>
+                {isComplete
+                  ? 'Your progress is saved in this browser.'
+                  : 'Mark this step complete when you have finished the checks above.'}
+              </p>
+            </div>
+            <button
+              className={isComplete ? 'is-complete' : undefined}
+              type="button"
+              onClick={() => progress.toggle(activeStep.id)}
+            >
+              <Check aria-hidden="true" />
+              {isComplete ? 'Mark as incomplete' : 'Mark step complete'}
+            </button>
           </div>
-          <button
-            className={isComplete ? 'is-complete' : undefined}
-            type="button"
-            onClick={() => progress.toggle(activeStep.id)}
-          >
-            <Check aria-hidden="true" />
-            {isComplete ? 'Mark as incomplete' : 'Mark step complete'}
-          </button>
-        </div>
+        )}
 
         <nav className="guide-step-pagination" aria-label="Guide steps">
           {previousStep ? (

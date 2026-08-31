@@ -1,0 +1,39 @@
+---
+title: Review and Export
+description: Review the complete simulated server, download its runnable TypeScript project, and finish the Guide.
+contentType: guide-step
+section: build
+guideSlug: building-your-first-mcp-server
+guideStepId: review-and-export
+guideStepOrder: 8
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, interactive, export, typescript]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2026-07-28
+lastVerified: 2026-08-31
+---
+
+Your visual configuration, generated source, protocol history, and test result should now describe the same server. Review that consistency before exporting the project.
+
+<InteractiveGuideBlock scene="completion" />
+
+## Run the exported project
+
+Extract the ZIP, then run:
+
+```bash title="Terminal"
+npm install
+npm start
+```
+
+The local project exposes a Streamable HTTP MCP endpoint at `http://127.0.0.1:3000/mcp` with loopback host and origin validation.
+
+<Callout title="Hosted workspaces come later" type="warning">
+  ATM does not host this server or issue credentials in this phase. The disabled
+  hosted-endpoint and external-client actions mark the future Workspace API
+  boundary without pretending that it exists.
+</Callout>

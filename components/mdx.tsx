@@ -2,6 +2,7 @@ import type { MDXComponents } from 'mdx/types';
 import { ArrowRight, CheckCircle2, Info, TriangleAlert } from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
 import { MdxTabs, type MdxTabItem } from '@/components/mdx-tabs';
+import { InteractiveGuideBlock } from '@/components/interactive-guide-block';
 
 export function Callout({
   type = 'note',
@@ -118,6 +119,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     CardGrid,
     MetadataPanel,
     ProtocolDiagram,
+    InteractiveGuideBlock,
     ...components,
   };
 }

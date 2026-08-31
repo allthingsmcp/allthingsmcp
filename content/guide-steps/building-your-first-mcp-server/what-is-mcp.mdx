@@ -1,0 +1,56 @@
+---
+title: What Is MCP?
+description: Build a practical mental model of the host, client, server, and the capabilities an MCP server can expose.
+contentType: guide-step
+section: build
+guideSlug: building-your-first-mcp-server
+guideStepId: what-is-mcp
+guideStepOrder: 1
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, interactive, fundamentals, architecture]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2026-07-28
+lastVerified: 2026-08-31
+---
+
+Model Context Protocol gives AI applications and external capability providers a shared protocol boundary. The protocol does not make every API identical. It standardizes how participants discover capabilities and exchange structured messages.
+
+## The three participants
+
+- The **host** owns the user experience, model access, permissions, and client lifecycle.
+- An **MCP client** is created by the host and communicates with one server.
+- An **MCP server** exposes capabilities such as tools, resources, and prompts.
+
+<ProtocolDiagram
+  label="A host contains an MCP client, which connects to one MCP server over the protocol."
+  nodes={['Host', 'MCP client', 'MCP server']}
+/>
+
+## What your server will expose
+
+<CardGrid
+  items={[
+    {
+      title: 'Tools',
+      description: 'Callable operations such as looking up current weather.',
+    },
+    {
+      title: 'Resources',
+      description: 'Read-only data that a client can retrieve by URI.',
+    },
+    {
+      title: 'Prompts',
+      description:
+        'Reusable message templates that users can select explicitly.',
+    },
+  ]}
+/>
+
+<Callout title="Keep the boundary in view">
+  The server exposes capabilities. The host decides how those capabilities are
+  presented, approved, and used within its product.
+</Callout>

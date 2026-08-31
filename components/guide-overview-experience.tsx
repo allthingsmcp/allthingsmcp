@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import type { GuideResource, GuideStep } from '@/lib/content-schema';
 import { useGuideProgress } from '@/components/use-guide-progress';
+import { InteractiveGuideOverview } from '@/components/interactive-guide-overview';
+import type { InteractiveGuideId } from '@/lib/interactive-guides';
 
 export type GuideOverviewData = {
   slug: string;
@@ -27,6 +29,7 @@ export type GuideOverviewData = {
   steps: GuideStep[];
   prerequisites: string[];
   resources: GuideResource[];
+  interactiveGuideId?: InteractiveGuideId;
 };
 
 function label(value: string) {
@@ -38,6 +41,14 @@ export function GuideOverviewExperience({
 }: {
   guide: GuideOverviewData;
 }) {
+  if (guide.interactiveGuideId) {
+    return <InteractiveGuideOverview guide={guide} />;
+  }
+
+  return <StandardGuideOverview guide={guide} />;
+}
+
+function StandardGuideOverview({ guide }: { guide: GuideOverviewData }) {
   const stepIds = useMemo(
     () => guide.steps.map((step) => step.id),
     [guide.steps],
