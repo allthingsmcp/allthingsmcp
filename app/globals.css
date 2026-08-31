@@ -3172,7 +3172,12 @@ a.content-card:hover {
   font-size: clamp(2.8rem, 5vw, 4.6rem);
   line-height: 1.02;
 }
-.guide-title-line > span {
+.guide-title-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.guide-title-badges > span {
   padding: 6px 10px;
   border: 1px solid rgba(74, 222, 128, 0.5);
   border-radius: 6px;
@@ -3180,6 +3185,11 @@ a.content-card:hover {
   color: #8ae9b9;
   font-size: 0.68rem;
   font-weight: 700;
+}
+.guide-title-badges > span + span {
+  border-color: rgba(157, 184, 255, 0.44);
+  background: rgba(10, 85, 255, 0.18);
+  color: #b8ceff;
 }
 .guide-overview-hero__inner > div:first-child > p {
   max-width: 710px;
@@ -4347,80 +4357,9 @@ a.content-card:hover {
   }
 }
 
-/* Embedded interactive Guides */
-.interactive-overview {
-  background: #fff;
-}
-.interactive-overview-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(520px, 1.08fr);
-  gap: 56px;
-  align-items: center;
-  padding-block: 58px 64px;
-}
-.interactive-overview-copy {
-  display: grid;
-  justify-items: start;
-}
-.interactive-overview-back {
-  margin-bottom: 36px;
-  color: var(--blue);
-  font-size: 0.74rem;
-  font-weight: 700;
-}
-.interactive-overview-copy h1 {
-  max-width: 680px;
-  margin: 12px 0 18px;
-  font-size: clamp(3.2rem, 5.2vw, 5.4rem);
-  line-height: 0.98;
-}
-.interactive-overview-copy > p:not(.eyebrow) {
-  max-width: 620px;
-  color: var(--ink-soft);
-  font-size: 1rem;
-  line-height: 1.7;
-}
-.interactive-overview-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  margin-top: 28px;
-}
-.interactive-overview-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--ink-soft);
-  font-size: 0.72rem;
-  font-weight: 650;
-}
-.interactive-overview-meta svg {
-  width: 17px;
-  color: var(--blue);
-}
-.interactive-start-button {
-  min-width: 230px;
-  justify-content: center;
-  margin-top: 32px;
-}
-.interactive-start-button svg {
-  width: 16px;
-}
-.interactive-overview-progress {
-  display: grid;
-  width: min(360px, 100%);
-  grid-template-columns: 1fr auto;
-  gap: 7px 12px;
-  margin-top: 20px;
-  color: var(--muted);
-  font-size: 0.66rem;
-}
-.interactive-overview-progress strong {
-  color: var(--ink);
-}
-.interactive-overview-progress .guide-progress-track {
-  grid-column: 1 / -1;
-  background: var(--border);
+/* Interactive Guide overview enhancement */
+.interactive-guide-enhancement {
+  padding-top: 40px;
 }
 .interactive-overview-outcome {
   overflow: hidden;
@@ -4434,6 +4373,18 @@ a.content-card:hover {
   gap: 14px;
   padding: 22px 24px;
   border-bottom: 1px solid var(--border);
+}
+.interactive-enhancement-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+.interactive-enhancement-note svg {
+  width: 16px;
 }
 .interactive-overview-outcome > header > span {
   display: grid;
@@ -4450,6 +4401,10 @@ a.content-card:hover {
 .interactive-overview-outcome h2 {
   margin-top: 4px;
   font-size: 1.25rem;
+}
+.interactive-enhancement-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
 }
 .interactive-overview-diagram {
   display: grid;
@@ -4513,15 +4468,14 @@ a.content-card:hover {
 }
 .interactive-overview-learn {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px 22px;
-  padding: 20px 24px 24px;
-  border-top: 1px solid var(--border);
+  align-content: center;
+  gap: 13px;
+  padding: 28px;
+  border-left: 1px solid var(--border);
   background: #fff;
 }
 .interactive-overview-learn h3 {
-  grid-column: 1 / -1;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   font-size: 0.86rem;
 }
 .interactive-overview-learn p {
@@ -4537,70 +4491,6 @@ a.content-card:hover {
   flex: 0 0 auto;
   color: var(--green);
 }
-.interactive-overview-content {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 32px;
-  padding-block: 48px 80px;
-  border-top: 1px solid var(--border);
-}
-.interactive-overview-aside {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  background: #fff;
-}
-.interactive-overview-aside section {
-  padding: 21px;
-}
-.interactive-overview-aside section + section {
-  border-top: 1px solid var(--border);
-}
-.interactive-overview-aside section > svg {
-  width: 20px;
-  margin-bottom: 10px;
-  color: var(--blue);
-}
-.interactive-overview-aside h2 {
-  margin-bottom: 9px;
-  font-size: 0.83rem;
-}
-.interactive-overview-aside p,
-.interactive-overview-aside li,
-.interactive-overview-aside a {
-  color: var(--ink-soft);
-  font-size: 0.7rem;
-  line-height: 1.6;
-}
-.interactive-overview-aside ul {
-  display: grid;
-  gap: 7px;
-  padding-left: 16px;
-}
-.interactive-overview-aside a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--blue);
-  font-weight: 650;
-}
-.interactive-overview-aside a + a {
-  margin-top: 9px;
-}
-.interactive-overview-aside a svg {
-  width: 13px;
-}
-.interactive-overview-aside .interactive-simulation-note {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 10px;
-  background: var(--blue-pale);
-}
-.interactive-overview-aside .interactive-simulation-note svg {
-  margin: 0;
-}
-
 .guide-step-page:has(.interactive-guide-block) {
   background: linear-gradient(90deg, var(--surface) 0 25%, #fff 25% 100%);
 }
@@ -5719,9 +5609,16 @@ a.content-card:hover {
 }
 
 @media (max-width: 1100px) {
-  .interactive-overview-hero {
+  .interactive-enhancement-grid {
+    grid-template-columns: 1fr;
+  }
+  .interactive-overview-learn {
     grid-template-columns: 1fr 1fr;
-    gap: 32px;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+  .interactive-overview-learn h3 {
+    grid-column: 1 / -1;
   }
   .interactive-builder-layout,
   .interactive-client-layout {
@@ -5733,24 +5630,17 @@ a.content-card:hover {
 }
 
 @media (max-width: 760px) {
-  .interactive-overview-hero {
-    grid-template-columns: 1fr;
-    gap: 36px;
-    padding-block: 28px 40px;
+  .interactive-guide-enhancement {
+    padding-top: 24px;
   }
-  .interactive-overview-back {
-    margin-bottom: 24px;
+  .interactive-overview-outcome > header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 18px;
   }
-  .interactive-overview-copy h1 {
-    font-size: clamp(3rem, 14vw, 4.2rem);
-  }
-  .interactive-overview-meta {
-    display: grid;
-    gap: 10px;
-  }
-  .interactive-start-button,
-  .interactive-overview-progress {
+  .interactive-enhancement-note {
     width: 100%;
+    margin-left: 60px;
   }
   .interactive-overview-diagram {
     grid-template-columns: 1fr;
@@ -5763,13 +5653,10 @@ a.content-card:hover {
   }
   .interactive-overview-learn {
     grid-template-columns: 1fr;
+    padding: 20px 18px;
   }
   .interactive-overview-learn h3 {
     grid-column: 1;
-  }
-  .interactive-overview-content {
-    grid-template-columns: 1fr;
-    padding-block: 28px 52px;
   }
   .guide-step-page:has(.interactive-guide-block) {
     background: #fff;
