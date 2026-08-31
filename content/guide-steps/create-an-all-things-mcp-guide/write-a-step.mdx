@@ -1,0 +1,67 @@
+---
+title: Write a Useful Step
+description: Create a step document that matches the manifest, teaches one meaningful action, and ends with an observable checkpoint.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-guide
+guideStepId: write-a-step
+guideStepOrder: 3
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, contributing, markdown]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 15
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+Place step documents under `content/guide-steps/your-guide-slug/`. The metadata connects each document to its overview and controls its position.
+
+```yaml
+---
+title: Connect and Invoke
+description: Connect the client, inspect the advertised tools, and invoke one tool with a valid argument.
+contentType: guide-step
+section: build
+guideSlug: build-a-useful-mcp-client
+guideStepId: connect-and-invoke
+guideStepOrder: 2
+authors: [Your Name]
+status: draft
+tags: [guide-step, client, typescript]
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 35
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+```
+
+## Use standard Markdown first
+
+Ordinary Markdown keeps contributions readable in GitHub and portable outside the site. Writers can use:
+
+- second- and third-level headings
+- **bold** and _emphasis_
+- [descriptive links](https://modelcontextprotocol.io/)
+- ordered and unordered lists
+- inline `code`
+- fenced code blocks with a language
+- blockquotes for short quotations or principles
+- tables for compact comparisons
+
+## Give the step a reliable rhythm
+
+1. Explain what the reader is about to do and why.
+2. Show the exact command, code, or interface action.
+3. Explain only the details that affect the result.
+4. Provide a checkpoint the reader can observe.
+5. Identify likely failure modes when they are consequential.
+
+<Callout title="One step, one meaningful result" type="note">
+  A step may contain several small actions, but they should all resolve one
+  named part of the Guide. Split a step when it creates a separate artifact or
+  requires a separate verification loop.
+</Callout>

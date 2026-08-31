@@ -1,0 +1,122 @@
+---
+title: Add Structured Content
+description: Present alternatives, related choices, reference metadata, and technical flows with safe and accessible structured components.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-guide
+guideStepId: add-structured-content
+guideStepOrder: 5
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, contributing, mdx, diagrams]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+The remaining components accept constrained data rather than arbitrary scripts. This keeps contributed MDX reviewable, accessible, and safe to build.
+
+## Tabs for equivalent alternatives
+
+Use tabs when readers need one of several equivalent commands. Keep labels short and do not hide required sequential instructions inside tabs.
+
+```mdx
+<Tabs
+  items={[
+    { label: 'pnpm', content: 'pnpm content:validate', language: 'bash' },
+    { label: 'npm', content: 'npm run content:validate', language: 'bash' },
+  ]}
+/>
+```
+
+<Tabs
+  items={[
+    {
+      label: 'pnpm',
+      content: 'pnpm content:validate',
+      language: 'bash',
+    },
+    {
+      label: 'npm',
+      content: 'npm run content:validate',
+      language: 'bash',
+    },
+  ]}
+/>
+
+## Card grid for related choices
+
+Use cards for a small set of peer destinations or choices. Do not use them for a sequence.
+
+```mdx
+<CardGrid
+  items={[
+    {
+      title: 'Contribution guide',
+      description: 'Review the full workflow.',
+      href: '/contribute',
+    },
+    {
+      title: 'Guide catalogue',
+      description: 'Inspect published examples.',
+      href: '/guides',
+    },
+  ]}
+/>
+```
+
+<CardGrid
+  items={[
+    {
+      title: 'Contribution guide',
+      description: 'Review the full contribution workflow.',
+      href: '/contribute',
+    },
+    {
+      title: 'Guide catalogue',
+      description: 'Inspect published Guides and their structure.',
+      href: '/guides',
+    },
+  ]}
+/>
+
+## Metadata panel for source context
+
+Use this panel for version scope, source provenance, compatibility, or other reference details that should remain visible but separate from the main instruction.
+
+```mdx
+<MetadataPanel>
+  **Verification scope:** tested with Node.js 22 on macOS and Linux. Last
+  verified on 2026-08-31.
+</MetadataPanel>
+```
+
+<MetadataPanel>
+  **Verification scope:** tested with Node.js 22 on macOS and Linux. Last
+  verified on 2026-08-31.
+</MetadataPanel>
+
+## Protocol diagram for a simple flow
+
+Use the diagram component for a short labelled flow. The `label` is the accessible text equivalent, so it must communicate the same relationship as the visual.
+
+```mdx
+<ProtocolDiagram
+  label="A contributor plans, writes, validates, and submits a Guide for review."
+  nodes={['Plan', 'Write', 'Validate', 'Review']}
+/>
+```
+
+<ProtocolDiagram
+  label="A contributor plans, writes, validates, and submits a Guide for review."
+  nodes={['Plan', 'Write', 'Validate', 'Review']}
+/>
+
+<Callout title="Need a richer technical diagram?" type="note">
+  Propose a reusable diagram asset or component with an accessible text
+  equivalent. Do not recreate complex architecture with unreviewed HTML inside a
+  content file.
+</Callout>

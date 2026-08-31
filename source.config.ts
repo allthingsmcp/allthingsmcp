@@ -21,8 +21,24 @@ export const authors = defineCollections({
     name: z.string().min(1),
     role: z.string().min(1),
     bio: z.string().min(20),
+    image: z.string().startsWith('/'),
     url: z.string().url().optional(),
   }),
 });
 
-export default defineConfig();
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      addLanguageClass: true,
+      engine: 'oniguruma',
+      langAlias: {
+        mdx: 'tsx',
+      },
+      langs: ['tsx'],
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+    },
+  },
+});

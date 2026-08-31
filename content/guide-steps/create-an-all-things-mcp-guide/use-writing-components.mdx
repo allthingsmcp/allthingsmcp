@@ -1,0 +1,119 @@
+---
+title: Use Writing Components
+description: Add code, notes, warnings, checklists, and numbered procedures using the reviewed components available to Guide authors.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-guide
+guideStepId: use-writing-components
+guideStepOrder: 4
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, contributing, mdx, components]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 15
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+Use reviewed components only when they make an instruction easier to understand or verify. The examples below show the source first and the rendered result second.
+
+## Code and inline code
+
+Always identify the language after the opening fence. Add `title="..."` when a filename or terminal context helps, and add `lineNumbers` only when the prose refers to specific lines. Use inline code for filenames, commands, properties, and short identifiers such as `guideStepId`.
+
+````md
+```ts title="guide.ts" lineNumbers
+const guide = {
+  status: 'draft',
+  section: 'build',
+};
+```
+````
+
+```ts title="guide.ts" lineNumbers
+const guide = {
+  status: 'draft',
+  section: 'build',
+};
+```
+
+## Informational callout
+
+Use a note for context that matters but does not signal risk.
+
+```mdx title="Note callout"
+<Callout title="Preview behavior" type="note">
+  Draft Guides appear in pull-request previews but not in production.
+</Callout>
+```
+
+<Callout title="Preview behavior" type="note">
+  Draft Guides appear in pull-request previews but not in production.
+</Callout>
+
+## Warning callout
+
+Use warnings sparingly for actions that may break a setup, expose data, weaken security, or produce a misleading result.
+
+```mdx title="Warning callout"
+<Callout title="Do not publish unverified commands" type="warning">
+  Run every command against the versions named in the Guide before publication.
+</Callout>
+```
+
+<Callout title="Do not publish unverified commands" type="warning">
+  Run every command against the versions named in the Guide before publication.
+</Callout>
+
+## Checklist
+
+Use a checklist for acceptance criteria or a set of checks, not for chronological instructions.
+
+```mdx title="Checklist"
+<Checklist
+  items={[
+    'Every command was tested',
+    'The expected output is described',
+    'Links point to primary sources',
+  ]}
+/>
+```
+
+<Checklist
+  items={[
+    'Every command was tested',
+    'The expected output is described',
+    'Links point to primary sources',
+  ]}
+/>
+
+## Numbered procedure
+
+Use `Steps` for a short procedure inside one Guide step. The Guide sidebar remains the navigation for the larger sequence.
+
+```mdx title="Numbered procedure"
+<Steps
+  items={[
+    { title: 'Run the check', description: 'Execute the documented command.' },
+    {
+      title: 'Inspect the result',
+      description: 'Compare the output with the stated checkpoint.',
+    },
+  ]}
+/>
+```
+
+<Steps
+  items={[
+    {
+      title: 'Run the check',
+      description: 'Execute the documented command.',
+    },
+    {
+      title: 'Inspect the result',
+      description: 'Compare the output with the stated checkpoint.',
+    },
+  ]}
+/>

@@ -5,12 +5,17 @@ import { Menu, Search, X } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Logo } from '@/components/logo';
+import { useSearchDialog } from '@/components/search-dialog';
 import { primaryNav } from '@/lib/site-data';
 import { cn } from '@/lib/utils';
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const { openSearch } = useSearchDialog();
   const [open, setOpen] = useState(false);
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
+  const toggleMenu = () => setOpen((value) => !value);
 
   return (
     <header className="site-header">
@@ -24,25 +29,26 @@ export function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className={cn(pathname === item.href && 'is-active')}
+              className={cn(isActive(item.href) && 'is-active')}
             >
               {item.label}
             </Link>
           ))}
         </nav>
         <div className="header-actions">
-          <Link
+          <button
+            type="button"
             className="search-trigger"
-            href="/search"
             aria-label="Search All Things MCP"
+            onClick={openSearch}
           >
             <Search aria-hidden="true" className="size-4" />
             <span>Search</span>
             <kbd>⌘K</kbd>
-          </Link>
+          </button>
           <Link
             className="button button--primary newsletter-button"
-            href="#newsletter"
+            href="/#newsletter"
           >
             Newsletter
           </Link>
@@ -52,7 +58,13 @@ export function SiteHeader() {
             aria-expanded={open}
             aria-controls="mobile-navigation"
             aria-label={open ? 'Close navigation' : 'Open navigation'}
-            onClick={() => setOpen((value) => !value)}
+            onClick={toggleMenu}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggleMenu();
+              }
+            }}
           >
             {open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
           </button>
@@ -65,21 +77,27 @@ export function SiteHeader() {
           aria-label="Mobile navigation"
         >
           <div className="shell mobile-nav__inner">
-            {[
-              ...primaryNav,
-              { label: 'Tools', href: '/tools' },
-              { label: 'Glossary', href: '/glossary' },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={cn(pathname === item.href && 'is-active')}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link href="/contribute">Contribute</Link>
+            {[...primaryNav, { label: 'Newsletter', href: '/#newsletter' }].map(
+              (item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(isActive(item.href) && 'is-active')}
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                openSearch();
+              }}
+            >
+              Search
+            </button>
           </div>
         </nav>
       )}

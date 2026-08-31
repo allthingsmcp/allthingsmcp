@@ -1,0 +1,62 @@
+---
+title: Validate and Submit
+description: Run the authoring checks, inspect the complete Guide at desktop and mobile sizes, and prepare a focused pull request.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-guide
+guideStepId: validate-and-submit
+guideStepOrder: 6
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, contributing, validation, pull-request]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+Run the focused authoring checks before opening a pull request:
+
+```bash
+pnpm format:write
+pnpm content:validate
+pnpm typecheck
+pnpm lint
+```
+
+The content validator rejects invalid metadata, duplicate slugs, missing Guide steps, mismatched step order, broken internal references, unapproved MDX components, imports, exports, and executable JavaScript.
+
+## Preview the complete experience
+
+```bash
+pnpm dev
+```
+
+Open the Guide overview and every step. Check both a desktop viewport and a narrow mobile viewport.
+
+<Checklist
+  items={[
+    'The overview promises a specific, observable outcome',
+    'Every manifest entry has one matching step document',
+    'Previous and next navigation follows the intended order',
+    'Code can be copied and run as written',
+    'Every step ends with a result the reader can verify',
+    'Callouts and structured components are used intentionally',
+    'The Guide remains readable at a 390px viewport',
+    'All automated checks pass',
+  ]}
+/>
+
+## Prepare the pull request
+
+Keep the pull request focused on one Guide. Explain its intended reader, promised outcome, verification environment, and any parts that need especially close technical review.
+
+<Callout title="Technical review is part of publication" type="warning">
+  Do not change `status` to `published` merely because the page builds. A
+  maintainer must review the writing and a technically qualified reviewer must
+  verify claims, commands, and version scope.
+</Callout>
+
+When review is complete, add `publishedAt`, update `lastVerified`, change the status to `published`, and rerun the checks.

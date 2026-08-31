@@ -15,6 +15,21 @@ const base = {
   estimatedMinutes: 10,
   specVersion: '2025-11-25',
   lastVerified: '2026-08-03',
+  outcome: 'Complete a practical outcome by following the ordered guide steps.',
+  guideSteps: [
+    {
+      id: 'prepare',
+      title: 'Prepare',
+      description: 'Prepare the environment and required dependencies.',
+      estimatedMinutes: 5,
+    },
+    {
+      id: 'build',
+      title: 'Build',
+      description: 'Build and inspect the smallest working implementation.',
+      estimatedMinutes: 10,
+    },
+  ],
 };
 
 describe('content contract', () => {
@@ -29,6 +44,43 @@ describe('content contract', () => {
   it('requires technical metadata for a guide', () => {
     const invalid = { ...base, lastVerified: undefined };
     expect(contentSchema.safeParse(invalid).success).toBe(false);
+  });
+
+  it('requires ordered, uniquely identified guide steps', () => {
+    const missing = { ...base, guideSteps: undefined };
+    const duplicate = {
+      ...base,
+      guideSteps: [base.guideSteps[0], base.guideSteps[0]],
+    };
+    expect(contentSchema.safeParse(missing).success).toBe(false);
+    expect(contentSchema.safeParse(duplicate).success).toBe(false);
+  });
+
+  it('requires parent and ordering metadata for guide steps', () => {
+    const step = {
+      ...base,
+      contentType: 'guide-step' as const,
+      outcome: undefined,
+      guideSteps: undefined,
+      guideSlug: 'build-a-server',
+      guideStepId: 'prepare',
+      guideStepOrder: 1,
+    };
+    expect(contentSchema.safeParse(step).success).toBe(true);
+    expect(
+      contentSchema.safeParse({ ...step, guideStepId: undefined }).success,
+    ).toBe(false);
+  });
+
+  it('requires a topic for blog posts', () => {
+    const invalid = {
+      ...base,
+      contentType: 'article' as const,
+      section: 'blog' as const,
+    };
+    const valid = { ...invalid, blogTopic: 'architecture' as const };
+    expect(contentSchema.safeParse(invalid).success).toBe(false);
+    expect(contentSchema.safeParse(valid).success).toBe(true);
   });
 
   it('rejects impossible calendar dates', () => {

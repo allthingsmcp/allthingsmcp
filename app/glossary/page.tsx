@@ -2,49 +2,7 @@ import { Search } from 'lucide-react';
 import { DirectoryHero } from '@/components/directory-hero';
 import { NewsletterPanel } from '@/components/newsletter-panel';
 import { StatusBadge } from '@/components/status-badge';
-
-const terms = [
-  [
-    'Authorization',
-    'The process of determining what actions a client or user is allowed to perform.',
-    'Security',
-  ],
-  [
-    'Capability',
-    'A feature or function that an MCP participant can support or negotiate.',
-    'Protocol',
-  ],
-  [
-    'Client',
-    'A protocol participant inside a host that connects to one MCP server.',
-    'Protocol',
-  ],
-  [
-    'Elicitation',
-    'A server-initiated request for additional information from a user through a client.',
-    'Primitives',
-  ],
-  [
-    'Host',
-    'The application environment that coordinates one or more MCP clients.',
-    'Protocol',
-  ],
-  [
-    'Resource',
-    'Contextual data that a server exposes for clients to read.',
-    'Primitives',
-  ],
-  [
-    'Tool',
-    'An operation exposed by a server that a model can invoke through a client.',
-    'Primitives',
-  ],
-  [
-    'Transport',
-    'The communication mechanism that carries MCP messages.',
-    'Transport',
-  ],
-];
+import { glossaryTerms } from '@/lib/glossary-data';
 
 export default function GlossaryPage() {
   return (
@@ -90,13 +48,13 @@ export default function GlossaryPage() {
             ].map((item, index) => (
               <button key={item}>
                 <span>{item}</span>
-                <b>{[terms.length, 3, 3, 1, 1, 0, 0][index]}</b>
+                <b>{[glossaryTerms.length, 3, 3, 1, 1, 0, 0][index]}</b>
               </button>
             ))}
           </aside>
           <div className="glossary-list">
-            {terms.map(([term, definition, category]) => (
-              <article key={term}>
+            {glossaryTerms.map(({ term, definition, category }) => (
+              <article id={term.toLowerCase()} key={term}>
                 <span className="term-letter">{term.charAt(0)}</span>
                 <h2>{term}</h2>
                 <p>{definition}</p>

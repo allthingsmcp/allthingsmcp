@@ -10,11 +10,8 @@ export type CardItem = {
 };
 
 export const primaryNav = [
-  { label: 'Learn', href: '/learn' },
-  { label: 'Build', href: '/build' },
-  { label: 'Operate', href: '/operate' },
-  { label: 'Security', href: '/security' },
-  { label: 'Ecosystem', href: '/ecosystem' },
+  { label: 'Guides', href: '/guides' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Spec Watch', href: '/spec-watch' },
 ];
 

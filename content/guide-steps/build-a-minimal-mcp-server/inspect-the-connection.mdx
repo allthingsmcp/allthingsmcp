@@ -1,0 +1,57 @@
+---
+title: Inspect the Connection
+description: Launch the server with MCP Inspector and verify initialization, tool discovery, and a complete tool invocation.
+contentType: guide-step
+section: build
+guideSlug: build-a-minimal-mcp-server
+guideStepId: inspect-the-connection
+guideStepOrder: 4
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, inspector, verification]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 20
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+The server is useful only when a client can initialize a session, discover the tool, and invoke it successfully. Use the SDK development command to launch MCP Inspector:
+
+```bash title="Terminal"
+uv run mcp dev server.py
+```
+
+The command imports the module, finds the `mcp` server object, launches it over stdio, and opens the Inspector development interface.
+
+## Verify the protocol flow
+
+In Inspector:
+
+1. Connect to the server.
+2. Open the **Tools** section.
+3. Confirm that `add` appears with integer fields for `a` and `b`.
+4. Invoke it with `a = 2` and `b = 3`.
+5. Confirm that the result contains `5`.
+
+You have now exercised the essential path: initialization, capability negotiation, tool discovery, tool invocation, and a structured result.
+
+## Diagnose the common failures
+
+- If the module cannot be imported, run the command from the project directory and recheck the filename.
+- If the tool is missing, confirm that `@mcp.tool()` decorates the function attached to the same `mcp` instance.
+- If the stdio connection breaks, remove ordinary `print()` calls from server code.
+
+<Callout title="You have a working protocol boundary" type="note">
+  This is the right point to commit the project. Add remote transport,
+  authorization, persistence, and deployment only when the server's real use
+  case requires them.
+</Callout>
+
+<MetadataPanel>
+  The development command and stdio behavior follow the [official MCP Python
+  SDK](https://github.com/modelcontextprotocol/python-sdk). MCP Inspector is
+  maintained in the official [Inspector
+  repository](https://github.com/modelcontextprotocol/inspector).
+</MetadataPanel>

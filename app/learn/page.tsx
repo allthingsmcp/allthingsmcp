@@ -1,4 +1,5 @@
-import { HubPage } from '@/components/hub-page';
+import { redirect } from 'next/navigation';
+
 export default function Page() {
-  return <HubPage hubKey="learn" />;
+  redirect('/guides#learn');
 }

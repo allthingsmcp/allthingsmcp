@@ -1,0 +1,57 @@
+---
+title: Add a Typed Tool
+description: Expose one deterministic addition tool with a narrow input schema and a description that clients can understand.
+contentType: guide-step
+section: build
+guideSlug: build-a-minimal-mcp-server
+guideStepId: add-a-tool
+guideStepOrder: 3
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, python, tools]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 15
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+Add a tool between the `FastMCP` instance and the run block:
+
+```python title="server.py" lineNumbers
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("mcp-server-demo")
+
+
+@mcp.tool()
+def add(a: int, b: int) -> int:
+    """Add two integers and return the result."""
+    return a + b
+
+
+if __name__ == "__main__":
+    mcp.run()
+```
+
+## What the decorator contributes
+
+The decorator registers `add` as a tool. The SDK uses the function name, type annotations, and docstring to construct the tool description and input schema exposed to clients.
+
+This first tool is intentionally deterministic and side-effect free. It lets you verify discovery and invocation without introducing credentials, network calls, or destructive behavior.
+
+<Checklist
+  items={[
+    'Both parameters have explicit integer types',
+    'The return value has an explicit type',
+    'The docstring describes the result in plain language',
+    'The tool performs no hidden network or file-system work',
+  ]}
+/>
+
+## Recheck the module
+
+```bash title="Terminal"
+uv run python -m py_compile server.py
+```

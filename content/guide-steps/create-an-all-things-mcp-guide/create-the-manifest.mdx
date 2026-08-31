@@ -1,0 +1,69 @@
+---
+title: Create the Guide Manifest
+description: Add the Guide overview document and define the metadata, prerequisites, resources, and ordered steps that power the experience.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-guide
+guideStepId: create-the-manifest
+guideStepOrder: 2
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, contributing, frontmatter]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+---
+
+Create the overview at `content/guides/your-guide-slug.mdx`. Its filename becomes the canonical Guide URL.
+
+```yaml
+---
+title: Build a Useful MCP Client
+description: Build a client that connects, discovers capabilities, and invokes one tool.
+contentType: guide
+section: build
+authors: [Your Name]
+status: draft
+tags: [guide, client, typescript]
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 45
+specVersion: 2025-11-25
+lastVerified: 2026-08-31
+outcome: Build a TypeScript MCP client and verify that it can discover and invoke a server tool.
+prerequisites:
+  - TypeScript basics
+  - Node.js 22 and pnpm
+guideResources:
+  - title: MCP TypeScript SDK
+    url: https://github.com/modelcontextprotocol/typescript-sdk
+guideSteps:
+  - id: prepare-the-project
+    title: Prepare the project
+    description: Create the project and install its required packages.
+    estimatedMinutes: 10
+  - id: connect-and-invoke
+    title: Connect and invoke
+    description: Connect to the server, discover tools, and invoke one safely.
+    estimatedMinutes: 35
+---
+```
+
+<Callout title="Start every contribution as a draft" type="note">
+  Drafts are available in pull-request previews but excluded from production.
+  Add `publishedAt` and change the status only after editorial and technical
+  review.
+</Callout>
+
+## Keep the manifest and files aligned
+
+Every `guideSteps` ID must have one matching step document. IDs must be unique, lowercase, and hyphenated; the array order determines navigation and progress.
+
+<MetadataPanel>
+  **Path contract:** an overview at `content/guides/build-a-client.mdx` with a
+  step ID of `connect-and-invoke` maps to
+  `/guides/build-a-client/connect-and-invoke`.
+</MetadataPanel>
