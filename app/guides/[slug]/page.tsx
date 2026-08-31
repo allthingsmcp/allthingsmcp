@@ -70,6 +70,7 @@ export default async function GuideOverviewPage({
           steps: data.guideSteps,
           prerequisites: data.prerequisites ?? [],
           resources: data.guideResources ?? [],
+          interactiveGuideId: data.interactiveGuideId,
         }}
       />
     </main>

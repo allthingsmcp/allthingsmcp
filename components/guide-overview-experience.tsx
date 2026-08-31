@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import type { GuideResource, GuideStep } from '@/lib/content-schema';
 import { useGuideProgress } from '@/components/use-guide-progress';
+import { InteractiveGuideEnhancement } from '@/components/interactive-guide-overview';
+import type { InteractiveGuideId } from '@/lib/interactive-guides';
 
 export type GuideOverviewData = {
   slug: string;
@@ -27,6 +29,7 @@ export type GuideOverviewData = {
   steps: GuideStep[];
   prerequisites: string[];
   resources: GuideResource[];
+  interactiveGuideId?: InteractiveGuideId;
 };
 
 function label(value: string) {
@@ -38,6 +41,10 @@ export function GuideOverviewExperience({
 }: {
   guide: GuideOverviewData;
 }) {
+  return <StandardGuideOverview guide={guide} />;
+}
+
+function StandardGuideOverview({ guide }: { guide: GuideOverviewData }) {
   const stepIds = useMemo(
     () => guide.steps.map((step) => step.id),
     [guide.steps],
@@ -57,7 +64,10 @@ export function GuideOverviewExperience({
             </nav>
             <div className="guide-title-line">
               <h1>{guide.title}</h1>
-              <span>{label(guide.difficulty)}</span>
+              <div className="guide-title-badges">
+                <span>{label(guide.difficulty)}</span>
+                {guide.interactiveGuideId && <span>Interactive</span>}
+              </div>
             </div>
             <p>{guide.description}</p>
             <div className="guide-overview-meta">
@@ -70,6 +80,11 @@ export function GuideOverviewExperience({
               <span>
                 <CalendarDays aria-hidden="true" /> Updated {guide.updatedAt}
               </span>
+              {guide.interactiveGuideId && (
+                <span>
+                  <Play aria-hidden="true" /> Browser simulation
+                </span>
+              )}
             </div>
           </div>
           <div className="guide-progress-summary" aria-live="polite">
@@ -93,6 +108,8 @@ export function GuideOverviewExperience({
           </div>
         </div>
       </section>
+
+      {guide.interactiveGuideId && <InteractiveGuideEnhancement />}
 
       <section className="shell guide-overview-layout">
         <div className="guide-step-list">

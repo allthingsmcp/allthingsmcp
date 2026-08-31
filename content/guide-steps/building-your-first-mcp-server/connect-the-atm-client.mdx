@@ -1,0 +1,29 @@
+---
+title: Connect the ATM Client
+description: Connect a deterministic learning client, discover the server, and inspect the current protocol exchange.
+contentType: guide-step
+section: build
+guideSlug: building-your-first-mcp-server
+guideStepId: connect-the-atm-client
+guideStepOrder: 6
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, interactive, client, discovery, protocol]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2026-07-28
+lastVerified: 2026-08-31
+---
+
+The ATM learning client is a deterministic browser simulation. Connecting it demonstrates how a current client discovers the server and lists the capabilities you configured.
+
+<InteractiveGuideBlock scene="connect-client" />
+
+After connecting, open **Protocol** and inspect `server/discover`. The request carries the current protocol metadata, while the response advertises the server identity and capability families.
+
+<Callout title="This is the modern protocol flow">
+  This Guide targets MCP `2026-07-28`. It intentionally does not show the older
+  initialize-based connection sequence.
+</Callout>

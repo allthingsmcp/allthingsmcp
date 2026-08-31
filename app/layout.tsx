@@ -69,6 +69,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${geist.variable} ${inter.variable} ${mono.variable}`}
     >
       <body>

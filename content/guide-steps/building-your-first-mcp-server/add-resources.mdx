@@ -1,0 +1,30 @@
+---
+title: Add Resources
+description: Expose read-only weather data through a stable resource URI, metadata, and a declared MIME type.
+contentType: guide-step
+section: build
+guideSlug: building-your-first-mcp-server
+guideStepId: add-resources
+guideStepOrder: 4
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, interactive, resources, uri]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2026-07-28
+lastVerified: 2026-08-31
+---
+
+Resources expose read-only data that the host application can retrieve and attach as context. A resource needs a stable URI, useful metadata, and a content type the client can interpret.
+
+Select **Supported cities** and inspect its `weather://cities` URI and response shape before adding it. You can compare it with the other curated resources first.
+
+<InteractiveGuideBlock scene="add-resources" />
+
+<Callout title="Resources are not tools">
+  Use a resource for data a client reads. Use a tool for an operation that the
+  model may choose to invoke. The distinction helps hosts apply appropriate
+  presentation and approval policies.
+</Callout>

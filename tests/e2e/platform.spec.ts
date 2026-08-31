@@ -21,7 +21,7 @@ for (const route of routes) {
     await page.goto(route);
     await expect(page.locator('.site-header')).toBeVisible();
     await expect(page.locator('main')).toBeVisible();
-    await expect(page.locator('footer')).toBeVisible();
+    await expect(page.getByRole('contentinfo')).toBeVisible();
     await expect(page.locator('h1')).toHaveCount(1);
   });
 }
@@ -32,7 +32,6 @@ test('mobile navigation exposes the focused destinations', async ({
 }) => {
   test.skip(!isMobile);
   await page.goto('/');
-  await page.waitForLoadState('networkidle');
   const menu = page.getByRole('button', { name: 'Open navigation' });
   await menu.click();
   await expect(
@@ -336,4 +335,206 @@ test('planned tools expose no open-tool action', async ({ page }) => {
   await page.goto('/tools');
   await expect(page.getByText('Planned').first()).toBeVisible();
   await expect(page.getByRole('link', { name: /open tool/i })).toHaveCount(0);
+});
+
+test('interactive Guide overview is distinct and leaves the original Guide intact', async ({
+  page,
+}) => {
+  await page.goto('/guides/building-your-first-mcp-server');
+  await expect(
+    page.getByRole('heading', { name: 'Building Your First MCP Server' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Interactive Guide', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'A configurable weather MCP server' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('progressbar', { name: 'Guide progress' }),
+  ).toHaveAttribute('aria-valuenow', '0');
+
+  await page.goto('/guides/build-a-minimal-mcp-server');
+  await expect(
+    page.getByRole('heading', { name: 'Build a Minimal MCP Server' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Interactive Guide', { exact: true }),
+  ).toHaveCount(0);
+});
+
+test('interactive Guide configuration propagates through code, protocol, client, and progress', async ({
+  page,
+}) => {
+  await page.goto('/guides/building-your-first-mcp-server/what-is-mcp');
+  await page.getByRole('button', { name: 'Mark step complete' }).click();
+  await page
+    .getByRole('link', { name: /Create your server/ })
+    .last()
+    .click();
+  const serverName = page.getByLabel('Server name');
+  await serverName.fill('lagos-weather-server');
+  await page.getByRole('button', { name: 'Create server' }).click();
+  await expect(page.getByText('Simulation ready')).toBeVisible();
+
+  await page.getByRole('tab', { name: 'Code' }).click();
+  await expect(page.locator('.interactive-code-panel')).toContainText(
+    'lagos-weather-server',
+  );
+  await expect(page.getByRole('button', { name: 'Copy code' })).toBeVisible();
+
+  await page
+    .getByRole('link', { name: /Add tools/ })
+    .first()
+    .click();
+  await page.getByRole('button', { name: /Get current weather/ }).click();
+  await expect(page.getByText('Input schema', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Add to server' }).click();
+  await expect(
+    page
+      .locator('.interactive-server-summary')
+      .getByText('get_weather', { exact: true }),
+  ).toBeVisible();
+
+  await page
+    .getByRole('link', { name: /Add resources/ })
+    .first()
+    .click();
+  await page.getByRole('button', { name: /Supported cities/ }).click();
+  await expect(page.getByText('Resource URI', { exact: true })).toBeVisible();
+  await expect(
+    page.locator('.interactive-schema-preview .token-json-key').first(),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Add to server' }).click();
+  await expect(
+    page
+      .locator('.interactive-server-summary')
+      .getByText('supported_cities', { exact: true }),
+  ).toBeVisible();
+
+  await page
+    .getByRole('link', { name: /Add prompts/ })
+    .first()
+    .click();
+  await page.getByRole('button', { name: /Plan for weather/ }).click();
+  await expect(
+    page.getByText('Prompt template', { exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Add to server' }).click();
+  await expect(
+    page
+      .locator('.interactive-server-summary')
+      .getByText('plan_for_weather', { exact: true }),
+  ).toBeVisible();
+
+  await page
+    .getByRole('link', { name: /Connect the ATM client/ })
+    .first()
+    .click();
+  await page.getByRole('button', { name: 'Connect ATM client' }).click();
+  await expect(page.getByText('Discovery complete')).toBeVisible();
+  await page.getByRole('tab', { name: 'Protocol' }).click();
+  await expect(
+    page.getByRole('button', { name: /server\/discover/ }).first(),
+  ).toBeVisible();
+  await expect(page.locator('.interactive-protocol-layout')).toContainText(
+    '2026-07-28',
+  );
+
+  await page
+    .getByRole('link', { name: /Test your server/ })
+    .first()
+    .click();
+  await page.getByRole('button', { name: 'Call get_weather' }).click();
+  await expect(page.getByText('lagos-weather-server response')).toBeVisible();
+  await expect(page.locator('.interactive-client-result')).toContainText(
+    'Partly cloudy',
+  );
+
+  await page
+    .getByRole('link', { name: /Review and export/ })
+    .first()
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'Connect external client Coming soon' }),
+  ).toBeDisabled();
+  await page.getByRole('button', { name: 'Finish guide' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Guide complete' }),
+  ).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText('8 of 8 complete')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Guide complete' }),
+  ).toBeVisible();
+});
+
+test('interactive Guide renders before browser persistence has restored', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const originalGetItem = Storage.prototype.getItem;
+    Storage.prototype.getItem = function (...args) {
+      const startedAt = performance.now();
+      while (performance.now() - startedAt < 250) {
+        // Deliberately delay persistence restoration to exercise first render.
+      }
+      return originalGetItem.apply(this, args);
+    };
+  });
+
+  await page.goto('/guides/building-your-first-mcp-server/create-your-server');
+  await expect(page.getByLabel('Server name')).toBeVisible();
+  await expect(page.getByText('Loading your Guide workspace…')).toHaveCount(0);
+});
+
+test('interactive Guide reset clears only its automatic objectives', async ({
+  page,
+}) => {
+  await page.goto('/guides/building-your-first-mcp-server/review-and-export');
+  await page.getByRole('button', { name: 'Reset simulation' }).click();
+  await expect(page.getByText('Not created yet')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Finish guide' }),
+  ).toBeDisabled();
+});
+
+test('interactive Guide scenes have no serious accessibility violations', async ({
+  page,
+}) => {
+  for (const step of [
+    'create-your-server',
+    'add-tools',
+    'add-resources',
+    'add-prompts',
+    'connect-the-atm-client',
+    'test-your-server',
+    'review-and-export',
+  ]) {
+    await page.goto(`/guides/building-your-first-mcp-server/${step}`);
+    const results = await new AxeBuilder({ page })
+      .include('.interactive-guide-block')
+      .analyze();
+    expect(
+      results.violations.filter((violation) =>
+        ['critical', 'serious'].includes(violation.impact ?? ''),
+      ),
+      `Accessibility violations in ${step}`,
+    ).toEqual([]);
+  }
+});
+
+test('interactive capability dialog supports escape and restores the page', async ({
+  page,
+}) => {
+  await page.goto('/guides/building-your-first-mcp-server/create-your-server');
+  await page.getByRole('button', { name: 'Create server' }).click();
+  await page.goto('/guides/building-your-first-mcp-server/add-tools');
+  await page.getByRole('button', { name: /Get current weather/ }).click();
+  const dialog = page.getByRole('dialog', { name: 'Get current weather' });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Add Tools' })).toBeVisible();
 });

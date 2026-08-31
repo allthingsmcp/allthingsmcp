@@ -43,33 +43,63 @@ export function useGuideProgress(slug: string, stepIds: string[]) {
   }, [slug, stepIds]);
 
   const update = useCallback(
-    (next: string[]) => {
-      const normalized = Array.from(
-        new Set(next.filter((id) => stepIds.includes(id))),
-      );
-      setCompleted(normalized);
-      try {
-        const payload: ProgressPayload = {
-          version: progressVersion,
-          completed: normalized,
-        };
-        window.localStorage.setItem(storageKey(slug), JSON.stringify(payload));
-      } catch {
-        // Keep the in-memory update when storage is unavailable.
-      }
+    (getNext: (current: string[]) => string[]) => {
+      setCompleted((current) => {
+        const normalized = Array.from(
+          new Set(getNext(current).filter((id) => stepIds.includes(id))),
+        );
+        if (
+          normalized.length === current.length &&
+          normalized.every((id, index) => id === current[index])
+        ) {
+          return current;
+        }
+        try {
+          const payload: ProgressPayload = {
+            version: progressVersion,
+            completed: normalized,
+          };
+          window.localStorage.setItem(
+            storageKey(slug),
+            JSON.stringify(payload),
+          );
+        } catch {
+          // Keep the in-memory update when storage is unavailable.
+        }
+        return normalized;
+      });
     },
     [slug, stepIds],
   );
 
   const toggle = useCallback(
     (id: string) => {
-      update(
-        completed.includes(id)
-          ? completed.filter((value) => value !== id)
-          : [...completed, id],
+      update((current) =>
+        current.includes(id)
+          ? current.filter((value) => value !== id)
+          : [...current, id],
       );
     },
-    [completed, update],
+    [update],
+  );
+
+  const complete = useCallback(
+    (id: string) => update((current) => [...current, id]),
+    [update],
+  );
+
+  const uncomplete = useCallback(
+    (id: string) =>
+      update((current) => current.filter((value) => value !== id)),
+    [update],
+  );
+
+  const reset = useCallback(
+    (ids?: string[]) =>
+      update((current) =>
+        ids?.length ? current.filter((value) => !ids.includes(value)) : [],
+      ),
+    [update],
   );
 
   const currentId = useMemo(
@@ -82,6 +112,9 @@ export function useGuideProgress(slug: string, stepIds: string[]) {
     currentId,
     ready,
     toggle,
+    complete,
+    uncomplete,
+    reset,
     percent: stepIds.length
       ? Math.round((completed.length / stepIds.length) * 100)
       : 0,

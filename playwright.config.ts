@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 const browserChannel = process.env.PLAYWRIGHT_CHANNEL as 'chrome' | undefined;
 const webServerCommand =
   process.env.PLAYWRIGHT_WEB_SERVER_COMMAND ?? 'pnpm dev';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -11,7 +12,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL,
     launchOptions: {
       args: ['--disable-extensions'],
     },
@@ -39,7 +40,7 @@ export default defineConfig({
   ],
   webServer: {
     command: webServerCommand,
-    url: 'http://localhost:3000',
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

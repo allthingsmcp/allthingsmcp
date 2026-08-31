@@ -11,3 +11,7 @@ test-results
 !.env.example
 pnpm-debug.log*
 .vercel
+
+# Regenerated interactive Guide concepts are intentionally not implementation references.
+/output/imagegen/interactive-guides-v2/
+/tmp/imagegen/

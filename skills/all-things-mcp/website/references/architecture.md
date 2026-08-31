@@ -11,3 +11,8 @@
 - Analytics: Vercel Web Analytics may be enabled by environment; event payloads must contain no user text or PII.
 
 Primary hubs are implemented from shared data in `lib/site-data.ts`. Blog posts use `/blog/[slug]`; Guide overviews use `/guides/[slug]`; hands-on Guide steps use `/guides/[slug]/[step]`. The catch-all library route remains a compatibility surface and redirects principal content to its canonical product URL. Keep data-only fixtures separate from authored technical content.
+
+Interactive Guides remain normal Guide overview and step routes. Their reviewed
+MDX blocks resolve to browser-local TypeScript registries and reducer state;
+authored MDX must never contain executable simulator logic. Consult
+`interactive-guide-inventory.md` for the supplied feature-semantics references.

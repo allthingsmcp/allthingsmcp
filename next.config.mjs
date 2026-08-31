@@ -4,6 +4,7 @@ import { createMDX } from 'fumadocs-mdx/next';
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  allowedDevOrigins: ['localhost', '127.0.0.1'],
   experimental: {
     typedEnv: true,
   },

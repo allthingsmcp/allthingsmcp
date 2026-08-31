@@ -5,6 +5,7 @@ import { GuideStepExperience } from '@/components/guide-step-experience';
 import { getMDXComponents } from '@/components/mdx';
 import type { ContentFrontmatter } from '@/lib/content-schema';
 import { source } from '@/lib/source';
+import { interactiveGuideIds } from '@/lib/interactive-guides';
 
 function getGuide(slug: string) {
   return source.getPages().find((page) => {
@@ -81,6 +82,9 @@ export default async function GuideStepPage({
   }
 
   const MDX = stepPage.data.body;
+  const interactiveGuideId = interactiveGuideIds.find(
+    (id) => id === guide.interactiveGuideId,
+  );
 
   return (
     <main id="main-content" className="guide-step-page">
@@ -96,6 +100,7 @@ export default async function GuideStepPage({
           updatedAt: data.updatedAt,
           specVersion: data.specVersion,
         }}
+        interactiveGuideId={interactiveGuideId}
         actions={
           <ContentMeta
             data={data}

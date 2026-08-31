@@ -1,5 +1,6 @@
 import { pageSchema } from 'fumadocs-core/source/schema';
 import { z } from 'zod';
+import { interactiveGuideIds } from '@/lib/interactive-guides';
 
 const isoDate = z
   .union([
@@ -95,6 +96,7 @@ export const contentSchema = pageSchema
       .optional(),
     substackUrl: z.string().url().optional(),
     outcome: z.string().min(24).optional(),
+    interactiveGuideId: z.enum(interactiveGuideIds).optional(),
     guideSteps: guideStepsSchema.optional(),
     guideResources: z.array(guideResourceSchema).optional(),
     guideSlug: z.string().min(1).optional(),
@@ -173,6 +175,14 @@ export const contentSchema = pageSchema
         code: 'custom',
         path: ['guideSteps'],
         message: 'Guides require an outcome and at least two ordered steps',
+      });
+    }
+
+    if (value.interactiveGuideId && value.contentType !== 'guide') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['interactiveGuideId'],
+        message: 'Only Guide overviews may declare interactiveGuideId',
       });
     }
 

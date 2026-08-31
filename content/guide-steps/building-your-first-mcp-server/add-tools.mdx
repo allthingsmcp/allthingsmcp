@@ -1,0 +1,35 @@
+---
+title: Add Tools
+description: Add callable weather operations and inspect how their descriptions and input fields become tool schemas.
+contentType: guide-step
+section: build
+guideSlug: building-your-first-mcp-server
+guideStepId: add-tools
+guideStepOrder: 3
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, interactive, tools, schemas]
+publishedAt: 2026-08-31
+updatedAt: 2026-08-31
+difficulty: beginner
+estimatedMinutes: 15
+specVersion: 2026-07-28
+lastVerified: 2026-08-31
+---
+
+Tools are operations a client can ask the server to perform. Their names, descriptions, and schemas should give both people and models enough information to invoke them correctly.
+
+Start with **Get current weather**. Review its `location` and `unit` fields before adding it, then select another tool from the curated catalog to compare its schema.
+
+<InteractiveGuideBlock scene="add-tools" />
+
+<Checklist
+  items={[
+    'The tool name describes an action',
+    'The description states what the caller receives',
+    'Required and optional inputs are distinguishable',
+    'The schema rejects unsupported values before execution',
+  ]}
+/>
+
+The simulation uses deterministic weather data. No external weather provider is contacted.

@@ -56,6 +56,23 @@ describe('content contract', () => {
     expect(contentSchema.safeParse(duplicate).success).toBe(false);
   });
 
+  it('allows a registered interactive Guide only on a Guide overview', () => {
+    const interactive = {
+      ...base,
+      interactiveGuideId: 'building-your-first-mcp-server' as const,
+    };
+    expect(contentSchema.safeParse(interactive).success).toBe(true);
+    expect(
+      contentSchema.safeParse({
+        ...interactive,
+        contentType: 'guide-step' as const,
+        guideSlug: 'example',
+        guideStepId: 'prepare',
+        guideStepOrder: 1,
+      }).success,
+    ).toBe(false);
+  });
+
   it('requires parent and ordering metadata for guide steps', () => {
     const step = {
       ...base,

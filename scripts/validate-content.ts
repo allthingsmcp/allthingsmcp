@@ -3,6 +3,12 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
 import { contentSchema } from '../lib/content-schema';
+import {
+  interactiveGuideDefinitions,
+  interactiveGuideScenes,
+  type InteractiveGuideId,
+  type InteractiveGuideScene,
+} from '../lib/interactive-guides';
 
 const root = process.cwd();
 const files = await fg('content/**/*.{md,mdx}', { cwd: root, absolute: true });
@@ -14,6 +20,7 @@ const allowedComponents = new Set([
   'CardGrid',
   'MetadataPanel',
   'ProtocolDiagram',
+  'InteractiveGuideBlock',
 ]);
 const slugs = new Map<string, string>();
 const knownLibraryUrls = new Set(
@@ -29,13 +36,18 @@ const knownLibraryUrls = new Set(
 const errors: string[] = [];
 const guides = new Map<
   string,
-  { file: string; steps: Array<{ id: string }> }
+  {
+    file: string;
+    steps: Array<{ id: string }>;
+    interactiveGuideId?: InteractiveGuideId;
+  }
 >();
 const guideSteps: Array<{
   file: string;
   guideSlug: string;
   stepId: string;
   order: number;
+  interactiveScenes: InteractiveGuideScene[];
 }> = [];
 
 for (const file of files) {
@@ -53,6 +65,7 @@ for (const file of files) {
     guides.set(guideSlug, {
       file: relative,
       steps: result.data.guideSteps ?? [],
+      interactiveGuideId: result.data.interactiveGuideId,
     });
   } else if (
     result.data.contentType === 'guide-step' &&
@@ -60,11 +73,36 @@ for (const file of files) {
     result.data.guideStepId &&
     result.data.guideStepOrder
   ) {
+    const scenes = Array.from(
+      parsed.content.matchAll(
+        /<InteractiveGuideBlock\s+scene="([^"]+)"\s*\/>/g,
+      ),
+    ).map((match) => match[1]);
+    const invalidScene = scenes.find(
+      (scene) =>
+        !interactiveGuideScenes.includes(scene as InteractiveGuideScene),
+    );
+    if (invalidScene) {
+      errors.push(
+        `${relative}: unknown interactive Guide scene ${invalidScene}`,
+      );
+    }
+    if (
+      parsed.content.includes('<InteractiveGuideBlock') &&
+      scenes.length === 0
+    ) {
+      errors.push(
+        `${relative}: InteractiveGuideBlock requires a literal scene attribute`,
+      );
+    }
     guideSteps.push({
       file: relative,
       guideSlug: result.data.guideSlug,
       stepId: result.data.guideStepId,
       order: result.data.guideStepOrder,
+      interactiveScenes: scenes.filter((scene) =>
+        interactiveGuideScenes.includes(scene as InteractiveGuideScene),
+      ) as InteractiveGuideScene[],
     });
   }
 
@@ -111,6 +149,19 @@ for (const step of guideSteps) {
   if (!guide) {
     errors.push(`${step.file}: unknown parent guide ${step.guideSlug}`);
     continue;
+  }
+  if (step.interactiveScenes.length && !guide.interactiveGuideId) {
+    errors.push(
+      `${step.file}: interactive blocks require interactiveGuideId on ${guide.file}`,
+    );
+  }
+  if (
+    guide.interactiveGuideId &&
+    !interactiveGuideDefinitions[guide.interactiveGuideId]
+  ) {
+    errors.push(
+      `${guide.file}: unknown interactive Guide ${guide.interactiveGuideId}`,
+    );
   }
   const manifestIndex = guide.steps.findIndex(
     (item) => item.id === step.stepId,
