@@ -382,6 +382,11 @@ test('interactive Guide configuration propagates through code, protocol, client,
     'lagos-weather-server',
   );
   await expect(page.getByRole('button', { name: 'Copy code' })).toBeVisible();
+  await expect(
+    page.getByRole('complementary', {
+      name: 'Generated code explanation',
+    }),
+  ).toContainText('Code stays in sync');
 
   await page
     .getByRole('link', { name: /Add tools/ })
@@ -439,6 +444,18 @@ test('interactive Guide configuration propagates through code, protocol, client,
   ).toBeVisible();
   await expect(page.locator('.interactive-protocol-layout')).toContainText(
     '2026-07-28',
+  );
+  const protocolExplanation = page.getByRole('complementary', {
+    name: 'Protocol exchange explanation',
+  });
+  await expect(protocolExplanation).toContainText('About this exchange');
+  await expect(protocolExplanation).toContainText('server/discover');
+  await page
+    .getByRole('button', { name: /tools\/list/ })
+    .first()
+    .click();
+  await expect(protocolExplanation).toContainText(
+    'The client asks which callable tools',
   );
 
   await page

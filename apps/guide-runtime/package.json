@@ -1,0 +1,6 @@
+{
+  "name": "@all-things-mcp/guide-runtime",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module"
+}

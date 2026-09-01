@@ -3,8 +3,9 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const root = process.cwd();
+const repositoryRoot = path.resolve(root, '../..');
 const sourceLogo = path.join(
-  root,
+  repositoryRoot,
   'skills/all-things-mcp/brand-system/assets/logo/all-things-mcp-logo.svg',
 );
 const outputDir = path.join(root, 'public/brand');
@@ -83,7 +84,7 @@ function tagline(color: string) {
 }
 
 async function loadSharp() {
-  const pnpmStore = path.join(root, 'node_modules/.pnpm');
+  const pnpmStore = path.join(repositoryRoot, 'node_modules/.pnpm');
   const entries = await readdir(pnpmStore);
   const sharpPackage = entries.find((entry) => entry.startsWith('sharp@'));
   if (!sharpPackage) throw new Error('Sharp is not installed in node_modules');

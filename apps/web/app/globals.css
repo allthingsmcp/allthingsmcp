@@ -4653,6 +4653,7 @@ a.content-card:hover {
 .interactive-client-inspector,
 .interactive-protocol-layout > nav,
 .interactive-protocol-layout > section,
+.interactive-learning-panel,
 .interactive-completion > header,
 .interactive-objectives {
   border: 1px solid var(--border);
@@ -5139,6 +5140,176 @@ a.content-card:hover {
 .interactive-add-capability svg {
   width: 14px;
 }
+.interactive-code-layout,
+.interactive-protocol-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.34fr);
+  gap: 16px;
+  align-items: start;
+}
+.interactive-learning-panel {
+  display: grid;
+  gap: 17px;
+  padding: 18px;
+}
+.interactive-learning-panel > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.interactive-learning-panel > header h3 {
+  margin-top: 4px;
+  font: 650 0.84rem var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.interactive-learning-panel > header > svg {
+  width: 18px;
+  flex: 0 0 auto;
+  color: var(--blue);
+}
+.interactive-learning-panel > p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.65rem;
+  line-height: 1.6;
+}
+.interactive-learning-panel > section {
+  display: grid;
+  gap: 10px;
+}
+.interactive-learning-panel h4 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-geist);
+  font-size: 0.69rem;
+}
+.interactive-learning-list {
+  display: grid;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.interactive-learning-list > div {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  padding: 11px;
+  border-bottom: 1px solid var(--border);
+}
+.interactive-learning-list > div:last-child {
+  border-bottom: 0;
+}
+.interactive-learning-list > div > span:first-child {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--blue-pale);
+  color: var(--blue);
+  font-size: 0.58rem;
+  font-weight: 750;
+}
+.interactive-learning-list > div > span.is-resource {
+  background: #e9f8f1;
+  color: var(--green);
+}
+.interactive-learning-list > div > span.is-prompt {
+  background: #f2edff;
+  color: var(--violet);
+}
+.interactive-learning-list svg {
+  width: 15px;
+}
+.interactive-learning-list > div > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+.interactive-learning-list strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 0.62rem;
+}
+.interactive-learning-list strong b {
+  display: grid;
+  min-width: 21px;
+  height: 21px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.52rem;
+}
+.interactive-learning-list small {
+  color: var(--muted);
+  font-size: 0.56rem;
+  line-height: 1.45;
+}
+.interactive-code-identity {
+  display: flex !important;
+  align-items: center;
+  gap: 10px !important;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.interactive-code-identity > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+.interactive-code-identity strong {
+  font: 650 0.64rem var(--font-mono);
+}
+.interactive-code-identity small {
+  color: var(--muted);
+  font-size: 0.54rem;
+}
+.interactive-learning-note {
+  display: grid !important;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 9px !important;
+  padding: 12px;
+  border: 1px solid #bfd1ff;
+  border-radius: 8px;
+  background: var(--blue-pale);
+  color: var(--blue-dark);
+}
+.interactive-learning-note > svg {
+  width: 17px;
+}
+.interactive-learning-note > span {
+  display: grid;
+  gap: 4px;
+}
+.interactive-learning-note strong {
+  font-size: 0.62rem;
+}
+.interactive-learning-note small {
+  color: var(--ink-soft);
+  font-size: 0.56rem;
+  line-height: 1.5;
+}
+.interactive-learning-panel > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--blue);
+  font-size: 0.59rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.interactive-learning-panel > a:hover {
+  text-decoration: underline;
+}
+.interactive-learning-panel > a svg {
+  width: 13px;
+}
 .interactive-code-panel {
   overflow: hidden;
   border: 1px solid #18304d;
@@ -5259,7 +5430,7 @@ a.content-card:hover {
 }
 .interactive-protocol-layout {
   display: grid;
-  grid-template-columns: 230px minmax(0, 1fr);
+  grid-template-columns: minmax(175px, 0.28fr) minmax(0, 1fr);
   gap: 14px;
 }
 .interactive-protocol-layout > nav {
@@ -5705,10 +5876,15 @@ a.content-card:hover {
     grid-column: 1;
   }
   .interactive-builder-layout,
+  .interactive-code-layout,
   .interactive-client-layout,
   .interactive-completion-grid,
+  .interactive-protocol-shell,
   .interactive-protocol-layout {
     grid-template-columns: 1fr;
+  }
+  .interactive-learning-panel {
+    padding: 15px;
   }
   .interactive-library {
     order: -1;

@@ -4,7 +4,7 @@ Thank you for helping make MCP knowledge clearer and more reliable. You may open
 
 ## Content changes
 
-1. Find the appropriate collection under `content/`.
+1. Find the appropriate collection under `apps/web/content/`.
 2. Copy a nearby document and update every frontmatter field.
 3. Use ordinary Markdown where possible. Reviewed MDX components are documented in `skills/all-things-mcp/website/references/content-contracts.md`.
 4. Cite primary sources for protocol behavior and record the specification version and verification date.
@@ -15,6 +15,10 @@ Write for a developer who wants to understand and apply the material. Separate p
 ## Code changes
 
 Read `AGENTS.md`, follow the local project skills, add or update tests, and preserve the custom design system. Do not introduce a second component system or a Fumadocs default theme.
+
+Website commands can be run from the repository root. The root scripts target
+`apps/web`; backend work belongs in `apps/guide-runtime`, and contracts shared
+across deployment boundaries belong in `packages/contracts`.
 
 ## Review
 

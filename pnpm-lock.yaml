@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  apps/guide-runtime: {}
+
+  apps/web:
     dependencies:
       '@types/mdx':
         specifier: ^2.0.13
@@ -102,6 +106,8 @@ importers:
       vitest:
         specifier: ^4.0.13
         version: 4.1.10(@types/node@24.13.3)(jsdom@27.4.0)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.5)(yaml@2.9.0))
+
+  packages/contracts: {}
 
 packages:
 
