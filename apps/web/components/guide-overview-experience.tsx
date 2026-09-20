@@ -17,6 +17,7 @@ import type { GuideResource, GuideStep } from '@/lib/content-schema';
 import { useGuideProgress } from '@/components/use-guide-progress';
 import { InteractiveGuideEnhancement } from '@/components/interactive-guide-overview';
 import type { InteractiveGuideId } from '@/lib/interactive-guides';
+import { GuideProgressStatus } from '@/components/auth-dialog';
 
 export type GuideOverviewData = {
   slug: string;
@@ -105,6 +106,7 @@ function StandardGuideOverview({ guide }: { guide: GuideOverviewData }) {
             <small>
               {complete ? 'Guide complete' : `${progress.percent}% complete`}
             </small>
+            <GuideProgressStatus status={progress.persistence} tone="dark" />
           </div>
         </div>
       </section>

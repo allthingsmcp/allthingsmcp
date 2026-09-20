@@ -3,9 +3,12 @@ import { Geist, Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { NextProvider } from 'fumadocs-core/framework/next';
 import { PrivacyAnalytics } from '@/components/privacy-analytics';
+import { AuthDialogProvider } from '@/components/auth-dialog';
 import { SearchDialogProvider } from '@/components/search-dialog';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { GuideProgressProvider } from '@/components/use-guide-progress';
+import { AuthSessionProvider } from '@/lib/auth-client';
 import { siteConfig } from '@/lib/config';
 import './globals.css';
 
@@ -74,12 +77,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <body>
         <NextProvider>
-          <SearchDialogProvider>
-            <SiteHeader />
-            {children}
-            <SiteFooter />
-            <PrivacyAnalytics />
-          </SearchDialogProvider>
+          <AuthSessionProvider>
+            <AuthDialogProvider>
+              <GuideProgressProvider>
+                <SearchDialogProvider>
+                  <SiteHeader />
+                  {children}
+                  <SiteFooter />
+                  <PrivacyAnalytics />
+                </SearchDialogProvider>
+              </GuideProgressProvider>
+            </AuthDialogProvider>
+          </AuthSessionProvider>
         </NextProvider>
       </body>
     </html>

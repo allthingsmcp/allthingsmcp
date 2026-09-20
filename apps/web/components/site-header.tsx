@@ -5,6 +5,7 @@ import { Menu, Search, X } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Logo } from '@/components/logo';
+import { AuthTrigger, useAuthDialog } from '@/components/auth-dialog';
 import { useSearchDialog } from '@/components/search-dialog';
 import { primaryNav } from '@/lib/site-data';
 import { cn } from '@/lib/utils';
@@ -12,6 +13,7 @@ import { cn } from '@/lib/utils';
 export function SiteHeader() {
   const pathname = usePathname();
   const { openSearch } = useSearchDialog();
+  const { openAuth } = useAuthDialog();
   const [open, setOpen] = useState(false);
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -46,6 +48,7 @@ export function SiteHeader() {
             <span>Search</span>
             <kbd>⌘K</kbd>
           </button>
+          <AuthTrigger />
           <Link
             className="button button--primary newsletter-button"
             href="/#newsletter"
@@ -97,6 +100,15 @@ export function SiteHeader() {
               }}
             >
               Search
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                openAuth('account');
+              }}
+            >
+              Sign in or view account
             </button>
           </div>
         </nav>

@@ -24,6 +24,145 @@
   --container: 1280px;
 }
 
+/* Account and authentication */
+.auth-dialog {
+  inset: 0;
+  width: min(calc(100% - 32px), 510px);
+  max-width: none;
+  padding: 0;
+  margin: auto;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--ink);
+}
+.auth-dialog::backdrop {
+  background: rgba(4, 13, 29, 0.58);
+  backdrop-filter: blur(7px);
+}
+.auth-dialog__surface {
+  position: relative;
+  padding: 34px;
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 28px 80px rgba(4, 13, 29, 0.22);
+}
+.auth-dialog__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.auth-dialog__close svg {
+  width: 17px;
+}
+.auth-dialog__icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 20px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--blue-pale);
+  color: var(--blue);
+}
+.auth-dialog__icon svg {
+  width: 24px;
+}
+.auth-dialog h2 {
+  margin-top: 6px;
+  font-size: 1.9rem;
+}
+.auth-dialog h2 + p {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+.auth-dialog__newsletter {
+  display: grid;
+  grid-template-columns: auto 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  padding: 14px;
+  margin-top: 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-blue);
+  cursor: pointer;
+}
+.auth-dialog__newsletter input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--blue);
+}
+.auth-dialog__newsletter-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--blue);
+}
+.auth-dialog__newsletter-icon svg {
+  width: 18px;
+}
+.auth-dialog__newsletter > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+.auth-dialog__newsletter strong {
+  font-size: 0.78rem;
+}
+.auth-dialog__newsletter small {
+  color: var(--ink-soft);
+  font-size: 0.66rem;
+  line-height: 1.45;
+}
+.auth-dialog__action {
+  width: 100%;
+  min-height: 46px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.auth-dialog__action:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.auth-dialog__configuration {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #f1d6a9;
+  border-radius: 7px;
+  background: #fff8ec;
+  color: #80571a;
+  font-size: 0.68rem;
+}
+.auth-dialog__error {
+  margin-top: 12px;
+  color: #b42318;
+  font-size: 0.7rem;
+}
+
+@media (max-width: 760px) {
+  .auth-dialog__surface {
+    padding: 26px 20px 22px;
+  }
+  .auth-dialog h2 {
+    padding-right: 34px;
+    font-size: 1.55rem;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -204,6 +343,27 @@ p {
   background: var(--surface);
   color: var(--muted);
   font: 600 0.68rem var(--font-mono);
+}
+.auth-trigger {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 650;
+}
+.auth-trigger:hover {
+  border-color: #a9c1ff;
+  color: var(--blue);
+}
+.auth-trigger svg {
+  width: 15px;
 }
 .menu-button {
   display: none;
@@ -3235,6 +3395,47 @@ a.content-card:hover {
   color: #9fb0c8;
   font-size: 0.64rem;
 }
+.auth-nudge,
+.auth-status {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--blue-dark);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+.auth-nudge {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(10, 85, 255, 0.28);
+  text-underline-offset: 3px;
+}
+.auth-nudge:hover {
+  color: var(--blue);
+  text-decoration-color: currentColor;
+}
+.auth-nudge svg,
+.auth-status svg {
+  width: 13px;
+}
+.auth-nudge--dark,
+.auth-status--dark {
+  color: #c9d9ff;
+}
+.auth-status.is-error {
+  color: #b42318;
+}
+.auth-status--dark.is-error {
+  color: #ffb4ac;
+}
+.guide-progress-summary .auth-nudge,
+.guide-progress-summary .auth-status {
+  margin-top: 3px;
+}
 .guide-progress-track {
   height: 7px;
   overflow: hidden;
@@ -3464,6 +3665,11 @@ a.content-card:hover {
   height: 4px;
   background: var(--border);
 }
+.guide-step-nav__progress .auth-nudge,
+.guide-step-nav__progress .auth-status {
+  margin-top: 3px;
+  font-size: 0.6rem;
+}
 .guide-step-mobile-selector {
   display: none;
 }
@@ -3559,6 +3765,10 @@ a.content-card:hover {
 .guide-step-completion p:not(.eyebrow) {
   color: var(--ink-soft);
   font-size: 0.74rem;
+}
+.guide-step-completion .auth-nudge,
+.guide-step-completion .auth-status {
+  margin-top: 9px;
 }
 .guide-step-completion button {
   display: inline-flex;
@@ -3703,6 +3913,16 @@ a.content-card:hover {
     justify-content: center;
     padding: 0;
     border: 0;
+  }
+  .auth-trigger {
+    width: 42px;
+    height: 42px;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+  }
+  .auth-trigger span {
+    display: none;
   }
   .menu-button {
     display: inline-flex;
@@ -4546,9 +4766,22 @@ a.content-card:hover {
   gap: 10px;
 }
 .interactive-guide-block__header small,
-.interactive-guide-block__header > span {
+.interactive-save-status > span {
   color: var(--muted);
   font-size: 0.62rem;
+}
+.interactive-save-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.interactive-save-status .auth-nudge,
+.interactive-save-status .auth-status {
+  font-size: 0.62rem;
+}
+.interactive-cloud-requirement {
+  margin-top: 12px;
 }
 .interactive-simulation-label {
   display: inline-flex;
@@ -4949,6 +5182,9 @@ a.content-card:hover {
   color: var(--muted);
   font-size: 0.57rem;
   line-height: 1.4;
+}
+.interactive-library-list > button.is-selected small {
+  color: #526079;
 }
 .interactive-library-list svg {
   width: 16px;
@@ -5852,8 +6088,10 @@ a.content-card:hover {
     justify-content: space-between;
     width: 100%;
   }
-  .interactive-guide-block__header > span {
-    display: none;
+  .interactive-save-status {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
   }
   .interactive-mode-tabs {
     overflow-x: auto;

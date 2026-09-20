@@ -18,3 +18,6 @@ Read `references/architecture.md` before changing platform structure and `refere
 7. Mark incomplete tools as `planned` and ecosystem fixtures as `not-reviewed`.
 8. Do not send search queries, email addresses, or user-entered content to analytics.
 9. Run formatting, lint, types, content validation, unit tests, build, and proportional browser checks.
+10. Keep reading and browser-local Guide simulation anonymous. Persistent Guide
+    progress is server-side: prompt readers to sign in to save progress, and
+    never imply anonymous progress survives a reload or browser session.

@@ -22,12 +22,14 @@ import {
   type InteractiveGuideId,
   type InteractiveGuideStateV1,
 } from '@/lib/interactive-guides';
+import type { GuidePersistenceStatus } from '@/components/use-guide-progress';
 
 type InteractiveGuideContextValue = {
   state: InteractiveGuideStateV1;
   definition: InteractiveGuideDefinition;
   dispatch: (action: InteractiveGuideAction) => void;
   reset: () => void;
+  progressPersistence: GuidePersistenceStatus;
 };
 
 const InteractiveGuideContext =
@@ -42,12 +44,16 @@ export function InteractiveGuideProvider({
   activeStepId,
   onComplete,
   onResetAutoSteps,
+  progressReady,
+  progressPersistence,
   children,
 }: {
   guideId: InteractiveGuideId;
   activeStepId: string;
   onComplete: (stepId: string) => void;
   onResetAutoSteps: (stepIds: string[]) => void;
+  progressReady: boolean;
+  progressPersistence: GuidePersistenceStatus;
   children: ReactNode;
 }) {
   const definition = interactiveGuideDefinitions[guideId];
@@ -107,21 +113,26 @@ export function InteractiveGuideProvider({
   }, [guideId, ready, state]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || !progressReady) return;
     const objective = getGuideObjectives(state).find(
       (item) => item.stepId === activeStepId,
     );
     if (objective?.complete) onComplete(activeStepId);
-  }, [activeStepId, onComplete, ready, state]);
+  }, [activeStepId, onComplete, progressReady, ready, state]);
 
   const reset = useCallback(() => {
     dispatch({ type: 'reset' });
-    onResetAutoSteps(definition.autoCompletedStepIds);
-  }, [definition.autoCompletedStepIds, dispatch, onResetAutoSteps]);
+    if (progressReady) onResetAutoSteps(definition.autoCompletedStepIds);
+  }, [
+    definition.autoCompletedStepIds,
+    dispatch,
+    onResetAutoSteps,
+    progressReady,
+  ]);
 
   const value = useMemo(
-    () => ({ state, definition, dispatch, reset }),
-    [definition, dispatch, reset, state],
+    () => ({ state, definition, dispatch, reset, progressPersistence }),
+    [definition, dispatch, progressPersistence, reset, state],
   );
 
   return (

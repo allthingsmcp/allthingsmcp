@@ -15,6 +15,7 @@ import type { GuideStep } from '@/lib/content-schema';
 import { useGuideProgress } from '@/components/use-guide-progress';
 import { InteractiveGuideProvider } from '@/components/interactive-guide-context';
 import type { InteractiveGuideId } from '@/lib/interactive-guides';
+import { GuideProgressStatus } from '@/components/auth-dialog';
 
 type StepPageData = {
   title: string;
@@ -58,6 +59,8 @@ export function GuideStepExperience({
       guideId={interactiveGuideId}
       onComplete={progress.complete}
       onResetAutoSteps={progress.reset}
+      progressReady={progress.ready}
+      progressPersistence={progress.persistence}
     >
       {children}
     </InteractiveGuideProvider>
@@ -79,6 +82,7 @@ export function GuideStepExperience({
           <div className="guide-progress-track" aria-hidden="true">
             <span style={{ width: `${progress.percent}%` }} />
           </div>
+          <GuideProgressStatus status={progress.persistence} />
         </div>
         <label className="guide-step-mobile-selector">
           <span>Current step</span>
@@ -142,17 +146,23 @@ export function GuideStepExperience({
               <h2>{isComplete ? 'Step completed' : 'Ready to continue?'}</h2>
               <p>
                 {isComplete
-                  ? 'Your progress is saved in this browser.'
+                  ? 'You completed this step.'
                   : 'Mark this step complete when you have finished the checks above.'}
               </p>
+              <GuideProgressStatus status={progress.persistence} />
             </div>
             <button
               className={isComplete ? 'is-complete' : undefined}
               type="button"
+              disabled={!progress.ready}
               onClick={() => progress.toggle(activeStep.id)}
             >
               <Check aria-hidden="true" />
-              {isComplete ? 'Mark as incomplete' : 'Mark step complete'}
+              {!progress.ready
+                ? 'Loading progress…'
+                : isComplete
+                  ? 'Mark as incomplete'
+                  : 'Mark step complete'}
             </button>
           </div>
         )}

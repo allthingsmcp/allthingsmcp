@@ -65,6 +65,26 @@ test('desktop navigation reflects the focused content model', async ({
   ).toHaveText(['Guides', 'Blog', 'Spec Watch']);
 });
 
+test('account controls hydrate without changing their initial text', async ({
+  page,
+}) => {
+  const hydrationErrors: string[] = [];
+  page.on('console', (message) => {
+    if (
+      message.type() === 'error' &&
+      message.text().includes('Hydration failed')
+    ) {
+      hydrationErrors.push(message.text());
+    }
+  });
+
+  await page.goto('/guides/build-a-minimal-mcp-server');
+  await expect(
+    page.getByRole('button', { name: 'Sign in to save progress' }),
+  ).toBeVisible();
+  expect(hydrationErrors).toEqual([]);
+});
+
 test('guides filter follows the URL fragment and browser history', async ({
   page,
 }) => {
@@ -102,7 +122,7 @@ test('guides page presents one complete catalog', async ({ page }) => {
   );
 });
 
-test('guides use a structured overview and persistent step progress', async ({
+test('guides use a structured overview and temporary anonymous progress', async ({
   page,
 }) => {
   await page.goto('/guides/build-a-minimal-mcp-server');
@@ -135,6 +155,28 @@ test('guides use a structured overview and persistent step progress', async ({
   await expect(
     page.getByRole('progressbar', { name: 'Guide progress' }),
   ).toHaveAttribute('aria-valuenow', '25');
+  await expect(
+    page.getByRole('button', { name: 'Sign in to save progress' }),
+  ).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText('0 of 4 completed')).toBeVisible();
+  await expect(
+    page.getByRole('progressbar', { name: 'Guide progress' }),
+  ).toHaveAttribute('aria-valuenow', '0');
+
+  await page.getByRole('button', { name: 'Sign in to save progress' }).click();
+  const authDialog = page.getByRole('dialog', {
+    name: 'Save your progress',
+  });
+  await expect(authDialog).toContainText(
+    'Sign in or create an account to keep completed steps across reloads and devices.',
+  );
+  await expect(
+    authDialog.getByRole('checkbox', { name: /Keep me ahead of MCP/ }),
+  ).toBeChecked();
+  await expect(authDialog).not.toContainText('GitHub provides identity');
+  await expect(authDialog).not.toContainText('Reading and simulation work');
 });
 
 test('MDX component examples retain syntax highlighting', async ({ page }) => {
@@ -208,7 +250,9 @@ test('global search opens in context and returns canonical results', async ({
 
 test('command shortcut and legacy search URL open the search overlay', async ({
   page,
+  isMobile,
 }) => {
+  test.skip(isMobile, 'Desktop keyboard shortcut is not exposed on mobile.');
   await page.goto('/');
   await page.keyboard.press('ControlOrMeta+KeyK');
   await expect(
@@ -344,9 +388,7 @@ test('interactive Guide overview is distinct and leaves the original Guide intac
   await expect(
     page.getByRole('heading', { name: 'Building Your First MCP Server' }),
   ).toBeVisible();
-  await expect(
-    page.getByText('Interactive Guide', { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByText('Interactive', { exact: true })).toBeVisible();
   await expect(
     page.getByRole('heading', { name: 'A configurable weather MCP server' }),
   ).toBeVisible();
@@ -358,9 +400,7 @@ test('interactive Guide overview is distinct and leaves the original Guide intac
   await expect(
     page.getByRole('heading', { name: 'Build a Minimal MCP Server' }),
   ).toBeVisible();
-  await expect(
-    page.getByText('Interactive Guide', { exact: true }),
-  ).toHaveCount(0);
+  await expect(page.getByText('Interactive', { exact: true })).toHaveCount(0);
 });
 
 test('interactive Guide configuration propagates through code, protocol, client, and progress', async ({
@@ -481,9 +521,12 @@ test('interactive Guide configuration propagates through code, protocol, client,
   ).toBeVisible();
 
   await page.reload();
-  await expect(page.getByText('8 of 8 complete')).toBeVisible();
+  await expect(page.getByText('1 of 8 complete')).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Guide complete' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Sign in to save progress' }).first(),
   ).toBeVisible();
 });
 
@@ -542,16 +585,16 @@ test('interactive Guide scenes have no serious accessibility violations', async 
   }
 });
 
-test('interactive capability dialog supports escape and restores the page', async ({
+test('interactive capability selection reveals inline details without a modal', async ({
   page,
 }) => {
   await page.goto('/guides/building-your-first-mcp-server/create-your-server');
   await page.getByRole('button', { name: 'Create server' }).click();
   await page.goto('/guides/building-your-first-mcp-server/add-tools');
   await page.getByRole('button', { name: /Get current weather/ }).click();
-  const dialog = page.getByRole('dialog', { name: 'Get current weather' });
-  await expect(dialog).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(dialog).not.toBeVisible();
+  await expect(
+    page.getByRole('dialog', { name: 'Get current weather' }),
+  ).toHaveCount(0);
+  await expect(page.getByText('Input schema', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Add Tools' })).toBeVisible();
 });

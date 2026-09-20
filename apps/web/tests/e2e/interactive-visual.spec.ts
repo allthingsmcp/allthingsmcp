@@ -48,6 +48,9 @@ async function captureBlock(
 ) {
   await page.goto(`/guides/building-your-first-mcp-server/${step}`);
   if (tab) await page.getByRole('tab', { name: tab }).click();
+  await expect(
+    page.getByRole('button', { name: 'Sign in to save progress' }).first(),
+  ).toBeVisible();
   await expect(page.locator('.interactive-guide-block')).toHaveScreenshot(
     name,
     {
@@ -63,7 +66,10 @@ test.beforeEach(async ({ page }) => {
 
 test('interactive Guide overview visual baseline', async ({ page }) => {
   await page.goto('/guides/building-your-first-mcp-server');
-  await expect(page.locator('.interactive-overview')).toHaveScreenshot(
+  await expect(
+    page.getByRole('button', { name: 'Sign in to save progress' }),
+  ).toBeVisible();
+  await expect(page.locator('.guide-overview-hero')).toHaveScreenshot(
     'interactive-guide-overview.png',
     { animations: 'disabled', maxDiffPixelRatio: 0.01 },
   );

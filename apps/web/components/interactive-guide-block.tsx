@@ -23,6 +23,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { useInteractiveGuide } from '@/components/interactive-guide-context';
+import { AuthNudge, GuideProgressStatus } from '@/components/auth-dialog';
 import {
   cloneCapability,
   generateProjectFiles,
@@ -433,7 +434,11 @@ function CapabilityDetails({
             </div>
           </dl>
           <strong>Schema / response preview</strong>
-          <pre className="interactive-schema-preview">
+          <pre
+            className="interactive-schema-preview"
+            tabIndex={0}
+            aria-label={`${capability.title} schema and response preview`}
+          >
             <JsonCode value={resourceResponsePreviews[capability.id]} />
           </pre>
         </div>
@@ -1213,7 +1218,7 @@ function CompletionScene() {
         <button
           className="button button--secondary"
           disabled
-          title="Available when the Workspace API launches"
+          title="Coming later; an authenticated account will be required"
           type="button"
         >
           Connect external client <span>Coming soon</span>
@@ -1221,12 +1226,17 @@ function CompletionScene() {
         <button
           className="button button--secondary"
           disabled
-          title="Available when the Workspace API launches"
+          title="Coming later; an authenticated account will be required"
           type="button"
         >
           Create hosted endpoint <span>Coming soon</span>
         </button>
       </div>
+      <AuthNudge
+        className="interactive-cloud-requirement"
+        reason="hosted"
+        label="Why hosted features require an account"
+      />
       <div className="interactive-finish-row">
         <button className="interactive-reset" onClick={reset} type="button">
           <RotateCcw aria-hidden="true" /> Reset simulation
@@ -1267,7 +1277,7 @@ export function InteractiveGuideBlock({
   const initialMode: WorkspaceMode =
     scene === 'connect-client' || scene === 'test-server' ? 'client' : 'visual';
   const [mode, setMode] = useState<WorkspaceMode>(initialMode);
-  const { state } = useInteractiveGuide();
+  const { state, progressPersistence } = useInteractiveGuide();
 
   const content =
     mode === 'code' ? (
@@ -1289,7 +1299,10 @@ export function InteractiveGuideBlock({
           </span>
           <small>{state.server.name} · MCP 2026-07-28</small>
         </div>
-        <span>Changes are saved in this browser</span>
+        <div className="interactive-save-status">
+          <span>Configuration saved in this browser</span>
+          <GuideProgressStatus status={progressPersistence} />
+        </div>
       </header>
       <WorkspaceTabs mode={mode} onChange={setMode} />
       <div className="interactive-guide-block__body">{content}</div>
