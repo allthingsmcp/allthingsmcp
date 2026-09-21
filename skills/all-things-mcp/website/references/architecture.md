@@ -35,12 +35,14 @@ compatibility surface and redirects principal content to its canonical product
 URL. Keep data-only fixtures separate from authored technical content.
 
 Interactive Guides remain normal Guide overview and step routes. Their reviewed
-MDX blocks resolve to browser-local TypeScript registries and reducer state;
-authored MDX must never contain executable simulator logic. Consult
+MDX blocks resolve to an async workspace client backed by Guide Runtime;
+authored MDX must never contain executable runtime logic. Versioned declarative
+manifests live in `packages/mcp-templates`, while executable handlers remain in
+Guide Runtime. Consult
 `interactive-guide-inventory.md` for the supplied feature-semantics references.
 
-Anonymous reading, Guide simulation, and project downloads are first-class
-behavior. Anonymous completion state may live in memory for the active browser
-session, but persistent Guide progress is stored only by Guide Runtime for
-signed-in readers. Prompt readers to sign in to save progress on every Guide;
-hosted endpoints and external client connections also require authentication.
+Anonymous reading, real temporary MCP execution, and project downloads are
+first-class behavior. Anonymous workspaces expire after seven days and can be
+claimed at sign-in. Signed-in readers receive one persistent workspace per
+Guide and may issue revocable credentials for its Streamable HTTP endpoint.
+The built-in learning client uses the same MCP handler as external clients.

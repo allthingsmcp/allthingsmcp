@@ -10,6 +10,8 @@
     "dev": "pnpm --filter @all-things-mcp/web dev",
     "dev:web": "pnpm --filter @all-things-mcp/web dev",
     "dev:runtime": "pnpm --filter @all-things-mcp/guide-runtime dev",
+    "dev:demo": "pnpm --parallel --filter @all-things-mcp/guide-runtime --filter @all-things-mcp/web dev",
+    "demo:verify": "pnpm --filter @all-things-mcp/guide-runtime demo:verify",
     "build": "pnpm --filter @all-things-mcp/web build",
     "start": "pnpm --filter @all-things-mcp/web start",
     "lint": "pnpm --filter @all-things-mcp/web lint",

@@ -1,44 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import {
-  buildingFirstServerDefinition,
-  cloneCapability,
-  createInitialInteractiveGuideState,
-  interactiveGuideReducer,
-} from '../../lib/interactive-guides';
-
-const simulatorStorageKey =
-  'all-things-mcp:interactive-guide:v1:building-your-first-mcp-server';
-
-function configuredState() {
-  let state = interactiveGuideReducer(createInitialInteractiveGuideState(), {
-    type: 'create-server',
-    name: 'weather-server',
-  });
-  for (const capability of buildingFirstServerDefinition.capabilities.filter(
-    (item) =>
-      ['get-weather', 'supported-cities', 'plan-for-weather'].includes(item.id),
-  )) {
-    state = interactiveGuideReducer(state, {
-      type: 'upsert-capability',
-      capability: cloneCapability(capability),
-    });
-  }
-  state = interactiveGuideReducer(state, { type: 'connect-client' });
-  state = interactiveGuideReducer(state, {
-    type: 'run-tool',
-    toolName: 'get_weather',
-    location: 'London',
-    unit: 'celsius',
-  });
-  return interactiveGuideReducer(state, { type: 'finish' });
-}
-
-async function seedSimulator(page: Page) {
-  await page.addInitScript(
-    ({ key, value }) => window.localStorage.setItem(key, value),
-    { key: simulatorStorageKey, value: JSON.stringify(configuredState()) },
-  );
-}
+import { runClientCommand, seedRuntimeWorkspace } from './runtime-helpers';
 
 async function captureBlock(
   page: Page,
@@ -47,10 +8,37 @@ async function captureBlock(
   tab?: string,
 ) {
   await page.goto(`/guides/building-your-first-mcp-server/${step}`);
+  await expect(page.locator('.interactive-save-status')).toContainText(
+    'Workspace persisted',
+  );
   if (tab) await page.getByRole('tab', { name: tab }).click();
+  if (tab === 'Protocol') {
+    await page
+      .getByRole('button', { name: /server\/discover/ })
+      .first()
+      .click();
+  }
+  if (step === 'test-your-server') {
+    await runClientCommand(page, 'Call get_weather', 'tools/call');
+  }
+  if (step === 'review-and-export') {
+    await page
+      .getByRole('button', { name: 'Finish guide', exact: true })
+      .click();
+    await expect(
+      page.getByRole('button', { name: 'Guide complete' }),
+    ).toBeVisible();
+  }
   await expect(
     page.getByRole('button', { name: 'Sign in to save progress' }).first(),
   ).toBeVisible();
+  await page.mouse.move(0, 0);
+  // Exclude only runtime-dependent timing text and overlays outside the
+  // component. Message labels, statuses, and MCP payloads remain unmodified.
+  await page.addStyleTag({
+    content:
+      '.site-header, nextjs-portal { display: none !important; } .interactive-protocol-layout nav small { visibility: hidden !important; }',
+  });
   await expect(page.locator('.interactive-guide-block')).toHaveScreenshot(
     name,
     {
@@ -61,7 +49,7 @@ async function captureBlock(
 }
 
 test.beforeEach(async ({ page }) => {
-  await seedSimulator(page);
+  await seedRuntimeWorkspace(page);
 });
 
 test('interactive Guide overview visual baseline', async ({ page }) => {

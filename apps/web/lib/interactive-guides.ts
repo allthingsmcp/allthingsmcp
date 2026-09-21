@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import { weatherTemplate } from '@all-things-mcp/mcp-templates';
+import type {
+  McpProtocolEvent,
+  McpWorkspace,
+  McpWorkspaceConfiguration,
+} from '@all-things-mcp/contracts';
 
 export const interactiveGuideIds = ['building-your-first-mcp-server'] as const;
 
@@ -92,9 +98,19 @@ export type InteractiveGuideAction =
   | { type: 'connect-client' }
   | { type: 'run-tool'; toolName: string; location: string; unit: string }
   | { type: 'read-resource'; resourceName: string }
-  | { type: 'get-prompt'; promptName: string }
+  | {
+      type: 'get-prompt';
+      promptName: string;
+      arguments?: Record<string, string>;
+    }
   | { type: 'select-event'; eventId: string }
   | { type: 'finish' }
+  | {
+      type: 'apply-runtime';
+      command: 'discover' | 'call-tool' | 'read-resource' | 'get-prompt';
+      events: McpProtocolEvent[];
+      result?: Record<string, unknown>;
+    }
   | { type: 'reset' };
 
 const identifier = /^[a-z][a-z0-9_]*$/;
@@ -191,7 +207,7 @@ const interactiveGuideStateV1Schema = z.object({
   finished: z.boolean(),
 });
 
-const weatherCapabilities: CapabilityDefinition[] = [
+export const legacyWeatherCapabilities: CapabilityDefinition[] = [
   {
     id: 'get-weather',
     kind: 'tool',
@@ -351,7 +367,17 @@ export const buildingFirstServerDefinition: InteractiveGuideDefinition = {
     'connect-the-atm-client',
     'test-your-server',
   ],
-  capabilities: weatherCapabilities,
+  capabilities: weatherTemplate.capabilities.map((capability) => ({
+    id: capability.id,
+    kind: capability.kind,
+    name: capability.name,
+    title: capability.title,
+    description: capability.description,
+    fields: capability.fields,
+    uri: capability.uri,
+    mimeType: capability.mimeType,
+    template: capability.template,
+  })),
 };
 
 export const interactiveGuideDefinitions: Record<
@@ -394,6 +420,96 @@ export function validateServerName(name: string) {
     return 'Use lowercase letters, numbers, and hyphens.';
   }
   return undefined;
+}
+
+export function workspaceConfigurationFromState(
+  state: InteractiveGuideStateV1,
+): McpWorkspaceConfiguration {
+  const available = new Set(weatherTemplate.capabilities.map(({ id }) => id));
+  return {
+    serverName: state.server.name,
+    enabledCapabilityIds: [
+      ...new Set(
+        [
+          ...state.server.tools,
+          ...state.server.resources,
+          ...state.server.prompts,
+        ]
+          .map(({ id }) => id)
+          .filter((id) => available.has(id)),
+      ),
+    ],
+  };
+}
+
+export function protocolEventSucceeded(
+  event: Pick<ProtocolEvent, 'status' | 'response'>,
+) {
+  const result = event.response.result;
+  return (
+    event.status === 'response' &&
+    !event.response.error &&
+    !(
+      result &&
+      typeof result === 'object' &&
+      'isError' in result &&
+      result.isError
+    )
+  );
+}
+
+function runtimeEvents(events: McpProtocolEvent[]): ProtocolEvent[] {
+  return events.map((event, index) => ({
+    ...event,
+    sequence: index + 1,
+    label: event.method,
+    direction: 'client-to-server' as const,
+    status: protocolEventSucceeded(event)
+      ? 'response'
+      : event.status === 'request'
+        ? 'request'
+        : 'error',
+  }));
+}
+
+export function stateFromWorkspace(
+  workspace: McpWorkspace,
+  events: McpProtocolEvent[] = [],
+) {
+  const initial = createInitialInteractiveGuideState();
+  const enabled = new Set(workspace.configuration.enabledCapabilityIds);
+  const capabilities =
+    interactiveGuideDefinitions[workspace.guideSlug as InteractiveGuideId]
+      ?.capabilities ?? [];
+  const protocolEvents = runtimeEvents(events);
+  const lastEvent = protocolEvents.findLast((event) =>
+    ['tools/call', 'resources/read', 'prompts/get'].includes(event.method),
+  );
+  return {
+    ...initial,
+    server: {
+      ...initial.server,
+      name: workspace.configuration.serverName,
+      created: true,
+      tools: capabilities.filter((c) => c.kind === 'tool' && enabled.has(c.id)),
+      resources: capabilities.filter(
+        (c) => c.kind === 'resource' && enabled.has(c.id),
+      ),
+      prompts: capabilities.filter(
+        (c) => c.kind === 'prompt' && enabled.has(c.id),
+      ),
+    },
+    protocolEvents,
+    selectedEventId: protocolEvents.at(-1)?.id,
+    clientConnected: protocolEvents.some(
+      (event) =>
+        event.method === 'server/discover' && protocolEventSucceeded(event),
+    ),
+    lastResult:
+      lastEvent && protocolEventSucceeded(lastEvent)
+        ? (lastEvent.response.result as Record<string, unknown> | undefined)
+        : undefined,
+  };
 }
 
 export function validateCapability(
@@ -733,6 +849,26 @@ export function interactiveGuideReducer(
       return { ...state, selectedEventId: action.eventId };
     case 'finish':
       return { ...state, finished: true };
+    case 'apply-runtime': {
+      const events = runtimeEvents(action.events);
+      const successful =
+        events.length > 0 && events.every(protocolEventSucceeded);
+      return {
+        ...state,
+        clientConnected:
+          action.command === 'discover' ? successful : state.clientConnected,
+        protocolEvents: [...state.protocolEvents, ...events]
+          .slice(-100)
+          .map((event, index) => ({ ...event, sequence: index + 1 })),
+        selectedEventId: events.at(-1)?.id ?? state.selectedEventId,
+        lastResult:
+          action.command === 'discover'
+            ? state.lastResult
+            : successful
+              ? action.result
+              : undefined,
+      };
+    }
     case 'reset':
       return createInitialInteractiveGuideState();
   }
@@ -768,15 +904,17 @@ export function getGuideObjectives(
       complete:
         state.clientConnected &&
         state.protocolEvents.some(
-          (event) => event.method === 'server/discover',
+          (event) =>
+            event.method === 'server/discover' && protocolEventSucceeded(event),
         ),
     },
     {
       stepId: 'test-your-server',
       label: 'Complete a tool call',
-      complete:
-        !!state.lastResult &&
-        state.protocolEvents.some((event) => event.method === 'tools/call'),
+      complete: state.protocolEvents.some(
+        (event) =>
+          event.method === 'tools/call' && protocolEventSucceeded(event),
+      ),
     },
     {
       stepId: 'review-and-export',
@@ -814,11 +952,7 @@ function toolSource(tool: CapabilityDefinition) {
       })
     },
     async (${handlerParameters}) => {
-      const result = {
-        tool: ${JSON.stringify(tool.name)},
-        inputs: ${inputObject},
-        output: "Deterministic weather simulation"
-      };
+      const result = await executeWeatherTool(${JSON.stringify(tool.name)}, ${inputObject});
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result) }],
         structuredContent: result
@@ -896,6 +1030,38 @@ import {
 } from "@modelcontextprotocol/node";
 import * as z from "zod/v4";
 
+const attribution = { label: "Weather data by Open-Meteo", url: "https://open-meteo.com/" };
+
+async function executeWeatherTool(name: string, input: Record<string, unknown>) {
+  const location = String(input.location ?? input.query ?? "");
+  const geocoding = new URL("https://geocoding-api.open-meteo.com/v1/search");
+  geocoding.searchParams.set("name", location);
+  geocoding.searchParams.set("count", name === "search_locations" ? "5" : "1");
+  const matches = await fetch(geocoding).then(async response => {
+    if (!response.ok) throw new Error("Open-Meteo geocoding returned " + response.status);
+    return (await response.json() as { results?: Array<Record<string, unknown>> }).results ?? [];
+  });
+  if (name === "search_locations") return { query: location, matches, attribution };
+  const place = matches[0];
+  if (!place) throw new Error("No location matched “" + location + "”.");
+  const forecast = new URL("https://api.open-meteo.com/v1/forecast");
+  forecast.searchParams.set("latitude", String(place.latitude));
+  forecast.searchParams.set("longitude", String(place.longitude));
+  forecast.searchParams.set("timezone", "auto");
+  if (name === "get_forecast") {
+    forecast.searchParams.set("daily", "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max");
+    forecast.searchParams.set("forecast_days", "7");
+  } else {
+    forecast.searchParams.set("current", "temperature_2m,apparent_temperature,weather_code,wind_speed_10m");
+    forecast.searchParams.set("temperature_unit", input.unit === "fahrenheit" ? "fahrenheit" : "celsius");
+  }
+  const weather = await fetch(forecast).then(async response => {
+    if (!response.ok) throw new Error("Open-Meteo forecast returned " + response.status);
+    return await response.json() as Record<string, unknown>;
+  });
+  return { location: place, ...weather, attribution };
+}
+
 function buildServer() {
   const server = new McpServer({
     name: ${JSON.stringify(state.server.name)},
@@ -911,14 +1077,15 @@ const handler = createMcpHandler(buildServer);
 const nodeHandler = toNodeHandler(handler);
 const validateHost = localhostHostValidation();
 const validateOrigin = localhostOriginValidation();
+const port = Number(process.env.PORT ?? 3001);
 
 createServer((request, response) => {
   if (!validateHost(request, response) || !validateOrigin(request, response)) {
     return;
   }
   void nodeHandler(request, response);
-}).listen(3000, "127.0.0.1", () => {
-  console.log("MCP server available at http://127.0.0.1:3000/mcp");
+}).listen(port, "127.0.0.1", () => {
+  console.log("MCP server available at http://127.0.0.1:" + port + "/mcp");
 });
 `;
 }
@@ -965,7 +1132,7 @@ export function generateProjectFiles(state: InteractiveGuideStateV1) {
       null,
       2,
     )}\n`,
-    'README.md': `# ${state.server.name}\n\nGenerated by the All Things MCP interactive Guide.\n\n## Run locally\n\n\`\`\`bash\nnpm install\nnpm start\n\`\`\`\n\nThe MCP endpoint is available at \`http://127.0.0.1:3000/mcp\`.\n`,
+    'README.md': `# ${state.server.name}\n\nGenerated by the All Things MCP interactive Guide. Weather data is provided by [Open-Meteo](https://open-meteo.com/) under CC BY 4.0.\n\n## Run locally\n\n\`\`\`bash\nnpm install\nnpm start\n\`\`\`\n\nThe MCP endpoint is available at \`http://127.0.0.1:3001/mcp\`. Set the \`PORT\` environment variable to use another port.\n`,
     'src/server.ts': generateServerSource(state),
   };
 }

@@ -8,9 +8,13 @@ import {
   getGuideObjectives,
   interactiveGuideReducer,
   isInteractiveGuideState,
+  stateFromWorkspace,
   validateCapability,
 } from '@/lib/interactive-guides';
 import { createZipArchive } from '@/lib/zip';
+import type { McpProtocolEvent, McpWorkspace } from '@all-things-mcp/contracts';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 function configureServer() {
   let state = interactiveGuideReducer(createInitialInteractiveGuideState(), {
@@ -31,6 +35,81 @@ function configureServer() {
 }
 
 describe('interactive Guide state', () => {
+  it('does not complete a real tool objective for an MCP error returned over HTTP 200', () => {
+    const event: McpProtocolEvent = {
+      id: 'failed-call',
+      sequence: 1,
+      method: 'tools/call',
+      status: 'response',
+      request: {},
+      response: {
+        result: {
+          isError: true,
+          content: [{ type: 'text', text: 'Provider unavailable' }],
+        },
+      },
+      durationMs: 10,
+      createdAt: '2026-09-21T00:00:00.000Z',
+    };
+    const state = interactiveGuideReducer(configureServer(), {
+      type: 'apply-runtime',
+      command: 'call-tool',
+      events: [event],
+      result: event.response.result as Record<string, unknown>,
+    });
+    expect(state.protocolEvents[0].status).toBe('error');
+    expect(state.lastResult).toBeUndefined();
+    expect(
+      getGuideObjectives(state).find(
+        ({ stepId }) => stepId === 'test-your-server',
+      )?.complete,
+    ).toBe(false);
+  });
+
+  it('restores successful real discovery and tool objectives from persisted owner traces', () => {
+    const workspace: McpWorkspace = {
+      id: '11111111-1111-4111-8111-111111111111',
+      publicId: '22222222-2222-4222-8222-222222222222',
+      guideSlug: 'building-your-first-mcp-server',
+      templateId: 'weather',
+      templateVersion: 1,
+      configuration: {
+        serverName: 'persisted-weather',
+        enabledCapabilityIds: ['get-weather'],
+      },
+      revision: 2,
+      status: 'active',
+      anonymous: true,
+      createdAt: '2026-09-21T00:00:00.000Z',
+      updatedAt: '2026-09-21T00:00:00.000Z',
+      expiresAt: '2026-09-28T00:00:00.000Z',
+    };
+    const events: McpProtocolEvent[] = ['server/discover', 'tools/call'].map(
+      (method, index) => ({
+        id: String(index),
+        sequence: 1,
+        method,
+        status: 'response',
+        request: {},
+        response: { result: { source: 'Open-Meteo' } },
+        durationMs: 10,
+        createdAt: '2026-09-21T00:00:00.000Z',
+      }),
+    );
+    const state = stateFromWorkspace(workspace, events);
+    expect(state.clientConnected).toBe(true);
+    expect(state.protocolEvents.map(({ sequence }) => sequence)).toEqual([
+      1, 2,
+    ]);
+    expect(
+      getGuideObjectives(state)
+        .filter(({ stepId }) =>
+          ['connect-the-atm-client', 'test-your-server'].includes(stepId),
+        )
+        .every(({ complete }) => complete),
+    ).toBe(true);
+  });
+
   it('configures capabilities without mutating the curated definitions', () => {
     const original = buildingFirstServerDefinition.capabilities[0];
     const edited = cloneCapability(original);
@@ -149,6 +228,47 @@ describe('interactive Guide state', () => {
 });
 
 describe('generated TypeScript project', () => {
+  it('typechecks every exported curated capability and uses a separate configurable port', () => {
+    const state = configureServer();
+    state.server.tools = buildingFirstServerDefinition.capabilities.filter(
+      ({ kind }) => kind === 'tool',
+    );
+    state.server.resources = buildingFirstServerDefinition.capabilities.filter(
+      ({ kind }) => kind === 'resource',
+    );
+    const source = generateServerSource(state);
+    const filename = fileURLToPath(
+      new URL('../fixtures/virtual-export.ts', import.meta.url),
+    );
+    const options: ts.CompilerOptions = {
+      target: ts.ScriptTarget.ES2022,
+      module: ts.ModuleKind.NodeNext,
+      moduleResolution: ts.ModuleResolutionKind.NodeNext,
+      strict: true,
+      noEmit: true,
+      skipLibCheck: true,
+      types: ['node'],
+    };
+    const host = ts.createCompilerHost(options);
+    const originalSourceFile = host.getSourceFile.bind(host);
+    host.getSourceFile = (path, version, onError, fresh) =>
+      path === filename
+        ? ts.createSourceFile(path, source, version, true)
+        : originalSourceFile(path, version, onError, fresh);
+    const diagnostics = ts.getPreEmitDiagnostics(
+      ts.createProgram([filename], options, host),
+    );
+    expect(
+      diagnostics.map((diagnostic) =>
+        ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'),
+      ),
+    ).toEqual([]);
+    expect(source).toContain('process.env.PORT ?? 3001');
+    expect(generateProjectFiles(state)['README.md']).toContain(
+      '127.0.0.1:3001/mcp',
+    );
+  }, 10000);
+
   it('uses SDK v2 registration and the current HTTP handler', () => {
     const source = generateServerSource(configureServer());
     expect(source).toContain('createMcpHandler');

@@ -13,10 +13,9 @@ Copy `apps/web/.env.example` to `apps/web/.env.local` to configure the public
 site, repository, and Substack URLs. Content lives in `apps/web/content/` and is
 validated with `pnpm content:validate`.
 
-Authentication is optional in local development. Anonymous reading, simulation,
-and downloads remain available when it is disabled, but persistent Guide
-progress is server-side and requires an account. Supabase owns authentication,
-sessions, profile preferences, and the welcome-email workflow. Follow
+Authentication is optional in local development. Anonymous reading, seven-day
+real MCP workspaces, and downloads remain available when it is disabled.
+Supabase owns authentication, sessions, profile preferences, and the welcome-email workflow. Follow
 `supabase/README.md`, then configure the Supabase URL and publishable key in
 `apps/web/.env.local`.
 
@@ -27,11 +26,32 @@ The Guide Runtime uses a separate deployment and database boundary. Set the same
 pnpm dev:runtime
 ```
 
+Keep the two environment files separate:
+
+- `apps/web/.env.local`: Supabase Auth URL and publishable key,
+  `GUIDE_RUNTIME_URL=http://localhost:8787`, and the shared secret.
+- `apps/guide-runtime/.env`: the same shared secret, runtime settings, and
+  `DATABASE_URL` containing the full Supabase PostgreSQL connection URI—not the
+  Supabase project URL or an API key. Never use a `NEXT_PUBLIC_` prefix for this
+  database credential or the shared secret.
+
+Apply the Supabase migrations before starting the database-backed runtime.
+Startup checks report connection failures or missing required tables immediately.
+Without `DATABASE_URL`, development uses memory storage and loses workspaces
+when the runtime restarts. Restart the relevant server after changing its env file.
+
+For a complete local guide demo, `pnpm dev:demo` starts both applications in
+one terminal (stop any existing servers on ports 3000 and 8787 first).
+Once both are running, `pnpm demo:verify` checks actual database persistence,
+all Weather capabilities against Open-Meteo, workspace claiming, and external
+token/pause/revocation behavior. It creates and then removes its own diagnostic
+workspace; it does not modify an existing account's workspace.
+
 ## Repository structure
 
 - `apps/web` contains the existing Next.js and Fumadocs website.
-- `apps/guide-runtime` is the independently deployable boundary for authenticated
-  Guide runs and future MCP requests.
+- `apps/guide-runtime` is the independently deployable, multi-tenant MCP and Guide-run boundary.
+- `packages/mcp-templates` contains versioned declarative capability manifests.
 - `packages/contracts` contains versioned schemas shared by both apps.
 - `skills` contains the project-local instructions and visual references.
 

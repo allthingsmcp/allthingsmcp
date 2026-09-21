@@ -7,11 +7,11 @@ authors: [All Things MCP Editors]
 status: published
 tags: [guide, interactive, server, typescript, weather]
 publishedAt: 2026-08-31
-updatedAt: 2026-08-31
+updatedAt: 2026-09-21
 difficulty: beginner
 estimatedMinutes: 90
 specVersion: 2026-07-28
-lastVerified: 2026-08-31
+lastVerified: 2026-09-21
 interactiveGuideId: building-your-first-mcp-server
 outcome: Configure a weather MCP server with tools, resources, and prompts; inspect its TypeScript and current protocol exchanges; test it through an ATM learning client; and export a runnable local project.
 prerequisites:
@@ -32,7 +32,7 @@ guideSteps:
     estimatedMinutes: 10
   - id: create-your-server
     title: Create your server
-    description: Start the browser simulation and establish the named server boundary you will configure.
+    description: Create a Guide Runtime workspace and establish the named server boundary you will configure.
     estimatedMinutes: 10
   - id: add-tools
     title: Add tools
@@ -48,7 +48,7 @@ guideSteps:
     estimatedMinutes: 10
   - id: connect-the-atm-client
     title: Connect the ATM client
-    description: Discover the configured server and inspect the modern protocol messages exchanged by the simulator.
+    description: Discover the configured server and inspect the real protocol messages exchanged with Guide Runtime.
     estimatedMinutes: 10
   - id: test-your-server
     title: Test your server
@@ -60,9 +60,10 @@ guideSteps:
     estimatedMinutes: 10
 ---
 
-This Guide combines concise explanations with a browser-local workspace. Your configuration remains the source of truth across every step and every workspace view.
+This Guide combines concise explanations with a real, persisted Guide Runtime workspace. Your configuration remains the source of truth across every step and every workspace view.
 
-<Callout title="A simulation with a real output">
-  The workspace does not create a hosted server. It simulates the configuration
-  and protocol flow, then exports a real TypeScript project you can run locally.
+<Callout title="A real MCP server with exportable source">
+  The workspace executes real MCP exchanges using curated server capabilities.
+  Anonymous workspaces last seven days; sign in to claim one and issue external
+  credentials.
 </Callout>

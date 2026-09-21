@@ -1,6 +1,6 @@
 ---
 title: Create Your Server
-description: Start the browser-local workspace and establish the named MCP server boundary you will configure.
+description: Start a temporary Guide Runtime workspace and establish the named MCP server boundary you will configure.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,11 +10,11 @@ authors: [All Things MCP Editors]
 status: published
 tags: [guide-step, interactive, server, typescript]
 publishedAt: 2026-08-31
-updatedAt: 2026-08-31
+updatedAt: 2026-09-21
 difficulty: beginner
 estimatedMinutes: 10
 specVersion: 2026-07-28
-lastVerified: 2026-08-31
+lastVerified: 2026-09-21
 ---
 
 Begin with a named server boundary. The name becomes part of the server identity shown to clients and the downloaded project package.
@@ -23,9 +23,9 @@ Use a lowercase, hyphenated name. The default `weather-server` is deliberately d
 
 <InteractiveGuideBlock scene="create-server" />
 
-<Callout title="Browser-local for now">
-  Creating the server configures the Guide simulation. It does not provision a
-  process, endpoint, credential, or cloud resource.
+<Callout title="A temporary real workspace">
+  Creating the server provisions a seven-day workspace that executes real MCP
+  requests. Sign in to claim it and issue credentials for its external endpoint.
 </Callout>
 
 Switch to **Code** after creating the server. The generated source should already contain a current SDK v2 server factory even though it exposes no capabilities yet.

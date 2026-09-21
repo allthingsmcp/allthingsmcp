@@ -124,10 +124,7 @@ export function useGuideProgress(slug: string, stepIds: string[]) {
 
         if (!response.ok) throw new Error('Unable to save progress.');
         const run = (await response.json()) as GuideRun;
-        revisionRef.current = Math.max(
-          revisionRef.current ?? 0,
-          run.revision,
-        );
+        revisionRef.current = Math.max(revisionRef.current ?? 0, run.revision);
         if (operation === saveOperationRef.current) {
           setServerCompleted(
             normalizeGuideProgress(run.progress.completedStepIds, stepIds),

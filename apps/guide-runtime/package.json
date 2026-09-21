@@ -4,14 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --env-file-if-exists=.env --watch --import tsx src/server.ts",
+    "dev": "node --env-file-if-exists=.env --import tsx src/server.ts",
     "start": "tsx src/server.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "demo:verify": "node --env-file-if-exists=.env --import tsx scripts/verify-demo.ts"
   },
   "dependencies": {
     "@all-things-mcp/contracts": "workspace:*",
+    "@all-things-mcp/mcp-templates": "workspace:*",
     "@hono/node-server": "^1.19.17",
+    "@modelcontextprotocol/server": "^2.0.0",
     "hono": "^4.13.5",
     "jose": "^6.2.10",
     "pg": "^8.23.0",

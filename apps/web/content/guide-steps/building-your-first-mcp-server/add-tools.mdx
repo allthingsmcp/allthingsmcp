@@ -10,11 +10,11 @@ authors: [All Things MCP Editors]
 status: published
 tags: [guide-step, interactive, tools, schemas]
 publishedAt: 2026-08-31
-updatedAt: 2026-08-31
+updatedAt: 2026-09-21
 difficulty: beginner
 estimatedMinutes: 15
 specVersion: 2026-07-28
-lastVerified: 2026-08-31
+lastVerified: 2026-09-21
 ---
 
 Tools are operations a client can ask the server to perform. Their names, descriptions, and schemas should give both people and models enough information to invoke them correctly.
@@ -32,4 +32,4 @@ Start with **Get current weather**. Review its `location` and `unit` fields befo
   ]}
 />
 
-The simulation uses deterministic weather data. No external weather provider is contacted.
+Weather operations use live data from [Open-Meteo](https://open-meteo.com/). If the provider is unavailable, the runtime returns an explicit MCP error instead of fabricated data.

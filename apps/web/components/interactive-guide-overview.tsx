@@ -20,7 +20,7 @@ export function InteractiveGuideEnhancement() {
             <h2>A configurable weather MCP server</h2>
           </div>
           <p className="interactive-enhancement-note">
-            <MonitorPlay aria-hidden="true" /> Browser simulation
+            <MonitorPlay aria-hidden="true" /> Live MCP workspace
           </p>
         </header>
         <div className="interactive-enhancement-grid">

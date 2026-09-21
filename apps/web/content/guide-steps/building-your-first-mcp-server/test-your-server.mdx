@@ -10,11 +10,11 @@ authors: [All Things MCP Editors]
 status: published
 tags: [guide-step, interactive, client, tools, testing]
 publishedAt: 2026-08-31
-updatedAt: 2026-08-31
+updatedAt: 2026-09-21
 difficulty: beginner
 estimatedMinutes: 15
 specVersion: 2026-07-28
-lastVerified: 2026-08-31
+lastVerified: 2026-09-21
 ---
 
 A useful test crosses the protocol boundary. Choose a location, invoke the first configured tool, then inspect both the result and the corresponding `tools/call` exchange.
@@ -30,4 +30,4 @@ A useful test crosses the protocol boundary. Choose a location, invoke the first
   ]}
 />
 
-The weather value is deterministic, so repeating the same request produces the same result. That makes the Guide useful without presenting a simulated upstream API as real.
+The result comes from Open-Meteo and includes attribution. Live values may change between requests; provider failures are returned as explicit MCP errors.

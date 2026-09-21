@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createGuideRuntimeApp } from "../src/app.js";
 import { runtimeTokenAudience, runtimeTokenIssuer } from "../src/auth.js";
 import { MemoryGuideRunRepository } from "../src/repository.js";
+import { MemoryWorkspaceRepository } from '../src/workspace-repository.js';
 
 const sharedSecret = "test-guide-runtime-shared-secret-32-chars";
 
@@ -26,6 +27,7 @@ describe("Guide Runtime", () => {
   it("keeps health public and protects user data", async () => {
     const app = createGuideRuntimeApp({
       repository: new MemoryGuideRunRepository(),
+      workspaceRepository: new MemoryWorkspaceRepository(),
       sharedSecret,
     });
     expect((await app.request("/health")).status).toBe(200);
@@ -44,6 +46,7 @@ describe("Guide Runtime", () => {
   it("creates, reads, and revision-checks a Guide run", async () => {
     const app = createGuideRuntimeApp({
       repository: new MemoryGuideRunRepository(),
+      workspaceRepository: new MemoryWorkspaceRepository(),
       sharedSecret,
     });
     const headers = {

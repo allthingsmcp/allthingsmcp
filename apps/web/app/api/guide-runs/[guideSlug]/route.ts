@@ -2,23 +2,9 @@ import {
   guideRunSchema,
   upsertGuideRunRequestSchema,
 } from '@all-things-mcp/contracts';
-import {
-  AuthenticationRequiredError,
-  fetchGuideRuntime,
-  RuntimeConfigurationError,
-} from '@/lib/runtime-server';
+import { fetchGuideRuntime, runtimeErrorResponse } from '@/lib/runtime-server';
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-function errorResponse(error: unknown) {
-  if (error instanceof AuthenticationRequiredError) {
-    return Response.json({ error: error.message }, { status: 401 });
-  }
-  if (error instanceof RuntimeConfigurationError) {
-    return Response.json({ error: error.message }, { status: 503 });
-  }
-  throw error;
-}
 
 export async function GET(
   _request: Request,
@@ -39,7 +25,7 @@ export async function GET(
     }
     return Response.json(guideRunSchema.parse(await response.json()));
   } catch (error) {
-    return errorResponse(error);
+    return runtimeErrorResponse(error);
   }
 }
 
@@ -67,6 +53,6 @@ export async function PUT(
     if (!response.ok) return Response.json(body, { status: response.status });
     return Response.json(guideRunSchema.parse(body));
   } catch (error) {
-    return errorResponse(error);
+    return runtimeErrorResponse(error);
   }
 }

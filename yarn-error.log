@@ -1,0 +1,53 @@
+Arguments: 
+  /Users/gbadebobello/.nvm/versions/node/v25.1.0/bin/node /usr/local/bin/yarn install
+
+PATH: 
+  /Users/gbadebobello/.antigravity-ide/antigravity-ide/bin:/Users/gbadebobello/.antigravity/antigravity/bin:/Users/gbadebobello/.antigravity/antigravity/bin:/Users/gbadebobello/.local/bin:/Users/gbadebobello/Library/pnpm:/Users/gbadebobello/anaconda3/bin:/Users/gbadebobello/.nvm/versions/node/v25.1.0/bin:/Users/gbadebobello/go/bin:/Library/Frameworks/Python.framework/Versions/3.12/bin:/Users/gbadebobello/go/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/code:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/usr/local/go/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin
+
+Yarn version: 
+  1.22.10
+
+Node version: 
+  25.1.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: ENOENT: no such file or directory, open '/Users/gbadebobello/Library/Caches/Yarn/v6/npm-@supabase-cli-darwin-arm64-2.117.0-bffec0a0197b766e775316656584740065ba6d51-integrity/node_modules/@supabase/cli-darwin-arm64/.yarn-metadata.json'
+
+npm manifest: 
+  {
+    "name": "all-things-mcp",
+    "version": "0.1.0",
+    "private": true,
+    "packageManager": "pnpm@10.20.0",
+    "engines": {
+      "node": ">=22"
+    },
+    "scripts": {
+      "dev": "pnpm --filter @all-things-mcp/web dev",
+      "dev:web": "pnpm --filter @all-things-mcp/web dev",
+      "dev:runtime": "pnpm --filter @all-things-mcp/guide-runtime dev",
+      "build": "pnpm --filter @all-things-mcp/web build",
+      "start": "pnpm --filter @all-things-mcp/web start",
+      "lint": "pnpm --filter @all-things-mcp/web lint",
+      "typecheck": "pnpm -r --if-present typecheck",
+      "format": "pnpm --filter @all-things-mcp/web format",
+      "format:write": "pnpm --filter @all-things-mcp/web format:write",
+      "content:validate": "pnpm --filter @all-things-mcp/web content:validate",
+      "brand:generate": "pnpm --filter @all-things-mcp/web brand:generate",
+      "test": "pnpm -r --if-present test",
+      "test:e2e": "pnpm --filter @all-things-mcp/web test:e2e",
+      "check": "pnpm --filter @all-things-mcp/web check"
+    },
+    "devDependencies": {
+      "supabase": "^2.116.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

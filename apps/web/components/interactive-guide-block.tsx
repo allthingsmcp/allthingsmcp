@@ -200,7 +200,7 @@ function WorkspaceTabs({
 }
 
 function ServerSummary({ readOnly = false }: { readOnly?: boolean }) {
-  const { state, dispatch } = useInteractiveGuide();
+  const { state, dispatch, runtimeBusy, claimConflict } = useInteractiveGuide();
   return (
     <section className="interactive-server-summary">
       <header>
@@ -210,11 +210,13 @@ function ServerSummary({ readOnly = false }: { readOnly?: boolean }) {
         <div>
           <strong>{state.server.name}</strong>
           <small>
-            {state.server.created ? 'Simulation ready' : 'Not created yet'}
+            {state.server.created
+              ? 'Runtime workspace ready'
+              : 'Not created yet'}
           </small>
         </div>
         <span className="interactive-status">
-          <Circle aria-hidden="true" /> Simulation
+          <Circle aria-hidden="true" /> Live runtime
         </span>
       </header>
       <div className="interactive-capability-groups">
@@ -242,6 +244,7 @@ function ServerSummary({ readOnly = false }: { readOnly?: boolean }) {
                         <span className="interactive-inline-actions">
                           <button
                             aria-label={`Remove ${item.name}`}
+                            disabled={runtimeBusy || claimConflict}
                             onClick={() =>
                               dispatch({
                                 type: 'remove-capability',
@@ -270,7 +273,8 @@ function ServerSummary({ readOnly = false }: { readOnly?: boolean }) {
 }
 
 function CreateServerScene() {
-  const { state, dispatch } = useInteractiveGuide();
+  const { state, dispatch, runtimeBusy, claimConflict, runtimeStatus } =
+    useInteractiveGuide();
   const [name, setName] = useState(state.server.name);
   const error = validateServerName(name);
   return (
@@ -293,7 +297,12 @@ function CreateServerScene() {
         </label>
         <button
           className="button button--primary"
-          disabled={!!error}
+          disabled={
+            !!error ||
+            runtimeBusy ||
+            claimConflict ||
+            runtimeStatus === 'expired'
+          }
           onClick={() => dispatch({ type: 'create-server', name })}
           type="button"
         >
@@ -302,7 +311,7 @@ function CreateServerScene() {
         </button>
         {state.server.created && (
           <span className="interactive-status is-success" role="status">
-            <CheckCircle2 aria-hidden="true" /> Simulation ready
+            <CheckCircle2 aria-hidden="true" /> Runtime workspace ready
           </span>
         )}
       </section>
@@ -483,7 +492,8 @@ function CapabilityDetails({
 }
 
 function CapabilityScene({ kind }: { kind: CapabilityKind }) {
-  const { state, definition, dispatch } = useInteractiveGuide();
+  const { state, definition, dispatch, runtimeBusy, claimConflict } =
+    useInteractiveGuide();
   const meta = kindMeta[kind];
   const Icon = meta.icon;
   const options = definition.capabilities.filter((item) => item.kind === kind);
@@ -557,7 +567,7 @@ function CapabilityScene({ kind }: { kind: CapabilityKind }) {
         {selected && (
           <CapabilityDetails
             capability={selected}
-            canAdd={state.server.created}
+            canAdd={state.server.created && !runtimeBusy && !claimConflict}
             exists={added.some((item) => item.id === selected.id)}
             onAdd={() =>
               dispatch({
@@ -980,7 +990,7 @@ function ProtocolMode() {
               <b>{item.sequence}</b>
               <span>
                 <strong>{item.method}</strong>
-                <small>{item.durationMs} ms · Simulated</small>
+                <small>{item.durationMs.toFixed(1)} ms · Guide Runtime</small>
               </span>
             </button>
           ))}
@@ -1012,16 +1022,24 @@ function ProtocolMode() {
 }
 
 function ClientMode({ scene }: { scene: InteractiveGuideScene }) {
-  const { state, dispatch } = useInteractiveGuide();
+  const { state, dispatch, runtimeBusy, runtimeStatus, claimConflict } =
+    useInteractiveGuide();
   const [location, setLocation] = useState('London');
   const [unit, setUnit] = useState('celsius');
-  const tool = state.server.tools[0];
-  const resource = state.server.resources[0];
+  const [day, setDay] = useState('Monday');
+  const [toolId, setToolId] = useState('');
+  const tool =
+    state.server.tools.find((item) => item.id === toolId) ??
+    state.server.tools[0];
   const prompt = state.server.prompts[0];
+  const disabled =
+    runtimeBusy ||
+    runtimeStatus === 'paused' ||
+    runtimeStatus === 'expired' ||
+    claimConflict;
   const connect = () => dispatch({ type: 'connect-client' });
   const run = () => {
     if (!tool) return;
-    if (!state.clientConnected) connect();
     dispatch({ type: 'run-tool', toolName: tool.name, location, unit });
   };
   return (
@@ -1036,19 +1054,21 @@ function ClientMode({ scene }: { scene: InteractiveGuideScene }) {
             className={`interactive-status ${state.clientConnected ? 'is-success' : ''}`}
           >
             <Circle aria-hidden="true" />{' '}
-            {state.clientConnected ? 'Connected to simulator' : 'Disconnected'}
+            {state.clientConnected
+              ? 'Connected to Guide Runtime'
+              : 'Disconnected'}
           </span>
         </header>
         {!state.clientConnected ? (
           <div className="interactive-client-connect">
             <MonitorPlay aria-hidden="true" />
             <p>
-              Connect to discover the capabilities currently exposed by your
-              simulated server.
+              Connect to discover the capabilities currently exposed by your MCP
+              server.
             </p>
             <button
               className="button button--primary"
-              disabled={!state.server.created}
+              disabled={!state.server.created || disabled}
               onClick={connect}
               type="button"
             >
@@ -1072,8 +1092,10 @@ function ClientMode({ scene }: { scene: InteractiveGuideScene }) {
               className="interactive-guided-commands"
               aria-label="Guided client commands"
             >
-              {resource && (
+              {state.server.resources.map((resource) => (
                 <button
+                  key={resource.id}
+                  disabled={disabled}
                   onClick={() =>
                     dispatch({
                       type: 'read-resource',
@@ -1084,11 +1106,16 @@ function ClientMode({ scene }: { scene: InteractiveGuideScene }) {
                 >
                   <Database aria-hidden="true" /> Read {resource.uri}
                 </button>
-              )}
+              ))}
               {prompt && (
                 <button
+                  disabled={disabled || !location.trim() || !day.trim()}
                   onClick={() =>
-                    dispatch({ type: 'get-prompt', promptName: prompt.name })
+                    dispatch({
+                      type: 'get-prompt',
+                      promptName: prompt.name,
+                      arguments: { city: location.trim(), day: day.trim() },
+                    })
                   }
                   type="button"
                 >
@@ -1096,28 +1123,58 @@ function ClientMode({ scene }: { scene: InteractiveGuideScene }) {
                 </button>
               )}
             </div>
-            {(scene === 'test-server' || state.lastResult) && (
+            {(scene === 'test-server' || state.lastResult || prompt) && (
               <div className="interactive-command-form">
+                {state.server.tools.length > 1 && (
+                  <label>
+                    <span>Tool</span>
+                    <select
+                      value={tool?.id ?? ''}
+                      onChange={(event) => setToolId(event.target.value)}
+                    >
+                      {state.server.tools.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 <label>
-                  <span>Location</span>
+                  <span>
+                    {tool?.name === 'search_locations'
+                      ? 'Search query'
+                      : 'Location'}
+                  </span>
                   <input
                     onChange={(event) => setLocation(event.target.value)}
                     value={location}
                   />
                 </label>
-                <label>
-                  <span>Unit</span>
-                  <select
-                    onChange={(event) => setUnit(event.target.value)}
-                    value={unit}
-                  >
-                    <option value="celsius">Celsius</option>
-                    <option value="fahrenheit">Fahrenheit</option>
-                  </select>
-                </label>
+                {tool?.fields.some((field) => field.name === 'unit') && (
+                  <label>
+                    <span>Unit</span>
+                    <select
+                      onChange={(event) => setUnit(event.target.value)}
+                      value={unit}
+                    >
+                      <option value="celsius">Celsius</option>
+                      <option value="fahrenheit">Fahrenheit</option>
+                    </select>
+                  </label>
+                )}
+                {prompt && (
+                  <label>
+                    <span>Day</span>
+                    <input
+                      value={day}
+                      onChange={(event) => setDay(event.target.value)}
+                    />
+                  </label>
+                )}
                 <button
                   className="button button--primary"
-                  disabled={!tool}
+                  disabled={!tool || disabled || !location.trim()}
                   onClick={run}
                   type="button"
                 >
@@ -1171,7 +1228,21 @@ function downloadProject(
 }
 
 function CompletionScene() {
-  const { state, dispatch, reset } = useInteractiveGuide();
+  const {
+    state,
+    dispatch,
+    reset,
+    workspace,
+    runtimeBusy,
+    runtimeStatus,
+    issueExternalToken,
+    revokeExternalToken,
+    setWorkspacePaused,
+  } = useInteractiveGuide();
+  const [access, setAccess] = useState<{
+    token: string;
+    endpoint: string;
+  } | null>(null);
   const objectives = getGuideObjectives(state);
   const ready = objectives
     .filter((item) => item.stepId !== 'review-and-export')
@@ -1186,8 +1257,8 @@ function CompletionScene() {
           <p className="eyebrow">Review and export</p>
           <h3>Your first MCP server is configured</h3>
           <p>
-            Review the browser-local simulation, download the project, and run
-            it on your machine.
+            Review the real MCP exchanges, download the project, or connect an
+            external client to your signed-in workspace.
           </p>
         </div>
       </header>
@@ -1215,35 +1286,77 @@ function CompletionScene() {
         >
           <Download aria-hidden="true" /> Download project
         </button>
-        <button
-          className="button button--secondary"
-          disabled
-          title="Coming later; an authenticated account will be required"
-          type="button"
-        >
-          Connect external client <span>Coming soon</span>
-        </button>
-        <button
-          className="button button--secondary"
-          disabled
-          title="Coming later; an authenticated account will be required"
-          type="button"
-        >
-          Create hosted endpoint <span>Coming soon</span>
-        </button>
+        {workspace && !workspace.anonymous && (
+          <>
+            <button
+              className="button button--secondary"
+              disabled={runtimeBusy}
+              onClick={() =>
+                void issueExternalToken().then(
+                  (value) => value && setAccess(value),
+                )
+              }
+              type="button"
+            >
+              {access ? 'Rotate access token' : 'Create access token'}
+            </button>
+            <button
+              className="button button--secondary"
+              disabled={runtimeBusy}
+              onClick={() =>
+                void setWorkspacePaused(workspace?.status !== 'paused')
+              }
+              type="button"
+            >
+              {workspace?.status === 'paused'
+                ? 'Resume endpoint'
+                : 'Pause endpoint'}
+            </button>
+            {access ? (
+              <button
+                className="button button--secondary"
+                disabled={runtimeBusy}
+                onClick={() =>
+                  void revokeExternalToken().then(
+                    (revoked) => revoked && setAccess(null),
+                  )
+                }
+                type="button"
+              >
+                Revoke token
+              </button>
+            ) : null}
+          </>
+        )}
       </div>
+      {access ? (
+        <div role="status">
+          <p>
+            <strong>Endpoint:</strong> <code>{access.endpoint}</code>
+          </p>
+          <p>
+            <strong>Bearer token (shown once):</strong>{' '}
+            <code>{access.token}</code>
+          </p>
+        </div>
+      ) : null}
       <AuthNudge
         className="interactive-cloud-requirement"
         reason="hosted"
         label="Why hosted features require an account"
       />
       <div className="interactive-finish-row">
-        <button className="interactive-reset" onClick={reset} type="button">
-          <RotateCcw aria-hidden="true" /> Reset simulation
+        <button
+          className="interactive-reset"
+          disabled={runtimeBusy}
+          onClick={reset}
+          type="button"
+        >
+          <RotateCcw aria-hidden="true" /> Reset guide
         </button>
         <button
           className="button button--primary"
-          disabled={!ready}
+          disabled={!ready || runtimeBusy || runtimeStatus !== 'ready'}
           onClick={() => dispatch({ type: 'finish' })}
           type="button"
         >
@@ -1277,7 +1390,18 @@ export function InteractiveGuideBlock({
   const initialMode: WorkspaceMode =
     scene === 'connect-client' || scene === 'test-server' ? 'client' : 'visual';
   const [mode, setMode] = useState<WorkspaceMode>(initialMode);
-  const { state, progressPersistence } = useInteractiveGuide();
+  const {
+    state,
+    progressPersistence,
+    runtimeStatus,
+    runtimeBusy,
+    runtimeError,
+    workspace,
+    retryRuntime,
+    reset,
+    claimConflict,
+    resolveClaimConflict,
+  } = useInteractiveGuide();
 
   const content =
     mode === 'code' ? (
@@ -1295,17 +1419,75 @@ export function InteractiveGuideBlock({
       <header className="interactive-guide-block__header">
         <div>
           <span className="interactive-simulation-label">
-            <Radio aria-hidden="true" /> Browser simulation
+            <Radio aria-hidden="true" /> Real MCP runtime
           </span>
           <small>{state.server.name} · MCP 2026-07-28</small>
         </div>
         <div className="interactive-save-status">
-          <span>Configuration saved in this browser</span>
+          <span>
+            {runtimeStatus === 'loading'
+              ? 'Loading workspace…'
+              : runtimeStatus === 'error'
+                ? 'Request failed'
+                : runtimeStatus === 'expired'
+                  ? 'Workspace expired'
+                  : runtimeStatus === 'executing'
+                    ? 'Executing real MCP request…'
+                    : runtimeStatus === 'saving'
+                      ? 'Saving workspace…'
+                      : runtimeStatus === 'paused'
+                        ? 'Endpoint paused'
+                        : workspace
+                          ? 'Workspace persisted'
+                          : 'Ready to create'}
+          </span>
           <GuideProgressStatus status={progressPersistence} />
         </div>
       </header>
       <WorkspaceTabs mode={mode} onChange={setMode} />
+      {runtimeError ? (
+        <div role="alert">
+          <p>{runtimeError}</p>
+          <button
+            type="button"
+            disabled={runtimeBusy}
+            onClick={
+              runtimeStatus === 'expired' && (!workspace || workspace.anonymous)
+                ? reset
+                : retryRuntime
+            }
+          >
+            {runtimeStatus === 'expired' && (!workspace || workspace.anonymous)
+              ? 'Start a new workspace'
+              : 'Retry connection'}
+          </button>
+        </div>
+      ) : null}
+      {claimConflict ? (
+        <div role="alert">
+          <p>You already have a saved workspace for this guide.</p>
+          <button
+            type="button"
+            disabled={runtimeBusy}
+            onClick={() => void resolveClaimConflict('resume-saved')}
+          >
+            Resume saved
+          </button>
+          <button
+            type="button"
+            disabled={runtimeBusy}
+            onClick={() => void resolveClaimConflict('replace-with-current')}
+          >
+            Replace with current
+          </button>
+        </div>
+      ) : null}
       <div className="interactive-guide-block__body">{content}</div>
+      <p className="interactive-inline-note">
+        <Info aria-hidden="true" />
+        <a href="https://open-meteo.com/">Weather data by Open-Meteo</a> · CC BY
+        4.0
+      </p>
     </section>
   );
 }

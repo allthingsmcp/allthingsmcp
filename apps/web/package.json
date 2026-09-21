@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@all-things-mcp/contracts": "workspace:*",
+    "@all-things-mcp/mcp-templates": "workspace:*",
     "@supabase/ssr": "^0.12.6",
     "@supabase/supabase-js": "^2.115.0",
     "@types/mdx": "^2.0.13",

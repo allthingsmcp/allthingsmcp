@@ -1,6 +1,6 @@
 ---
 title: Review and Export
-description: Review the complete simulated server, download its runnable TypeScript project, and finish the Guide.
+description: Review the complete MCP server, download its runnable TypeScript project, and finish the Guide.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,11 +10,11 @@ authors: [All Things MCP Editors]
 status: published
 tags: [guide-step, interactive, export, typescript]
 publishedAt: 2026-08-31
-updatedAt: 2026-08-31
+updatedAt: 2026-09-21
 difficulty: beginner
 estimatedMinutes: 10
 specVersion: 2026-07-28
-lastVerified: 2026-08-31
+lastVerified: 2026-09-21
 ---
 
 Your visual configuration, generated source, protocol history, and test result should now describe the same server. Review that consistency before exporting the project.
@@ -30,10 +30,13 @@ npm install
 npm start
 ```
 
-The local project exposes a Streamable HTTP MCP endpoint at `http://127.0.0.1:3000/mcp` with loopback host and origin validation.
+The local project exposes a Streamable HTTP MCP endpoint at `http://127.0.0.1:3001/mcp` with loopback host and origin validation. Set the `PORT` environment variable to use another port.
 
-<Callout title="Hosted workspaces come later" type="warning">
-  ATM does not host this server or issue credentials in this phase. The disabled
-  hosted-endpoint and external-client actions mark the future Workspace API
-  boundary without pretending that it exists.
+<Callout title="Connect an external client">
+  Sign in to claim and keep your workspace, then create an access token above.
+  Configure your MCP client with the displayed endpoint and bearer token. Save
+  the token when it is shown; rotating or revoking it disables the old token.
+  Pausing the endpoint immediately prevents new MCP requests.
 </Callout>
+
+Weather results use live Open-Meteo data and include attribution. The exported project also calls Open-Meteo and requires an internet connection.
