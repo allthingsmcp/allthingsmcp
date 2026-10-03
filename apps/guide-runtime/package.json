@@ -1,0 +1,30 @@
+{
+  "name": "@all-things-mcp/guide-runtime",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env --import tsx src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "demo:verify": "node --env-file-if-exists=.env --import tsx scripts/verify-demo.ts"
+  },
+  "dependencies": {
+    "@all-things-mcp/contracts": "workspace:*",
+    "@all-things-mcp/mcp-templates": "workspace:*",
+    "@hono/node-server": "^1.19.17",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "hono": "^4.13.5",
+    "jose": "^6.2.10",
+    "pg": "^8.23.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  }
+}

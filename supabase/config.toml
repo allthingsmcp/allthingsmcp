@@ -1,0 +1,2 @@
+[functions.welcome-email]
+verify_jwt = false

@@ -1,0 +1,1493 @@
+'use client';
+
+import { useMemo, useState, type ReactNode } from 'react';
+import {
+  ArrowLeftRight,
+  Check,
+  CheckCircle2,
+  Circle,
+  Clipboard,
+  Code2,
+  Database,
+  Download,
+  FileJson2,
+  Info,
+  MessageSquareText,
+  MonitorPlay,
+  Play,
+  Plus,
+  Radio,
+  RotateCcw,
+  Server,
+  Trash2,
+  Wrench,
+} from 'lucide-react';
+import { useInteractiveGuide } from '@/components/interactive-guide-context';
+import { AuthNudge, GuideProgressStatus } from '@/components/auth-dialog';
+import {
+  cloneCapability,
+  generateProjectFiles,
+  generateServerSource,
+  getGuideObjectives,
+  validateServerName,
+  type CapabilityDefinition,
+  type CapabilityKind,
+  type InteractiveGuideScene,
+  type ProtocolEvent,
+} from '@/lib/interactive-guides';
+import { createZipArchive } from '@/lib/zip';
+
+type WorkspaceMode = 'visual' | 'code' | 'protocol' | 'client';
+
+const kindMeta: Record<
+  CapabilityKind,
+  { label: string; icon: typeof Wrench; className: string }
+> = {
+  tool: { label: 'Tools', icon: Wrench, className: 'is-tool' },
+  resource: {
+    label: 'Resources',
+    icon: Database,
+    className: 'is-resource',
+  },
+  prompt: {
+    label: 'Prompts',
+    icon: MessageSquareText,
+    className: 'is-prompt',
+  },
+};
+
+function collectionFor(
+  kind: CapabilityKind,
+  server: ReturnType<typeof useInteractiveGuide>['state']['server'],
+) {
+  return kind === 'tool'
+    ? server.tools
+    : kind === 'resource'
+      ? server.resources
+      : server.prompts;
+}
+
+function sceneKind(scene: InteractiveGuideScene): CapabilityKind | undefined {
+  if (scene === 'add-tools') return 'tool';
+  if (scene === 'add-resources') return 'resource';
+  if (scene === 'add-prompts') return 'prompt';
+  return undefined;
+}
+
+function JsonPanel({ value, label }: { value: unknown; label: string }) {
+  return (
+    <section className="interactive-json-panel">
+      <span>{label}</span>
+      <pre>
+        <JsonCode value={value} />
+      </pre>
+    </section>
+  );
+}
+
+function JsonCode({ value }: { value: unknown }) {
+  const json = useMemo(() => JSON.stringify(value, null, 2) ?? '', [value]);
+  const tokens = useMemo(() => {
+    const pattern =
+      /"(?:[^"\\]|\\.)*"(?=\s*:)|"(?:[^"\\]|\\.)*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\b(?:true|false|null)\b|[{}\[\],:]/g;
+    const output: ReactNode[] = [];
+    let cursor = 0;
+
+    for (const match of json.matchAll(pattern)) {
+      const index = match.index ?? 0;
+      if (index > cursor) output.push(json.slice(cursor, index));
+      const token = match[0];
+      const remainder = json.slice(index + token.length);
+      const className = token.startsWith('"')
+        ? /^\s*:/.test(remainder)
+          ? 'token-json-key'
+          : 'token-json-string'
+        : /^-?\d/.test(token)
+          ? 'token-json-number'
+          : /^(?:true|false|null)$/.test(token)
+            ? 'token-json-literal'
+            : 'token-json-punctuation';
+      output.push(
+        <span className={className} key={`${index}-${token}`}>
+          {token}
+        </span>,
+      );
+      cursor = index + token.length;
+    }
+    if (cursor < json.length) output.push(json.slice(cursor));
+    return output;
+  }, [json]);
+
+  return <code>{tokens}</code>;
+}
+
+function TypeScriptCode({ code }: { code: string }) {
+  const tokens = useMemo(
+    () =>
+      code.split('\n').map((line, lineIndex) => {
+        const commentIndex = line.indexOf('//');
+        const codePart = commentIndex >= 0 ? line.slice(0, commentIndex) : line;
+        const comment = commentIndex >= 0 ? line.slice(commentIndex) : '';
+        const parts = codePart.split(
+          /(\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|\b(?:import|from|const|function|return|async|await|new|if|void|type|as)\b|\b\d+(?:\.\d+)?\b)/g,
+        );
+        return (
+          <span
+            className={`interactive-code-line ${line.includes('server.register') ? 'is-generated-change' : ''}`}
+            key={`${lineIndex}-${line}`}
+          >
+            <span className="interactive-code-number">{lineIndex + 1}</span>
+            <span>
+              {parts.map((part, index) => {
+                const className = /^(?:\"|'|`)/.test(part)
+                  ? 'token-string'
+                  : /^(?:import|from|const|function|return|async|await|new|if|void|type|as)$/.test(
+                        part,
+                      )
+                    ? 'token-keyword'
+                    : /^\d/.test(part)
+                      ? 'token-number'
+                      : undefined;
+                return (
+                  <span className={className} key={`${part}-${index}`}>
+                    {part}
+                  </span>
+                );
+              })}
+              {comment && <span className="token-comment">{comment}</span>}
+            </span>
+          </span>
+        );
+      }),
+    [code],
+  );
+  return <code>{tokens}</code>;
+}
+
+function WorkspaceTabs({
+  mode,
+  onChange,
+}: {
+  mode: WorkspaceMode;
+  onChange: (mode: WorkspaceMode) => void;
+}) {
+  const modes: Array<[WorkspaceMode, string, typeof Wrench]> = [
+    ['visual', 'Visual', ArrowLeftRight],
+    ['code', 'Code', Code2],
+    ['protocol', 'Protocol', FileJson2],
+    ['client', 'Client', MonitorPlay],
+  ];
+  return (
+    <div
+      className="interactive-mode-tabs"
+      role="tablist"
+      aria-label="Guide workspace"
+    >
+      {modes.map(([value, label, Icon]) => (
+        <button
+          aria-selected={mode === value}
+          className={mode === value ? 'is-active' : undefined}
+          key={value}
+          onClick={() => onChange(value)}
+          role="tab"
+          type="button"
+        >
+          <Icon aria-hidden="true" /> {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ServerSummary({ readOnly = false }: { readOnly?: boolean }) {
+  const { state, dispatch, runtimeBusy, claimConflict } = useInteractiveGuide();
+  return (
+    <section className="interactive-server-summary">
+      <header>
+        <span className="interactive-server-icon">
+          <Server aria-hidden="true" />
+        </span>
+        <div>
+          <strong>{state.server.name}</strong>
+          <small>
+            {state.server.created
+              ? 'Runtime workspace ready'
+              : 'Not created yet'}
+          </small>
+        </div>
+        <span className="interactive-status">
+          <Circle aria-hidden="true" /> Live runtime
+        </span>
+      </header>
+      <div className="interactive-capability-groups">
+        {(['tool', 'resource', 'prompt'] as const).map((kind) => {
+          const meta = kindMeta[kind];
+          const Icon = meta.icon;
+          const items = collectionFor(kind, state.server);
+          return (
+            <section className={meta.className} key={kind}>
+              <div className="interactive-group-heading">
+                <span>
+                  <Icon aria-hidden="true" /> {meta.label}
+                </span>
+                <b>{items.length}</b>
+              </div>
+              {items.length ? (
+                <ul>
+                  {items.map((item) => (
+                    <li key={item.id}>
+                      <span>
+                        <strong>{item.name}</strong>
+                        <small>{item.description}</small>
+                      </span>
+                      {!readOnly && (
+                        <span className="interactive-inline-actions">
+                          <button
+                            aria-label={`Remove ${item.name}`}
+                            disabled={runtimeBusy || claimConflict}
+                            onClick={() =>
+                              dispatch({
+                                type: 'remove-capability',
+                                kind,
+                                id: item.id,
+                              })
+                            }
+                            type="button"
+                          >
+                            <Trash2 aria-hidden="true" />
+                          </button>
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No {meta.label.toLowerCase()} added yet.</p>
+              )}
+            </section>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function CreateServerScene() {
+  const { state, dispatch, runtimeBusy, claimConflict, runtimeStatus } =
+    useInteractiveGuide();
+  const [name, setName] = useState(state.server.name);
+  const error = validateServerName(name);
+  return (
+    <div className="interactive-create-layout">
+      <section>
+        <p className="eyebrow">Weather template</p>
+        <h3>Create the server boundary</h3>
+        <p>
+          Name the MCP server that will own the tools, resources, and prompts
+          you configure in this Guide.
+        </p>
+        <label>
+          <span>Server name</span>
+          <input
+            aria-invalid={!!error}
+            onChange={(event) => setName(event.target.value)}
+            value={name}
+          />
+          {error && <small className="field-error">{error}</small>}
+        </label>
+        <button
+          className="button button--primary"
+          disabled={
+            !!error ||
+            runtimeBusy ||
+            claimConflict ||
+            runtimeStatus === 'expired'
+          }
+          onClick={() => dispatch({ type: 'create-server', name })}
+          type="button"
+        >
+          <Plus aria-hidden="true" />
+          {state.server.created ? 'Update server' : 'Create server'}
+        </button>
+        {state.server.created && (
+          <span className="interactive-status is-success" role="status">
+            <CheckCircle2 aria-hidden="true" /> Runtime workspace ready
+          </span>
+        )}
+      </section>
+      <div
+        className="interactive-topology"
+        role="img"
+        aria-label="An ATM client connects to a weather MCP server, which exposes tools, resources, and prompts."
+      >
+        <span className="interactive-node is-client">
+          <MonitorPlay aria-hidden="true" /> ATM client
+        </span>
+        <i aria-hidden="true">Streamable HTTP →</i>
+        <span className="interactive-node is-server">
+          <Server aria-hidden="true" /> {name || 'weather-server'}
+        </span>
+        <div>
+          <span>
+            <Wrench aria-hidden="true" /> Tools
+          </span>
+          <span>
+            <Database aria-hidden="true" /> Resources
+          </span>
+          <span>
+            <MessageSquareText aria-hidden="true" /> Prompts
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const resourceResponsePreviews: Record<string, Record<string, unknown>> = {
+  'supported-cities': {
+    type: 'object',
+    properties: {
+      cities: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            country: { type: 'string' },
+            lat: { type: 'number' },
+            lon: { type: 'number' },
+          },
+        },
+      },
+    },
+  },
+  'station-metadata': {
+    type: 'object',
+    properties: {
+      stationId: { type: 'string' },
+      name: { type: 'string' },
+      lastUpdated: { type: 'string', format: 'date-time' },
+    },
+  },
+  'api-usage-guide': {
+    type: 'string',
+    description: 'Markdown usage instructions for the weather API.',
+  },
+};
+
+function CapabilityDetails({
+  capability,
+  exists,
+  canAdd,
+  onAdd,
+}: {
+  capability: CapabilityDefinition;
+  exists: boolean;
+  canAdd: boolean;
+  onAdd: () => void;
+}) {
+  const meta = kindMeta[capability.kind];
+  const Icon = meta.icon;
+
+  return (
+    <section
+      aria-live="polite"
+      className={`interactive-capability-details ${meta.className}`}
+    >
+      <header>
+        <span>
+          <Icon aria-hidden="true" />
+        </span>
+        <div>
+          <p className="eyebrow">{meta.label.slice(0, -1)} details</p>
+          <h4>{capability.name}</h4>
+          <p>{capability.description}</p>
+        </div>
+      </header>
+
+      {capability.kind === 'tool' && (
+        <div className="interactive-detail-section">
+          <strong>Input schema</strong>
+          <div className="interactive-schema-list">
+            {capability.fields.map((field) => (
+              <div key={field.name}>
+                <span>
+                  <code>{field.name}</code>
+                  <small>{field.description}</small>
+                </span>
+                <span className="interactive-schema-meta">
+                  <b>{field.enumValues?.length ? 'enum' : field.type}</b>
+                  <em>{field.required ? 'required' : 'optional'}</em>
+                  {field.enumValues?.length && (
+                    <small>Values: {field.enumValues.join(', ')}</small>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {capability.kind === 'resource' && (
+        <div className="interactive-detail-section">
+          <dl className="interactive-resource-details">
+            <div>
+              <dt>Resource URI</dt>
+              <dd>
+                <code>{capability.uri}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>MIME type</dt>
+              <dd>{capability.mimeType}</dd>
+            </div>
+          </dl>
+          <strong>Schema / response preview</strong>
+          <pre
+            className="interactive-schema-preview"
+            tabIndex={0}
+            aria-label={`${capability.title} schema and response preview`}
+          >
+            <JsonCode value={resourceResponsePreviews[capability.id]} />
+          </pre>
+        </div>
+      )}
+
+      {capability.kind === 'prompt' && (
+        <div className="interactive-detail-section">
+          <strong>Arguments</strong>
+          <div className="interactive-argument-list">
+            {capability.fields.map((field) => (
+              <span key={field.name}>
+                {field.name} <small>({field.type})</small>
+              </span>
+            ))}
+          </div>
+          <strong>Prompt template</strong>
+          <pre className="interactive-prompt-preview">
+            <code>{capability.template}</code>
+          </pre>
+        </div>
+      )}
+
+      <button
+        className="button button--primary interactive-add-capability"
+        disabled={!canAdd || exists}
+        onClick={onAdd}
+        type="button"
+      >
+        {exists ? (
+          <CheckCircle2 aria-hidden="true" />
+        ) : (
+          <Plus aria-hidden="true" />
+        )}
+        {!canAdd
+          ? 'Create server first'
+          : exists
+            ? 'Added to server'
+            : 'Add to server'}
+      </button>
+    </section>
+  );
+}
+
+function CapabilityScene({ kind }: { kind: CapabilityKind }) {
+  const { state, definition, dispatch, runtimeBusy, claimConflict } =
+    useInteractiveGuide();
+  const meta = kindMeta[kind];
+  const Icon = meta.icon;
+  const options = definition.capabilities.filter((item) => item.kind === kind);
+  const added = collectionFor(kind, state.server);
+  const [selectedId, setSelectedId] = useState(options[0]?.id ?? '');
+  const selected =
+    options.find((option) => option.id === selectedId) ?? options[0];
+
+  const headings: Record<CapabilityKind, [string, string]> = {
+    tool: [
+      'Available API capabilities',
+      'Choose a predefined tool and review its input schema.',
+    ],
+    resource: [
+      'Available data resources',
+      'Choose a predefined resource and review what it exposes.',
+    ],
+    prompt: [
+      'Available prompts',
+      'Choose a predefined prompt and review its arguments and template.',
+    ],
+  };
+
+  return (
+    <div className="interactive-builder-layout">
+      <ServerSummary />
+      <aside className="interactive-library">
+        <header>
+          <div>
+            <h3>{headings[kind][0]}</h3>
+            <p>{headings[kind][1]}</p>
+          </div>
+          <Icon aria-hidden="true" />
+        </header>
+        {!state.server.created && (
+          <div className="interactive-inline-note">
+            <Info aria-hidden="true" /> Create your server in step 2 before
+            adding capabilities.
+          </div>
+        )}
+        <div className="interactive-library-list">
+          {options.map((option) => {
+            const exists = added.some((item) => item.id === option.id);
+            const isSelected = selected?.id === option.id;
+            return (
+              <button
+                aria-pressed={isSelected}
+                className={isSelected ? 'is-selected' : undefined}
+                key={option.id}
+                onClick={() => setSelectedId(option.id)}
+                type="button"
+              >
+                <span className={meta.className}>
+                  <Icon aria-hidden="true" />
+                </span>
+                <span>
+                  <strong>{option.title}</strong>
+                  <small>{option.description}</small>
+                </span>
+                {exists ? (
+                  <CheckCircle2 aria-label="Added" />
+                ) : isSelected ? (
+                  <Circle aria-label="Selected" />
+                ) : (
+                  <Plus aria-label="Select" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {selected && (
+          <CapabilityDetails
+            capability={selected}
+            canAdd={state.server.created && !runtimeBusy && !claimConflict}
+            exists={added.some((item) => item.id === selected.id)}
+            onAdd={() =>
+              dispatch({
+                type: 'upsert-capability',
+                capability: cloneCapability(selected),
+              })
+            }
+          />
+        )}
+      </aside>
+    </div>
+  );
+}
+
+function CodeMode() {
+  const { state } = useInteractiveGuide();
+  const code = generateServerSource(state);
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  };
+  return (
+    <div className="interactive-code-layout">
+      <section className="interactive-code-panel">
+        <header>
+          <div>
+            <p className="eyebrow">Generated from your configuration</p>
+            <h3>src/server.ts</h3>
+          </div>
+          <div className="interactive-code-actions">
+            <button onClick={copy} type="button">
+              {copied ? (
+                <Check aria-hidden="true" />
+              ) : (
+                <Clipboard aria-hidden="true" />
+              )}
+              {copied ? 'Copied' : 'Copy code'}
+            </button>
+          </div>
+        </header>
+        <pre>
+          <TypeScriptCode code={code} />
+        </pre>
+        <p>
+          <Info aria-hidden="true" /> Read-only in this phase. Use Visual mode
+          to change the server.
+        </p>
+      </section>
+      <CodeLearningPanel />
+    </div>
+  );
+}
+
+function CodeLearningPanel() {
+  const { state } = useInteractiveGuide();
+  const registrations = [
+    {
+      label: 'Tools',
+      detail: 'Callable actions registered on the server',
+      count: state.server.tools.length,
+      icon: Wrench,
+      className: 'is-tool',
+    },
+    {
+      label: 'Resources',
+      detail: 'Data and context exposed by URI',
+      count: state.server.resources.length,
+      icon: Database,
+      className: 'is-resource',
+    },
+    {
+      label: 'Prompts',
+      detail: 'Reusable message templates for clients',
+      count: state.server.prompts.length,
+      icon: MessageSquareText,
+      className: 'is-prompt',
+    },
+  ];
+
+  return (
+    <aside
+      aria-label="Generated code explanation"
+      className="interactive-learning-panel"
+    >
+      <header>
+        <div>
+          <p className="eyebrow">About this code</p>
+          <h3>Your MCP server</h3>
+        </div>
+        <Code2 aria-hidden="true" />
+      </header>
+      <p>
+        This TypeScript file is generated from the capabilities you configured
+        in Visual mode.
+      </p>
+
+      <section className="interactive-code-identity">
+        <span className="interactive-server-icon">
+          <Server aria-hidden="true" />
+        </span>
+        <span>
+          <strong>{state.server.name}</strong>
+          <small>Version {state.server.version}</small>
+        </span>
+      </section>
+
+      <section>
+        <h4>What your code contains</h4>
+        <div className="interactive-learning-list">
+          {registrations.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label}>
+                <span className={item.className}>
+                  <Icon aria-hidden="true" />
+                </span>
+                <span>
+                  <strong>
+                    {item.label} <b>{item.count}</b>
+                  </strong>
+                  <small>{item.detail}</small>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="interactive-learning-note">
+        <Info aria-hidden="true" />
+        <span>
+          <strong>Code stays in sync</strong>
+          <small>
+            Visual configuration is the source of truth. Every change
+            regenerates this read-only preview.
+          </small>
+        </span>
+      </section>
+    </aside>
+  );
+}
+
+type ProtocolLesson = {
+  summary: string;
+  notices: Array<{ label: string; detail: string }>;
+};
+
+function protocolLesson(event: ProtocolEvent): ProtocolLesson {
+  if (event.status === 'error') {
+    return {
+      summary:
+        'The server could not complete this request, so it returned a JSON-RPC error instead of a result.',
+      notices: [
+        {
+          label: 'Method',
+          detail: `The request still identifies the intended operation as ${event.method}.`,
+        },
+        {
+          label: 'Error',
+          detail:
+            'The response contains an error code and a message that the client can inspect.',
+        },
+        {
+          label: 'Request ID',
+          detail:
+            'The matching ID lets the client associate this error with its original request.',
+        },
+      ],
+    };
+  }
+
+  const lessons: Record<string, ProtocolLesson> = {
+    'server/discover': {
+      summary:
+        'The ATM client discovers the server identity, protocol version, and capability families before making feature requests.',
+      notices: [
+        {
+          label: 'Method',
+          detail:
+            'server/discover identifies this as a modern protocol discovery request.',
+        },
+        {
+          label: 'Metadata',
+          detail:
+            'The request identifies the client and the protocol version it understands.',
+        },
+        {
+          label: 'Capabilities',
+          detail:
+            'The result advertises which server feature families the client may use.',
+        },
+      ],
+    },
+    'tools/list': {
+      summary:
+        'The client asks which callable tools the server currently exposes.',
+      notices: [
+        {
+          label: 'Method',
+          detail: 'tools/list requests the server’s current tool catalogue.',
+        },
+        {
+          label: 'Descriptors',
+          detail:
+            'A real listing describes each tool and its input schema, not merely its name.',
+        },
+        {
+          label: 'No execution',
+          detail:
+            'Listing a tool only discovers it; the client has not invoked anything yet.',
+        },
+      ],
+    },
+    'resources/list': {
+      summary:
+        'The client asks which readable resources are available from the server.',
+      notices: [
+        {
+          label: 'Method',
+          detail: 'resources/list discovers the server’s resource catalogue.',
+        },
+        {
+          label: 'URI',
+          detail:
+            'Each resource is addressed by a URI that can later be passed to resources/read.',
+        },
+        {
+          label: 'Read boundary',
+          detail:
+            'Discovery describes resources; their content is returned only when one is read.',
+        },
+      ],
+    },
+    'prompts/list': {
+      summary:
+        'The client discovers reusable prompt templates offered by the server.',
+      notices: [
+        {
+          label: 'Method',
+          detail: 'prompts/list requests the available prompt templates.',
+        },
+        {
+          label: 'Arguments',
+          detail:
+            'Prompt descriptors tell clients which values a template expects.',
+        },
+        {
+          label: 'Template',
+          detail:
+            'The populated messages are returned later through prompts/get.',
+        },
+      ],
+    },
+    'tools/call': {
+      summary:
+        'The client invokes one named tool with explicit arguments, and the server returns the handler result.',
+      notices: [
+        {
+          label: 'Method',
+          detail: 'tools/call tells the server to invoke a tool.',
+        },
+        {
+          label: 'Arguments',
+          detail:
+            'The params identify the tool and provide values that match its input schema.',
+        },
+        {
+          label: 'Result',
+          detail:
+            'The response contains model-readable content and a structured result for the client.',
+        },
+      ],
+    },
+    'resources/read': {
+      summary:
+        'The client reads one resource by URI and receives its content and media type.',
+      notices: [
+        {
+          label: 'Method',
+          detail:
+            'resources/read requests the content behind one resource URI.',
+        },
+        {
+          label: 'Address',
+          detail:
+            'The URI in params identifies exactly which resource to read.',
+        },
+        {
+          label: 'Contents',
+          detail:
+            'The result can contain one or more content entries with their URI and MIME type.',
+        },
+      ],
+    },
+    'prompts/get': {
+      summary:
+        'The client supplies prompt arguments and receives the populated messages.',
+      notices: [
+        {
+          label: 'Method',
+          detail: 'prompts/get selects one prompt template by name.',
+        },
+        {
+          label: 'Arguments',
+          detail:
+            'Runtime values are passed separately from the reusable template definition.',
+        },
+        {
+          label: 'Messages',
+          detail:
+            'The result contains the messages the client can present or send to a model.',
+        },
+      ],
+    },
+  };
+
+  return (
+    lessons[event.method] ?? {
+      summary:
+        'This JSON-RPC exchange pairs one client request with the server response that carries the same request ID.',
+      notices: [
+        {
+          label: 'Method',
+          detail: `${event.method} identifies the operation the client requested.`,
+        },
+        {
+          label: 'Request',
+          detail:
+            'The request contains the method and any operation parameters.',
+        },
+        {
+          label: 'Response',
+          detail: 'The response returns either a result or a structured error.',
+        },
+      ],
+    }
+  );
+}
+
+function ProtocolLearningPanel({ event }: { event: ProtocolEvent }) {
+  const lesson = protocolLesson(event);
+
+  return (
+    <aside
+      aria-label="Protocol exchange explanation"
+      aria-live="polite"
+      className="interactive-learning-panel"
+    >
+      <header>
+        <div>
+          <p className="eyebrow">About this exchange</p>
+          <h3>{event.method}</h3>
+        </div>
+        <Info aria-hidden="true" />
+      </header>
+      <p>{lesson.summary}</p>
+
+      <section>
+        <h4>What to notice</h4>
+        <div className="interactive-learning-list">
+          {lesson.notices.map((notice, index) => (
+            <div key={notice.label}>
+              <span className="is-protocol" aria-hidden="true">
+                {index + 1}
+              </span>
+              <span>
+                <strong>{notice.label}</strong>
+                <small>{notice.detail}</small>
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <a
+        href="https://modelcontextprotocol.io/specification/2026-07-28"
+        rel="noreferrer"
+        target="_blank"
+      >
+        View the 2026-07-28 specification
+        <FileJson2 aria-hidden="true" />
+      </a>
+    </aside>
+  );
+}
+
+function ProtocolMode() {
+  const { state, dispatch } = useInteractiveGuide();
+  const event =
+    state.protocolEvents.find((item) => item.id === state.selectedEventId) ??
+    state.protocolEvents[0];
+  if (!event) {
+    return (
+      <section className="interactive-empty-state">
+        <Radio aria-hidden="true" />
+        <h3>No protocol messages yet</h3>
+        <p>
+          Connect the ATM learning client to generate a current 2026-07-28
+          discovery exchange.
+        </p>
+      </section>
+    );
+  }
+  return (
+    <div className="interactive-protocol-shell">
+      <div className="interactive-protocol-layout">
+        <nav aria-label="Protocol messages">
+          <span>{state.protocolEvents.length} messages</span>
+          {state.protocolEvents.map((item) => (
+            <button
+              className={item.id === event.id ? 'is-active' : undefined}
+              key={item.id}
+              onClick={() =>
+                dispatch({ type: 'select-event', eventId: item.id })
+              }
+              type="button"
+            >
+              <b>{item.sequence}</b>
+              <span>
+                <strong>{item.method}</strong>
+                <small>{item.durationMs.toFixed(1)} ms · Guide Runtime</small>
+              </span>
+            </button>
+          ))}
+        </nav>
+        <section>
+          <header>
+            <div>
+              <p className="eyebrow">Message {event.sequence}</p>
+              <h3>{event.label}</h3>
+            </div>
+            <span className="interactive-status">
+              {event.status === 'error' ? (
+                <Info aria-hidden="true" />
+              ) : (
+                <CheckCircle2 aria-hidden="true" />
+              )}{' '}
+              {event.status === 'error' ? 'Error' : 'Success'}
+            </span>
+          </header>
+          <div className="interactive-json-grid">
+            <JsonPanel label="Request" value={event.request} />
+            <JsonPanel label="Response" value={event.response} />
+          </div>
+        </section>
+      </div>
+      <ProtocolLearningPanel event={event} />
+    </div>
+  );
+}
+
+function ClientMode({ scene }: { scene: InteractiveGuideScene }) {
+  const { state, dispatch, runtimeBusy, runtimeStatus, claimConflict } =
+    useInteractiveGuide();
+  const [location, setLocation] = useState('London');
+  const [unit, setUnit] = useState('celsius');
+  const [day, setDay] = useState('Monday');
+  const [toolId, setToolId] = useState('');
+  const tool =
+    state.server.tools.find((item) => item.id === toolId) ??
+    state.server.tools[0];
+  const prompt = state.server.prompts[0];
+  const disabled =
+    runtimeBusy ||
+    runtimeStatus === 'paused' ||
+    runtimeStatus === 'expired' ||
+    claimConflict;
+  const connect = () => dispatch({ type: 'connect-client' });
+  const run = () => {
+    if (!tool) return;
+    dispatch({ type: 'run-tool', toolName: tool.name, location, unit });
+  };
+  return (
+    <div className="interactive-client-layout">
+      <section className="interactive-client-conversation">
+        <header>
+          <div>
+            <p className="eyebrow">ATM learning client</p>
+            <h3>Test the protocol boundary</h3>
+          </div>
+          <span
+            className={`interactive-status ${state.clientConnected ? 'is-success' : ''}`}
+          >
+            <Circle aria-hidden="true" />{' '}
+            {state.clientConnected
+              ? 'Connected to Guide Runtime'
+              : 'Disconnected'}
+          </span>
+        </header>
+        {!state.clientConnected ? (
+          <div className="interactive-client-connect">
+            <MonitorPlay aria-hidden="true" />
+            <p>
+              Connect to discover the capabilities currently exposed by your MCP
+              server.
+            </p>
+            <button
+              className="button button--primary"
+              disabled={!state.server.created || disabled}
+              onClick={connect}
+              type="button"
+            >
+              Connect ATM client
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="interactive-discovery-summary">
+              <CheckCircle2 aria-hidden="true" />
+              <span>
+                <strong>Discovery complete</strong>
+                <small>
+                  {state.server.tools.length} tools ·{' '}
+                  {state.server.resources.length} resources ·{' '}
+                  {state.server.prompts.length} prompts
+                </small>
+              </span>
+            </div>
+            <div
+              className="interactive-guided-commands"
+              aria-label="Guided client commands"
+            >
+              {state.server.resources.map((resource) => (
+                <button
+                  key={resource.id}
+                  disabled={disabled}
+                  onClick={() =>
+                    dispatch({
+                      type: 'read-resource',
+                      resourceName: resource.name,
+                    })
+                  }
+                  type="button"
+                >
+                  <Database aria-hidden="true" /> Read {resource.uri}
+                </button>
+              ))}
+              {prompt && (
+                <button
+                  disabled={disabled || !location.trim() || !day.trim()}
+                  onClick={() =>
+                    dispatch({
+                      type: 'get-prompt',
+                      promptName: prompt.name,
+                      arguments: { city: location.trim(), day: day.trim() },
+                    })
+                  }
+                  type="button"
+                >
+                  <MessageSquareText aria-hidden="true" /> Get {prompt.name}
+                </button>
+              )}
+            </div>
+            {(scene === 'test-server' || state.lastResult || prompt) && (
+              <div className="interactive-command-form">
+                {state.server.tools.length > 1 && (
+                  <label>
+                    <span>Tool</span>
+                    <select
+                      value={tool?.id ?? ''}
+                      onChange={(event) => setToolId(event.target.value)}
+                    >
+                      {state.server.tools.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                <label>
+                  <span>
+                    {tool?.name === 'search_locations'
+                      ? 'Search query'
+                      : 'Location'}
+                  </span>
+                  <input
+                    onChange={(event) => setLocation(event.target.value)}
+                    value={location}
+                  />
+                </label>
+                {tool?.fields.some((field) => field.name === 'unit') && (
+                  <label>
+                    <span>Unit</span>
+                    <select
+                      onChange={(event) => setUnit(event.target.value)}
+                      value={unit}
+                    >
+                      <option value="celsius">Celsius</option>
+                      <option value="fahrenheit">Fahrenheit</option>
+                    </select>
+                  </label>
+                )}
+                {prompt && (
+                  <label>
+                    <span>Day</span>
+                    <input
+                      value={day}
+                      onChange={(event) => setDay(event.target.value)}
+                    />
+                  </label>
+                )}
+                <button
+                  className="button button--primary"
+                  disabled={!tool || disabled || !location.trim()}
+                  onClick={run}
+                  type="button"
+                >
+                  <Play aria-hidden="true" /> Call {tool?.name ?? 'a tool'}
+                </button>
+              </div>
+            )}
+            {state.lastResult && (
+              <div className="interactive-client-result">
+                <span>
+                  <Server aria-hidden="true" /> {state.server.name} response
+                </span>
+                <pre>{JSON.stringify(state.lastResult, null, 2)}</pre>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+      <aside className="interactive-client-inspector">
+        <p className="eyebrow">Inspector</p>
+        <h3>Current exchange</h3>
+        {state.protocolEvents.length ? (
+          <JsonPanel
+            label={state.protocolEvents.at(-1)?.method ?? 'Protocol'}
+            value={state.protocolEvents.at(-1)?.response}
+          />
+        ) : (
+          <p>Protocol details appear after the client connects.</p>
+        )}
+      </aside>
+    </div>
+  );
+}
+
+function downloadProject(
+  state: ReturnType<typeof useInteractiveGuide>['state'],
+) {
+  const archive = createZipArchive(generateProjectFiles(state));
+  const buffer = archive.buffer.slice(
+    archive.byteOffset,
+    archive.byteOffset + archive.byteLength,
+  ) as ArrayBuffer;
+  const url = URL.createObjectURL(
+    new Blob([buffer], { type: 'application/zip' }),
+  );
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${state.server.name || 'weather-server'}.zip`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function CompletionScene() {
+  const {
+    state,
+    dispatch,
+    reset,
+    workspace,
+    runtimeBusy,
+    runtimeStatus,
+    issueExternalToken,
+    revokeExternalToken,
+    setWorkspacePaused,
+  } = useInteractiveGuide();
+  const [access, setAccess] = useState<{
+    token: string;
+    endpoint: string;
+  } | null>(null);
+  const objectives = getGuideObjectives(state);
+  const ready = objectives
+    .filter((item) => item.stepId !== 'review-and-export')
+    .every((item) => item.complete);
+  return (
+    <div className="interactive-completion">
+      <header>
+        <span className="interactive-completion-mark">
+          <CheckCircle2 aria-hidden="true" />
+        </span>
+        <div>
+          <p className="eyebrow">Review and export</p>
+          <h3>Your first MCP server is configured</h3>
+          <p>
+            Review the real MCP exchanges, download the project, or connect an
+            external client to your signed-in workspace.
+          </p>
+        </div>
+      </header>
+      <div className="interactive-completion-grid">
+        <ServerSummary readOnly />
+        <section className="interactive-objectives">
+          <h4>Guide objectives</h4>
+          {objectives.map((objective) => (
+            <p key={objective.stepId}>
+              {objective.complete ? (
+                <CheckCircle2 aria-hidden="true" />
+              ) : (
+                <Circle aria-hidden="true" />
+              )}{' '}
+              {objective.label}
+            </p>
+          ))}
+        </section>
+      </div>
+      <div className="interactive-completion-actions">
+        <button
+          className="button button--primary"
+          onClick={() => downloadProject(state)}
+          type="button"
+        >
+          <Download aria-hidden="true" /> Download project
+        </button>
+        {workspace && !workspace.anonymous && (
+          <>
+            <button
+              className="button button--secondary"
+              disabled={runtimeBusy}
+              onClick={() =>
+                void issueExternalToken().then(
+                  (value) => value && setAccess(value),
+                )
+              }
+              type="button"
+            >
+              {access ? 'Rotate access token' : 'Create access token'}
+            </button>
+            <button
+              className="button button--secondary"
+              disabled={runtimeBusy}
+              onClick={() =>
+                void setWorkspacePaused(workspace?.status !== 'paused')
+              }
+              type="button"
+            >
+              {workspace?.status === 'paused'
+                ? 'Resume endpoint'
+                : 'Pause endpoint'}
+            </button>
+            {access ? (
+              <button
+                className="button button--secondary"
+                disabled={runtimeBusy}
+                onClick={() =>
+                  void revokeExternalToken().then(
+                    (revoked) => revoked && setAccess(null),
+                  )
+                }
+                type="button"
+              >
+                Revoke token
+              </button>
+            ) : null}
+          </>
+        )}
+      </div>
+      {access ? (
+        <div role="status">
+          <p>
+            <strong>Endpoint:</strong> <code>{access.endpoint}</code>
+          </p>
+          <p>
+            <strong>Bearer token (shown once):</strong>{' '}
+            <code>{access.token}</code>
+          </p>
+        </div>
+      ) : null}
+      <AuthNudge
+        className="interactive-cloud-requirement"
+        reason="hosted"
+        label="Why hosted features require an account"
+      />
+      <div className="interactive-finish-row">
+        <button
+          className="interactive-reset"
+          disabled={runtimeBusy}
+          onClick={reset}
+          type="button"
+        >
+          <RotateCcw aria-hidden="true" /> Reset guide
+        </button>
+        <button
+          className="button button--primary"
+          disabled={!ready || runtimeBusy || runtimeStatus !== 'ready'}
+          onClick={() => dispatch({ type: 'finish' })}
+          type="button"
+        >
+          {state.finished ? (
+            <CheckCircle2 aria-hidden="true" />
+          ) : (
+            <Check aria-hidden="true" />
+          )}
+          {state.finished ? 'Guide complete' : 'Finish guide'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function VisualMode({ scene }: { scene: InteractiveGuideScene }) {
+  const kind = sceneKind(scene);
+  if (scene === 'create-server') return <CreateServerScene />;
+  if (kind) return <CapabilityScene kind={kind} />;
+  if (scene === 'connect-client' || scene === 'test-server') {
+    return <ClientMode scene={scene} />;
+  }
+  return <CompletionScene />;
+}
+
+export function InteractiveGuideBlock({
+  scene,
+}: {
+  scene: InteractiveGuideScene;
+}) {
+  const initialMode: WorkspaceMode =
+    scene === 'connect-client' || scene === 'test-server' ? 'client' : 'visual';
+  const [mode, setMode] = useState<WorkspaceMode>(initialMode);
+  const {
+    state,
+    progressPersistence,
+    runtimeStatus,
+    runtimeBusy,
+    runtimeError,
+    workspace,
+    retryRuntime,
+    reset,
+    claimConflict,
+    resolveClaimConflict,
+  } = useInteractiveGuide();
+
+  const content =
+    mode === 'code' ? (
+      <CodeMode />
+    ) : mode === 'protocol' ? (
+      <ProtocolMode />
+    ) : mode === 'client' ? (
+      <ClientMode scene={scene} />
+    ) : (
+      <VisualMode scene={scene} />
+    );
+
+  return (
+    <section className="interactive-guide-block" data-scene={scene}>
+      <header className="interactive-guide-block__header">
+        <div>
+          <span className="interactive-simulation-label">
+            <Radio aria-hidden="true" /> Real MCP runtime
+          </span>
+          <small>{state.server.name} · MCP 2026-07-28</small>
+        </div>
+        <div className="interactive-save-status">
+          <span>
+            {runtimeStatus === 'loading'
+              ? 'Loading workspace…'
+              : runtimeStatus === 'error'
+                ? 'Request failed'
+                : runtimeStatus === 'expired'
+                  ? 'Workspace expired'
+                  : runtimeStatus === 'executing'
+                    ? 'Executing real MCP request…'
+                    : runtimeStatus === 'saving'
+                      ? 'Saving workspace…'
+                      : runtimeStatus === 'paused'
+                        ? 'Endpoint paused'
+                        : workspace
+                          ? 'Workspace persisted'
+                          : 'Ready to create'}
+          </span>
+          <GuideProgressStatus status={progressPersistence} />
+        </div>
+      </header>
+      <WorkspaceTabs mode={mode} onChange={setMode} />
+      {runtimeError ? (
+        <div role="alert">
+          <p>{runtimeError}</p>
+          <button
+            type="button"
+            disabled={runtimeBusy}
+            onClick={
+              runtimeStatus === 'expired' && (!workspace || workspace.anonymous)
+                ? reset
+                : retryRuntime
+            }
+          >
+            {runtimeStatus === 'expired' && (!workspace || workspace.anonymous)
+              ? 'Start a new workspace'
+              : 'Retry connection'}
+          </button>
+        </div>
+      ) : null}
+      {claimConflict ? (
+        <div role="alert">
+          <p>You already have a saved workspace for this guide.</p>
+          <button
+            type="button"
+            disabled={runtimeBusy}
+            onClick={() => void resolveClaimConflict('resume-saved')}
+          >
+            Resume saved
+          </button>
+          <button
+            type="button"
+            disabled={runtimeBusy}
+            onClick={() => void resolveClaimConflict('replace-with-current')}
+          >
+            Replace with current
+          </button>
+        </div>
+      ) : null}
+      <div className="interactive-guide-block__body">{content}</div>
+      <p className="interactive-inline-note">
+        <Info aria-hidden="true" />
+        <a href="https://open-meteo.com/">Weather data by Open-Meteo</a> · CC BY
+        4.0
+      </p>
+    </section>
+  );
+}

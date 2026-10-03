@@ -1,0 +1,33 @@
+---
+title: Test Your Server
+description: Invoke a configured weather tool through the ATM client and inspect its request, response, and structured result.
+contentType: guide-step
+section: build
+guideSlug: building-your-first-mcp-server
+guideStepId: test-your-server
+guideStepOrder: 7
+authors: [All Things MCP Editors]
+status: published
+tags: [guide-step, interactive, client, tools, testing]
+publishedAt: 2026-08-31
+updatedAt: 2026-09-21
+difficulty: beginner
+estimatedMinutes: 15
+specVersion: 2026-07-28
+lastVerified: 2026-09-21
+---
+
+A useful test crosses the protocol boundary. Choose a location, invoke the first configured tool, then inspect both the result and the corresponding `tools/call` exchange.
+
+<InteractiveGuideBlock scene="test-server" />
+
+<Checklist
+  items={[
+    'The ATM client discovered the server before invoking a tool',
+    'The request names a configured tool',
+    'Arguments match the tool input schema',
+    'The response contains both text and structured content',
+  ]}
+/>
+
+The result comes from Open-Meteo and includes attribution. Live values may change between requests; provider failures are returned as explicit MCP errors.
