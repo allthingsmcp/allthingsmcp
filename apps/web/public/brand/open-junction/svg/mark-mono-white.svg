@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title"><title id="title">All Things MCP — Open Junction v2 — mark-mono-white</title>
+  <g fill="#FFFFFF">
+    <path d="M20 44H51M77 44H108M64 58V88" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="20" cy="44" r="12"/>
+    <circle cx="108" cy="44" r="12"/>
+    <circle cx="64" cy="88" r="12"/>
+    <path fill-rule="evenodd" transform="rotate(45 64 44)" d="M56 30H72Q78 30 78 36V52Q78 58 72 58H56Q50 58 50 52V36Q50 30 56 30Z M60 38H68Q70 38 70 40V48Q70 50 68 50H60Q58 50 58 48V40Q58 38 60 38Z"/>
+  </g></svg>

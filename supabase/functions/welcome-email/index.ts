@@ -36,25 +36,26 @@ function welcomeEmail(profile: Profile, siteUrl: string) {
 
   return {
     subject: "Welcome to All Things MCP",
-    text: `Hi ${firstName},\n\nWelcome to All Things MCP — a practical place to understand MCP, build with it, and keep up with the protocol.\n\nA good place to start:\n1. Browse the Guides: ${guidesUrl}\n2. Build your first MCP server: ${startUrl}\n3. Follow Spec Watch for changes that affect your implementation: ${siteUrl}/spec-watch\n\nSee you inside,\nAll Things MCP`,
+    text: `Hi ${firstName},\n\nWelcome to All Things MCP — a practical place to understand MCP, build with it, and keep up with the protocol.\n\nA good place to start:\n1. Browse the Guides: ${guidesUrl}\n2. Build your first MCP server: ${startUrl}\n3. Follow Spec Watch for changes that affect your implementation: ${siteUrl}/spec-watch\n\nSee you inside,\nAll Things MCP\nLearn. Build. Ship with MCP.`,
     html: `<!doctype html>
 <html lang="en">
-  <body style="margin:0;background:#f7f9fc;color:#091225;font-family:Inter,Arial,sans-serif">
+  <body style="margin:0;background:#f8fafc;color:#0f172a;font-family:Inter,Arial,sans-serif">
     <div style="max-width:620px;margin:0 auto;padding:40px 20px">
-      <div style="background:#071426;border-radius:14px 14px 0 0;padding:30px;color:#fff">
-        <p style="margin:0 0 12px;color:#8fb1ff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">All Things MCP</p>
+      <div style="background:#0f172a;border-radius:14px 14px 0 0;padding:30px;color:#fff">
+        <img src="${escapeHtml(siteUrl)}/brand/open-junction/png/horizontal-dark.png" alt="All Things MCP" width="240" height="44" style="display:block;width:240px;max-width:100%;height:auto;border:0;margin:0 0 14px">
+        <p style="margin:0 0 20px;color:#60a5fa;font-size:13px;font-weight:600">Learn. Build. Ship with MCP.</p>
         <h1 style="margin:0;font-size:32px;line-height:1.15">Welcome, ${firstName}.</h1>
       </div>
-      <div style="background:#fff;border:1px solid #dde3ed;border-top:0;border-radius:0 0 14px 14px;padding:30px">
+      <div style="background:#fff;border:1px solid #dce4ee;border-top:0;border-radius:0 0 14px 14px;padding:30px">
         <p style="margin:0 0 24px;color:#3e4c66;font-size:16px;line-height:1.7">You now have a practical place to understand MCP, build with it, and keep up with the protocol.</p>
         <h2 style="margin:0 0 14px;font-size:18px">Start here</h2>
         <ol style="padding-left:22px;margin:0 0 28px;color:#3e4c66;line-height:1.8">
-          <li><a href="${guidesUrl}" style="color:#0a55ff;font-weight:600">Browse the Guides</a></li>
-          <li><a href="${startUrl}" style="color:#0a55ff;font-weight:600">Build your first MCP server</a></li>
-          <li><a href="${siteUrl}/spec-watch" style="color:#0a55ff;font-weight:600">Follow Spec Watch</a></li>
+          <li><a href="${guidesUrl}" style="color:#2563eb;font-weight:600">Browse the Guides</a></li>
+          <li><a href="${startUrl}" style="color:#2563eb;font-weight:600">Build your first MCP server</a></li>
+          <li><a href="${siteUrl}/spec-watch" style="color:#2563eb;font-weight:600">Follow Spec Watch</a></li>
         </ol>
-        <a href="${startUrl}" style="display:inline-block;padding:12px 18px;border-radius:6px;background:#0a55ff;color:#fff;font-weight:700;text-decoration:none">Start building</a>
-        <p style="margin:28px 0 0;color:#66738c;font-size:13px">See you inside,<br>All Things MCP</p>
+        <a href="${startUrl}" style="display:inline-block;padding:12px 18px;border-radius:6px;background:#2563eb;color:#fff;font-weight:700;text-decoration:none">Start building</a>
+        <p style="margin:28px 0 0;color:#53657b;font-size:13px">See you inside,<br>All Things MCP</p>
       </div>
     </div>
   </body>

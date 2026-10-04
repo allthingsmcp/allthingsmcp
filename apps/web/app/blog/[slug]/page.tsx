@@ -9,6 +9,7 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ContentMeta } from '@/components/content-meta';
 import { getMDXComponents } from '@/components/mdx';
 import type { ContentFrontmatter } from '@/lib/content-schema';
+import { socialCardMetadata } from '@/lib/social-card';
 import { source } from '@/lib/source';
 
 function getPost(slug: string) {
@@ -39,6 +40,12 @@ export async function generateMetadata({
     title: page.data.title,
     description: page.data.description,
     alternates: { canonical: `/blog/${slug}` },
+    ...socialCardMetadata({
+      title: page.data.title,
+      description: page.data.description,
+      kind: 'article',
+      slug,
+    }),
   };
 }
 

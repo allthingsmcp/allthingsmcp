@@ -2,3 +2,6 @@ interface:
   display_name: 'All Things MCP Brand System'
   short_description: 'Apply the All Things MCP visual identity'
   default_prompt: 'Use $brand-system to design this artifact in the All Things MCP identity.'
+  icon_small: './assets/logo/open-junction/icons/favicon.svg'
+  icon_large: './assets/logo/open-junction/icons/avatar.svg'
+  brand_color: '#2563EB'

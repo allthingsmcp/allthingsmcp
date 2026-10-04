@@ -22,8 +22,8 @@ File key: `QCWnQSMkYUnHSORN0KRU4n`
 - 12 text styles and 3 shadow styles.
 - Component sets: Button, Header, Content Card, Badge, Newsletter Panel, Footer.
 - Components: Logo, Search Field, List Row, Code Block, and 8 diagram nodes.
-- Official logo component: `97:2` (`Logo / All Things MCP`).
+- Historical logo component: `97:2` (`Logo / All Things MCP`), superseded by the Open Junction masters in this skill. Do not restore its artwork.
 
 ## Example-page coverage
 
-Homepage, Learn, Build, Operate, Security, Ecosystem directory/detail, Spec Watch hub/release, Tools directory/detail, Glossary/term, Search, article, learning path, lesson, About/Trust. Use Figma as structural authority; the images in `assets/references/` override it for icon treatment, type scale, density, and final polish.
+Homepage, Learn, Build, Operate, Security, Ecosystem directory/detail, Spec Watch hub/release, Tools directory/detail, Glossary/term, Search, article, learning path, lesson, About/Trust. Use Figma only for structural context. Current site components, the approved Open Junction assets, and the brand constitution take precedence. Logo-bearing historical mockups have been removed to prevent reuse of the retired identity.

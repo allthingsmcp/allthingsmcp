@@ -5,11 +5,12 @@ description: Apply and maintain the All Things MCP visual identity for product U
 
 # All Things MCP brand system
 
-Apply sources in this order:
-
-1. Inspect the generated UI images in `assets/references/` for visual execution.
-2. Read `references/brand-constitution.md` for rules and tokens.
-3. Read `references/figma-inventory.md` when mapping a Figma pattern or page.
+Open Junction (iteration 02) is the approved identity. Use the unmodified
+[logo masters](assets/logo/open-junction/svg), [brand values](assets/identity.json),
+and [brand constitution](references/brand-constitution.md) as the authority.
+Read [logo usage](references/logo-usage.md) when placing or exporting a logo.
+Retired logo-bearing mockups have been removed; do not recover their artwork
+from Git history or earlier exports.
 
 ## Workflow
 
@@ -22,4 +23,8 @@ Apply sources in this order:
 7. Retain dark surfaces for code and the editorial footer. Do not add a theme toggle.
 8. Verify focus, contrast, reduced motion, wrapping, and touch targets before finishing.
 
-Use `assets/logo/all-things-mcp-logo.svg` as the official lockup. Do not redraw it.
+Current site components are the layout reference. Read
+[Figma inventory](references/figma-inventory.md) only when mapping an existing
+Figma pattern; its retired logo and palette do not override the current brand.
+The signature line is **Learn. Build. Ship with MCP.** Placement and inclusion
+follow the surface; it is not mandatory in every component.

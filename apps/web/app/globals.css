@@ -2,14 +2,15 @@
 
 :root {
   --canvas: #fff;
-  --surface: #f7f9fc;
-  --surface-blue: #f2f6ff;
-  --ink: #091225;
+  --surface: #f8fafc;
+  --surface-blue: #eff6ff;
+  --ink: #0f172a;
   --ink-soft: #3e4c66;
-  --muted: #66738c;
-  --blue: #0a55ff;
-  --blue-dark: #0439bf;
-  --blue-pale: #edf3ff;
+  --muted: #53657b;
+  --blue: #2563eb;
+  --blue-on-dark: #60a5fa;
+  --blue-dark: #1d4ed8;
+  --blue-pale: #eff6ff;
   --green: #0b9f5a;
   --green-ink: #087846;
   --green-pale: #e9f9f1;
@@ -17,9 +18,9 @@
   --violet-pale: #f1edff;
   --orange: #dc6925;
   --orange-pale: #fff1e7;
-  --border: #dde3ed;
+  --border: #dce4ee;
   --border-strong: #c9d2e1;
-  --footer: #071426;
+  --footer: #0f172a;
   --shadow: 0 12px 30px rgba(29, 50, 84, 0.08);
   --container: 1280px;
 }
@@ -181,7 +182,7 @@ svg {
   transform: translateY(0);
 }
 :focus-visible {
-  outline: 3px solid rgba(10, 85, 255, 0.36);
+  outline: 3px solid rgba(37, 99, 235, 0.36);
   outline-offset: 3px;
   border-radius: 4px;
 }
@@ -239,7 +240,7 @@ p {
   align-items: center;
 }
 .logo-image {
-  width: 150px;
+  width: 200px;
   height: auto;
   display: block;
 }
@@ -375,11 +376,11 @@ p {
 .button--primary {
   background: var(--blue);
   color: white;
-  box-shadow: 0 6px 16px rgba(10, 85, 255, 0.18);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.18);
 }
 .button--primary:hover {
   background: var(--blue-dark);
-  box-shadow: 0 9px 20px rgba(10, 85, 255, 0.24);
+  box-shadow: 0 9px 20px rgba(37, 99, 235, 0.24);
 }
 .button--secondary {
   border-color: var(--border-strong);
@@ -708,7 +709,7 @@ a.content-card:hover {
   border-color: var(--blue);
   background: var(--blue);
   color: white;
-  outline: 3px solid rgba(10, 85, 255, 0.28);
+  outline: 3px solid rgba(37, 99, 235, 0.28);
   outline-offset: 3px;
   transform: translateY(-2px);
 }
@@ -912,7 +913,7 @@ a.content-card:hover {
   border-radius: 9px;
   background: var(--blue);
   color: white;
-  box-shadow: 0 8px 18px rgba(10, 85, 255, 0.24);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.24);
 }
 .newsletter-copy h2 {
   font-size: 1.1rem;
@@ -1000,7 +1001,7 @@ a.content-card:hover {
   font-size: 0.7rem;
 }
 .footer-bottom .logo-image {
-  width: 140px;
+  width: 200px;
 }
 .footer-social {
   display: flex;
@@ -1322,7 +1323,7 @@ a.content-card:hover {
   background:
     radial-gradient(
       circle at 10% 20%,
-      rgba(10, 85, 255, 0.07),
+      rgba(37, 99, 235, 0.07),
       transparent 26%
     ),
     linear-gradient(145deg, white, #f9fbff);
@@ -1377,7 +1378,7 @@ a.content-card:hover {
   width: 17px;
 }
 .guide-visual-nodes span.is-blue {
-  border-color: rgba(10, 85, 255, 0.3);
+  border-color: rgba(37, 99, 235, 0.3);
   color: var(--blue);
 }
 .guide-visual-nodes span.is-green {
@@ -1659,7 +1660,7 @@ a.content-card:hover {
   place-items: center;
   overflow: hidden;
   background:
-    radial-gradient(circle at center, rgba(10, 85, 255, 0.3), transparent 42%),
+    radial-gradient(circle at center, rgba(37, 99, 235, 0.3), transparent 42%),
     var(--footer);
 }
 .blog-cover > span {
@@ -2332,7 +2333,7 @@ a.content-card:hover {
   overflow: visible;
 }
 .search-dialog::backdrop {
-  background: rgba(7, 20, 38, 0.66);
+  background: rgba(15, 23, 42, 0.66);
   backdrop-filter: blur(5px);
 }
 .search-dialog__surface {
@@ -2381,7 +2382,7 @@ a.content-card:hover {
   padding: 0 15px;
   border: 1px solid var(--blue);
   border-radius: 9px;
-  box-shadow: 0 0 0 3px rgba(10, 85, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 .search-command > svg:first-child {
   width: 20px;
@@ -2866,7 +2867,7 @@ a.content-card:hover {
   border: 1px solid #1e3049;
   border-radius: 10px;
   background: var(--footer);
-  box-shadow: 0 10px 26px rgba(7, 20, 38, 0.1);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
 }
 .code-block__header {
   display: flex;
@@ -3243,10 +3244,10 @@ a.content-card:hover {
   background:
     radial-gradient(
       circle at 78% 16%,
-      rgba(10, 85, 255, 0.24),
+      rgba(37, 99, 235, 0.24),
       transparent 30%
     ),
-    linear-gradient(135deg, #071426 0%, #09203e 100%);
+    linear-gradient(135deg, #0f172a 0%, #09203e 100%);
   color: #fff;
 }
 .guide-overview-hero::after {
@@ -3308,7 +3309,7 @@ a.content-card:hover {
 }
 .guide-title-badges > span + span {
   border-color: rgba(157, 184, 255, 0.44);
-  background: rgba(10, 85, 255, 0.18);
+  background: rgba(37, 99, 235, 0.18);
   color: #b8ceff;
 }
 .guide-overview-hero__inner > div:first-child > p {
@@ -3371,7 +3372,7 @@ a.content-card:hover {
 .auth-nudge {
   cursor: pointer;
   text-decoration: underline;
-  text-decoration-color: rgba(10, 85, 255, 0.28);
+  text-decoration-color: rgba(37, 99, 235, 0.28);
   text-underline-offset: 3px;
 }
 .auth-nudge:hover {
@@ -3406,7 +3407,7 @@ a.content-card:hover {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #0a55ff, #61a0ff);
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
   transition: width 180ms ease;
 }
 .guide-overview-layout {
@@ -3858,9 +3859,13 @@ a.content-card:hover {
   }
   .header-inner {
     height: 64px;
+    gap: 8px;
+  }
+  .header-actions {
+    gap: 4px;
   }
   .logo-image {
-    width: 138px;
+    width: clamp(144px, 46vw, 180px);
   }
   .desktop-nav,
   .search-trigger span,
@@ -4334,7 +4339,7 @@ a.content-card:hover {
     border: 1px solid var(--border);
     border-radius: 9px;
     background: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 8px 22px rgba(9, 18, 37, 0.06);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
     backdrop-filter: blur(12px);
   }
   .blog-article-layout .article-toc__summary {
@@ -4693,7 +4698,7 @@ a.content-card:hover {
   border: 1px solid var(--border-strong);
   border-radius: 14px;
   background: var(--surface);
-  box-shadow: 0 12px 30px rgba(9, 18, 37, 0.07);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
   color: var(--ink);
   font-family: var(--font-inter);
 }
@@ -4707,7 +4712,7 @@ a.content-card:hover {
 .interactive-guide-block input:focus-visible,
 .interactive-guide-block select:focus-visible,
 .interactive-guide-block textarea:focus-visible {
-  outline: 3px solid rgba(10, 85, 255, 0.24);
+  outline: 3px solid rgba(37, 99, 235, 0.24);
   outline-offset: 2px;
 }
 .interactive-guide-block__header {

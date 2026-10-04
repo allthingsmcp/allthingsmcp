@@ -10,6 +10,7 @@ import { SiteHeader } from '@/components/site-header';
 import { GuideProgressProvider } from '@/components/use-guide-progress';
 import { AuthSessionProvider } from '@/lib/auth-client';
 import { siteConfig } from '@/lib/config';
+import { brandAssets, brandIdentity } from '@/lib/brand';
 import './globals.css';
 
 const geist = Geist({
@@ -34,13 +35,13 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   icons: {
     icon: [
-      { url: '/brand/favicon.svg', type: 'image/svg+xml' },
-      { url: '/brand/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: brandAssets.favicon, type: 'image/svg+xml' },
+      { url: brandAssets.favicon32, sizes: '32x32', type: 'image/png' },
     ],
-    shortcut: '/brand/favicon.svg',
+    shortcut: brandAssets.favicon,
     apple: [
       {
-        url: '/brand/apple-touch-icon.png',
+        url: brandAssets.appleTouch,
         sizes: '180x180',
         type: 'image/png',
       },
@@ -53,10 +54,10 @@ export const metadata: Metadata = {
     siteName: 'All Things MCP',
     images: [
       {
-        url: '/brand/social-card.png',
+        url: brandAssets.socialCard,
         width: 1200,
         height: 630,
-        alt: 'All Things MCP — Learn. Build. Ship with MCP.',
+        alt: `${brandIdentity.name} — ${brandIdentity.positioning}`,
       },
     ],
   },
@@ -64,7 +65,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'All Things MCP',
     description: siteConfig.description,
-    images: ['/brand/social-card.png'],
+    images: [brandAssets.socialCard],
   },
 };
 

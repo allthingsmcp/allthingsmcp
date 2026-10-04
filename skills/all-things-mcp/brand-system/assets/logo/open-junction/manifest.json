@@ -1,0 +1,120 @@
+{
+  "name": "All Things MCP — Open Junction",
+  "iteration": 2,
+  "status": "approved All Things MCP brand identity",
+  "approvedOn": "2026-10-03",
+  "scope": "The public All Things MCP website, product UI, email, and social assets.",
+  "date": "2026-10-03",
+  "colours": {
+    "blue": "#2563EB",
+    "lightBlue": "#60A5FA",
+    "navy": "#0F172A",
+    "white": "#FFFFFF",
+    "mist": "#F8FAFC",
+    "muted": "#53657B",
+    "line": "#DCE4EE"
+  },
+  "typography": "Geist 660, tightened spacing, custom rounded-point P counter; outlined for portability",
+  "symbol": "Three solid terminals around one open diamond hub; equal branches; 8-unit connectors",
+  "smallIcon": "9-unit connectors and larger central opening at 16–64px",
+  "assets": [
+    {
+      "name": "mark-blue",
+      "width": 128,
+      "height": 128,
+      "svg": "svg/mark-blue.svg",
+      "png": "png/mark-blue.png"
+    },
+    {
+      "name": "mark-on-dark",
+      "width": 128,
+      "height": 128,
+      "svg": "svg/mark-on-dark.svg",
+      "png": "png/mark-on-dark.png"
+    },
+    {
+      "name": "mark-mono-navy",
+      "width": 128,
+      "height": 128,
+      "svg": "svg/mark-mono-navy.svg",
+      "png": "png/mark-mono-navy.png"
+    },
+    {
+      "name": "mark-mono-white",
+      "width": 128,
+      "height": 128,
+      "svg": "svg/mark-mono-white.svg",
+      "png": "png/mark-mono-white.png"
+    },
+    {
+      "name": "horizontal-light",
+      "width": 950,
+      "height": 176,
+      "svg": "svg/horizontal-light.svg",
+      "png": "png/horizontal-light.png"
+    },
+    {
+      "name": "horizontal-dark",
+      "width": 950,
+      "height": 176,
+      "svg": "svg/horizontal-dark.svg",
+      "png": "png/horizontal-dark.png"
+    },
+    {
+      "name": "horizontal-mono-navy",
+      "width": 950,
+      "height": 176,
+      "svg": "svg/horizontal-mono-navy.svg",
+      "png": "png/horizontal-mono-navy.png"
+    },
+    {
+      "name": "horizontal-mono-white",
+      "width": 950,
+      "height": 176,
+      "svg": "svg/horizontal-mono-white.svg",
+      "png": "png/horizontal-mono-white.png"
+    },
+    {
+      "name": "primary-light",
+      "width": 950,
+      "height": 194,
+      "svg": "svg/primary-light.svg",
+      "png": "png/primary-light.png"
+    },
+    {
+      "name": "primary-dark",
+      "width": 950,
+      "height": 194,
+      "svg": "svg/primary-dark.svg",
+      "png": "png/primary-dark.png"
+    },
+    {
+      "name": "stacked-light",
+      "width": 820,
+      "height": 444,
+      "svg": "svg/stacked-light.svg",
+      "png": "png/stacked-light.png"
+    },
+    {
+      "name": "stacked-dark",
+      "width": 820,
+      "height": 444,
+      "svg": "svg/stacked-dark.svg",
+      "png": "png/stacked-dark.png"
+    },
+    {
+      "name": "wordmark-navy",
+      "width": 742,
+      "height": 128,
+      "svg": "svg/wordmark-navy.svg",
+      "png": "png/wordmark-navy.png"
+    },
+    {
+      "name": "wordmark-white",
+      "width": 742,
+      "height": 128,
+      "svg": "svg/wordmark-white.svg",
+      "png": "png/wordmark-white.png"
+    }
+  ]
+}

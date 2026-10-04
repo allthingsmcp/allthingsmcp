@@ -53,16 +53,16 @@ export default function HomePage() {
       <section className="shell home-hero">
         <div className="home-hero__copy">
           <h1>
-            Learn, build,
+            Learn. Build.
             <br />
-            and ship with <span>MCP.</span>
+            Ship with <span>MCP.</span>
           </h1>
           <p>
             Practical guides, technical analysis, and specification updates for
             people building with the Model Context Protocol.
           </p>
           <div className="button-row">
-            <Button href="/guides#learn">Start learning</Button>
+            <Button href="/guides">Start learning</Button>
             <Button href="/guides#build" variant="secondary">
               Explore the docs
             </Button>
