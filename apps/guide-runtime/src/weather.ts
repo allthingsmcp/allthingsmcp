@@ -4,6 +4,9 @@ const attribution = {
   license: "CC BY 4.0",
 };
 
+const maxCacheEntries = 256;
+const maxCacheKeyLength = 2_048;
+
 export class WeatherProviderError extends Error {
   constructor(
     message: string,
@@ -27,11 +30,24 @@ export class OpenMeteoProvider {
       "https://api.open-meteo.com/v1/forecast",
   ) {}
 
+  private pruneCache(now: number) {
+    for (const [key, entry] of this.cache) {
+      if (entry.expiresAt <= now) this.cache.delete(key);
+    }
+  }
+
   private async json(url: URL, ttlMs: number) {
     const key = url.toString();
+    const now = Date.now();
+    // TTL alone does not release values for locations that are never revisited.
+    this.pruneCache(now);
     const cached = this.cache.get(key);
-    if (cached && cached.expiresAt > Date.now())
+    if (cached) {
+      // Map insertion order tracks recency; reads do not extend freshness.
+      this.cache.delete(key);
+      this.cache.set(key, cached);
       return structuredClone(cached.value);
+    }
     const day = new Date().toISOString().slice(0, 10);
     if (this.upstreamWindow.day !== day)
       this.upstreamWindow = { day, count: 0 };
@@ -65,7 +81,15 @@ export class OpenMeteoProvider {
           "Open-Meteo returned an invalid response.",
         );
       }
-      this.cache.set(key, { value, expiresAt: Date.now() + ttlMs });
+      if (key.length <= maxCacheKeyLength) {
+        const cachedAt = Date.now();
+        this.pruneCache(cachedAt);
+        this.cache.delete(key);
+        while (this.cache.size >= maxCacheEntries) {
+          this.cache.delete(this.cache.keys().next().value!);
+        }
+        this.cache.set(key, { value, expiresAt: cachedAt + ttlMs });
+      }
       return structuredClone(value);
     } catch (error) {
       if (error instanceof WeatherProviderError) throw error;

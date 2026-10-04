@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": ">=24.2.0 <25"
   },
   "scripts": {
     "postinstall": "fumadocs-mdx source.config.ts .source",
-    "dev": "next dev",
+    "dev": "next dev --disable-source-maps",
+    "dev:debug": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
@@ -20,6 +21,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:memory": "node --test scripts/check-memory.test.mjs && node scripts/check-memory.mjs",
     "check": "pnpm format && pnpm lint && pnpm typecheck && pnpm content:validate && pnpm test && pnpm build"
   },
   "dependencies": {
@@ -36,7 +38,7 @@
     "gray-matter": "^4.0.3",
     "jose": "^6.2.10",
     "lucide-react": "^1.28.0",
-    "next": "^16.2.12",
+    "next": "^16.3.8",
     "pg": "^8.23.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -55,7 +57,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "eslint": "^9.39.1",
-    "eslint-config-next": "^16.2.12",
+    "eslint-config-next": "^16.3.8",
     "fast-glob": "^3.3.3",
     "jsdom": "^27.2.0",
     "prettier": "^3.6.2",

@@ -24,8 +24,8 @@ process.on('exit', () => {
       let recognized: boolean;
       if (name === 'next-env.d.ts') {
         const generated = original.replace(
-          /^import ["'][^"']*types\/routes\.d\.ts["'];$/m,
-          'import "./.next-e2e/dev/types/routes.d.ts";',
+          /^import ["'][^"']*types\/(routes|root-params)\.d\.ts["'];$/gm,
+          'import "./.next-e2e/dev/types/$1.d.ts";',
         );
         recognized = current === generated;
       } else {
@@ -151,7 +151,13 @@ for (let attempt = 0; ; attempt += 1) {
 }
 const require = createRequire(import.meta.url);
 launch(
-  [require.resolve('next/dist/bin/next'), 'dev', '--port', '3100'],
+  [
+    require.resolve('next/dist/bin/next'),
+    'dev',
+    '--disable-source-maps',
+    '--port',
+    '3100',
+  ],
   webDirectory,
   {
     NODE_ENV: 'development',
