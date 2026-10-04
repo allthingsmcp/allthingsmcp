@@ -86,48 +86,6 @@
   font-size: 0.84rem;
   line-height: 1.7;
 }
-.auth-dialog__newsletter {
-  display: grid;
-  grid-template-columns: auto 38px minmax(0, 1fr);
-  align-items: center;
-  gap: 11px;
-  padding: 14px;
-  margin-top: 18px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-blue);
-  cursor: pointer;
-}
-.auth-dialog__newsletter input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--blue);
-}
-.auth-dialog__newsletter-icon {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border-radius: 8px;
-  background: #fff;
-  color: var(--blue);
-}
-.auth-dialog__newsletter-icon svg {
-  width: 18px;
-}
-.auth-dialog__newsletter > span:last-child {
-  display: grid;
-  gap: 2px;
-}
-.auth-dialog__newsletter strong {
-  font-size: 0.78rem;
-}
-.auth-dialog__newsletter small {
-  color: var(--ink-soft);
-  font-size: 0.66rem;
-  line-height: 1.45;
-}
 .auth-dialog__action {
   width: 100%;
   min-height: 46px;
@@ -970,9 +928,11 @@ a.content-card:hover {
 }
 .newsletter-form iframe {
   width: 100%;
-  height: 54px;
-  border: 0;
-  background: transparent;
+  max-width: 480px;
+  height: 320px;
+  justify-self: end;
+  border: 1px solid var(--border);
+  background: white;
 }
 .newsletter-form small {
   color: var(--muted);
@@ -1959,7 +1919,7 @@ a.content-card:hover {
   margin-top: 8px;
 }
 .newsletter-panel--compact .newsletter-form iframe {
-  height: 80px;
+  justify-self: stretch;
 }
 .blog-article > header .text-link {
   margin-top: 18px;
@@ -4144,7 +4104,7 @@ a.content-card:hover {
     grid-column: 1 / -1;
   }
   .newsletter-form iframe {
-    height: 80px;
+    justify-self: stretch;
   }
   .newsletter-copy h2 {
     font-size: 1rem;

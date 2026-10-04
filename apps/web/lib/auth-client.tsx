@@ -94,11 +94,9 @@ function useSession() {
 
 async function signInWithGitHub({
   callbackURL,
-  newsletterOptIn,
 }: {
   provider: 'github';
   callbackURL: string;
-  newsletterOptIn?: boolean;
 }) {
   const client = createBrowserSupabaseClient();
   if (!client) return { error: new Error('Authentication is not configured.') };
@@ -109,7 +107,6 @@ async function signInWithGitHub({
     'next',
     `${requestedReturn.pathname}${requestedReturn.search}${requestedReturn.hash}`,
   );
-  callback.searchParams.set('newsletter', newsletterOptIn ? '1' : '0');
 
   const { error } = await client.auth.signInWithOAuth({
     provider: 'github',

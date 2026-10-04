@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Cloud,
   LogIn,
-  Mail,
   UserRound,
   X,
 } from 'lucide-react';
@@ -73,7 +72,6 @@ function AuthDialog({
   const resolvedSession = hydrated ? session : null;
   const pending = !hydrated || isPending;
   const [error, setError] = useState<string>();
-  const [subscribeToNewsletter, setSubscribeToNewsletter] = useState(true);
   const copy = reasonCopy[reason];
 
   useEffect(() => {
@@ -92,7 +90,6 @@ function AuthDialog({
     const result = await authClient.signIn.social({
       provider: 'github',
       callbackURL: window.location.href,
-      newsletterOptIn: subscribeToNewsletter,
     });
     if (result.error) setError(result.error.message ?? 'Unable to sign in.');
   }
@@ -159,24 +156,6 @@ function AuthDialog({
         ) : (
           <>
             <p>{copy.body}</p>
-            <label className="auth-dialog__newsletter">
-              <input
-                type="checkbox"
-                checked={subscribeToNewsletter}
-                onChange={(event) =>
-                  setSubscribeToNewsletter(event.currentTarget.checked)
-                }
-              />
-              <span className="auth-dialog__newsletter-icon">
-                <Mail aria-hidden="true" />
-              </span>
-              <span>
-                <strong>Keep me ahead of MCP</strong>
-                <small>
-                  Get practical guides, important spec changes, and no filler.
-                </small>
-              </span>
-            </label>
             <button
               ref={primaryButtonRef}
               className="button button--primary auth-dialog__action"
