@@ -17,10 +17,10 @@ export function NewsletterPanel({ compact = false }: { compact?: boolean }) {
         <Mail aria-hidden="true" />
       </div>
       <div className="newsletter-copy">
-        <h2 id="newsletter-title">Stay up to date with MCP</h2>
+        <h2 id="newsletter-title">Stay current across the MCP ecosystem</h2>
         <p>
-          Get independent guides, specification updates, and implementation
-          notes in your inbox.
+          Get independent guides, specification and extension updates, ecosystem
+          analysis, and implementation notes in your inbox.
         </p>
       </div>
       <div className="newsletter-form">
