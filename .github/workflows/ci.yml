@@ -19,7 +19,7 @@ jobs:
           version: 10.20.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm format
@@ -28,6 +28,7 @@ jobs:
       - run: pnpm content:validate
       - run: pnpm test
       - run: pnpm build
+      - run: pnpm test:memory
 
   smoke:
     runs-on: ubuntu-latest
@@ -39,7 +40,7 @@ jobs:
           version: 10.20.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @all-things-mcp/web exec playwright install --with-deps chromium

@@ -5,9 +5,26 @@ An independent, developer-first knowledge platform for learning, building, secur
 ## Local development
 
 ```bash
+nvm install
+nvm use
+corepack enable
 pnpm install
 pnpm dev
 ```
+
+Use Node 24 LTS (pinned in `.nvmrc`, package engines, and CI). Restart running
+development servers after updating dependencies. The normal dev command disables
+Node server source maps to mitigate generated-source-map retention during hot
+reloads. This changes server stack-trace debugging, not the production build.
+Use `pnpm dev:debug` only when mapped server stacks are needed; restart that
+session periodically. Raising the heap limit does not fix retained objects.
+
+For production, use `pnpm build` followed by `pnpm start`, never `pnpm dev`.
+After building, run `pnpm test:memory` to check repeated requests against an
+isolated local production server. CI runs this check too. It measures post-GC
+heap growth and memory peaks without adding a public diagnostic endpoint.
+This bounded smoke test is a regression guard, not a guarantee for arbitrary
+traffic, authenticated sessions, or the separately deployed Guide Runtime.
 
 Copy `apps/web/.env.example` to `apps/web/.env.local` to configure the public
 site, repository, and Substack URLs. Content lives in `apps/web/content/` and is
