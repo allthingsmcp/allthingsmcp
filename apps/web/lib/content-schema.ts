@@ -1,6 +1,6 @@
 import { pageSchema } from 'fumadocs-core/source/schema';
 import { z } from 'zod';
-import { interactiveGuideIds } from '@/lib/interactive-guides';
+import { interactiveGuideIds } from '@/lib/interactive-guide-ids';
 
 const isoDate = z
   .union([

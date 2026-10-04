@@ -9,9 +9,13 @@ export type CardItem = {
   badge?: string;
 };
 
-export const primaryNav = [
-  { label: 'Guides', href: '/guides' },
-  { label: 'Blog', href: '/blog' },
+export const primaryNav: Array<{
+  label: string;
+  href: string;
+  activePath?: string;
+}> = [
+  { label: 'Guides', href: '/#guides', activePath: '/guides' },
+  { label: 'Blog', href: '/#blog', activePath: '/blog' },
 ];
 
 export const hubs: Record<

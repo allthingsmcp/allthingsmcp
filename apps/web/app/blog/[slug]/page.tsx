@@ -2,10 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
-import { authors as authorProfiles } from 'collections/server';
-import { ArticleAuthors } from '@/components/article-authors';
 import { ArticleToc } from '@/components/article-toc';
 import { Breadcrumbs } from '@/components/breadcrumbs';
+import { ContentAuthors } from '@/components/content-authors';
 import { ContentMeta } from '@/components/content-meta';
 import { getMDXComponents } from '@/components/mdx';
 import type { ContentFrontmatter } from '@/lib/content-schema';
@@ -63,20 +62,6 @@ export default async function BlogPostPage({
     (!process.env.VERCEL_ENV && process.env.NODE_ENV === 'production');
   if (production && data.status === 'draft') notFound();
   const MDX = page.data.body;
-  const resolvedAuthors = data.authors.flatMap((name) => {
-    const profile = authorProfiles.find((author) => author.name === name);
-    return profile
-      ? [
-          {
-            name: profile.name,
-            role: profile.role,
-            image: profile.image,
-            url: profile.url,
-          },
-        ]
-      : [];
-  });
-
   return (
     <main id="main-content">
       <div className="shell">
@@ -96,7 +81,7 @@ export default async function BlogPostPage({
               path={`${page.slugs.join('/')}.mdx`}
               showAuthors={false}
             />
-            <ArticleAuthors authors={resolvedAuthors} />
+            <ContentAuthors names={data.authors} label="Article authors" />
             {data.substackUrl && (
               <Link className="text-link" href={data.substackUrl}>
                 Read the Substack edition <ExternalLink aria-hidden="true" />

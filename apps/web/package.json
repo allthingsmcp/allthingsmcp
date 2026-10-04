@@ -8,8 +8,8 @@
   },
   "scripts": {
     "postinstall": "fumadocs-mdx source.config.ts .source",
-    "dev": "next dev --disable-source-maps",
-    "dev:debug": "next dev",
+    "dev": "node scripts/dev.mjs --disable-source-maps",
+    "dev:debug": "node scripts/dev.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",

@@ -1,100 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  ArrowRight,
-  FileText,
-  Network,
-  Rocket,
-  ShieldCheck,
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { NewsletterPanel } from '@/components/newsletter-panel';
+import {
+  BlogCover,
+  BlogPostCard,
+  BlogPostMeta,
+  topicLabels,
+  type BlogPostSummary,
+  type BlogTopic,
+} from '@/components/blog-post-card';
 
-export type BlogTopic =
-  | 'concepts'
-  | 'architecture'
-  | 'security'
-  | 'production'
-  | 'ecosystem'
-  | 'opinion';
-
-export type BlogPostSummary = {
-  title: string;
-  description: string;
-  topic: BlogTopic;
-  authors: string[];
-  publishedAt?: string;
-  updatedAt: string;
-  estimatedMinutes?: number;
-  status: 'draft' | 'published';
-  href: string;
-};
-
-const topicLabels: Record<BlogTopic, string> = {
-  concepts: 'Concepts',
-  architecture: 'Architecture',
-  security: 'Security',
-  production: 'Production',
-  ecosystem: 'Ecosystem',
-  opinion: 'Opinion',
-};
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${value}T00:00:00Z`));
-}
-
-function PostMeta({ post }: { post: BlogPostSummary }) {
-  return (
-    <div className="blog-post-meta">
-      <span>{formatDate(post.publishedAt ?? post.updatedAt)}</span>
-      {post.estimatedMinutes && <span>{post.estimatedMinutes} min read</span>}
-      {post.status === 'draft' && <b>Draft preview</b>}
-    </div>
-  );
-}
-
-function BlogCover({
-  topic,
-  compact = false,
-}: {
-  topic: BlogTopic;
-  compact?: boolean;
-}) {
-  const icons = {
-    concepts: FileText,
-    architecture: Network,
-    security: ShieldCheck,
-    production: Rocket,
-    ecosystem: Network,
-    opinion: FileText,
-  };
-  const CoverIcon = icons[topic];
-  return (
-    <div
-      className={[
-        'blog-cover',
-        `blog-cover--${topic}`,
-        compact && 'blog-cover--compact',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      aria-hidden="true"
-    >
-      <span />
-      <div>
-        <CoverIcon />
-        <b>MCP</b>
-      </div>
-      <span />
-    </div>
-  );
-}
+export type { BlogPostSummary, BlogTopic } from '@/components/blog-post-card';
 
 export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
   const [activeTopic, setActiveTopic] = useState<'all' | BlogTopic>('all');
@@ -136,7 +55,7 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
               <div className="blog-feature__footer">
                 <div>
                   <strong>{featured.authors[0]}</strong>
-                  <PostMeta post={featured} />
+                  <BlogPostMeta post={featured} />
                 </div>
                 <b>
                   Read article <ArrowRight aria-hidden="true" />
@@ -184,18 +103,7 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
           {visiblePosts.length ? (
             <div className="blog-post-grid" aria-live="polite">
               {visiblePosts.map((post) => (
-                <Link
-                  className="blog-post-card"
-                  href={post.href}
-                  key={post.href}
-                >
-                  <BlogCover topic={post.topic} compact />
-                  <span>{topicLabels[post.topic]}</span>
-                  <h3>{post.title}</h3>
-                  <p>{post.description}</p>
-                  <PostMeta post={post} />
-                  <ArrowRight aria-hidden="true" />
-                </Link>
+                <BlogPostCard post={post} key={post.href} />
               ))}
             </div>
           ) : (
@@ -225,7 +133,7 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
                 <BlogCover topic={post.topic} compact />
                 <span>
                   <strong>{post.title}</strong>
-                  <PostMeta post={post} />
+                  <BlogPostMeta post={post} />
                 </span>
               </Link>
             ))}

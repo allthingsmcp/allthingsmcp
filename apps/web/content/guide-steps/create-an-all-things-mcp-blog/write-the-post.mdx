@@ -1,0 +1,64 @@
+---
+title: Write the Post
+description: Build a clear article from ordinary Markdown, useful examples, precise claims, and links to primary sources.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-blog
+guideStepId: write-the-post
+guideStepOrder: 3
+authors: [Gbadebo Bello]
+status: published
+tags: [guide-step, blog, writing, markdown]
+publishedAt: 2026-10-04
+updatedAt: 2026-10-04
+difficulty: beginner
+estimatedMinutes: 15
+specVersion: 2025-11-25
+lastVerified: 2026-10-04
+---
+
+Write the body directly below the frontmatter. Use ordinary Markdown for paragraphs, lists, links, emphasis, and tables.
+
+The page already renders the title and description from your metadata. Begin with an opening paragraph rather than repeating them as a `#` heading. Use `##` for the main sections and `###` for subsections; the site builds the table of contents from your headings.
+
+## Draft the answer first
+
+Open with the main idea and why it matters to the intended reader. Then develop the reasoning in the order they need it. A useful starting structure is:
+
+```md title="Article body outline"
+An opening paragraph that answers the article’s central question.
+
+## The context
+
+Explain the starting assumptions and the problem the reader faces.
+
+## The important distinction
+
+Develop the main idea with a concrete example and supporting sources.
+
+## A worked example
+
+Show the reasoning or behavior, including its limits.
+
+## What to do next
+
+Give the reader a useful next action or decision.
+```
+
+Replace the outline with subject-specific headings and complete prose. Each section should advance the explanation.
+
+## Make claims checkable
+
+Link to primary sources near the claims they support. Use descriptive link text rather than “click here.” When describing protocol behavior, cite the specification revision named in your metadata. When describing a library or tool, cite its own documentation and name the version you tested.
+
+Separate protocol requirements, implementation choices, and your recommendations. Label hypothetical examples and personal opinions clearly. If you describe an experiment, include the setup, observed result, and any limitations.
+
+For runnable examples, explain prerequisites, identify the file or terminal context, and show what success looks like. An illustrative snippet should be labeled as such rather than presented as a tested project.
+
+## Finish with a useful next step
+
+Return to the reader’s original question. State what the evidence allows them to conclude and link to a relevant Guide when they are ready to build something.
+
+Read the article once without looking at your outline. Remove repeated explanations, unexplained abbreviations, and claims that go beyond your sources. Revisit `estimatedMinutes` after the draft is complete; it is authored metadata, not an automatic word-count calculation.
+
+**Checkpoint:** the post answers its opening question, uses a clear heading hierarchy, supports technical claims with sources, and ends with a practical next step.

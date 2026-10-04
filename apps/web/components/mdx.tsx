@@ -3,6 +3,37 @@ import { ArrowRight, CheckCircle2, Info, TriangleAlert } from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
 import { MdxTabs, type MdxTabItem } from '@/components/mdx-tabs';
 import { InteractiveGuideBlock } from '@/components/interactive-guide-block';
+import { SectionLinkCopyButton } from '@/components/section-link-copy-button';
+
+type HeadingLevel = 'h2' | 'h3' | 'h4';
+
+function LinkedHeading({
+  as: Heading,
+  children,
+  id,
+  ...props
+}: React.ComponentPropsWithoutRef<'h2'> & { as: HeadingLevel }) {
+  if (!id) return <Heading {...props}>{children}</Heading>;
+
+  return (
+    <Heading {...props} id={id}>
+      {children}
+      <SectionLinkCopyButton id={id} />
+    </Heading>
+  );
+}
+
+function H2(props: React.ComponentPropsWithoutRef<'h2'>) {
+  return <LinkedHeading as="h2" {...props} />;
+}
+
+function H3(props: React.ComponentPropsWithoutRef<'h3'>) {
+  return <LinkedHeading as="h3" {...props} />;
+}
+
+function H4(props: React.ComponentPropsWithoutRef<'h4'>) {
+  return <LinkedHeading as="h4" {...props} />;
+}
 
 export function Callout({
   type = 'note',
@@ -111,6 +142,9 @@ export function ProtocolDiagram({
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
+    h2: H2,
+    h3: H3,
+    h4: H4,
     pre: CodeBlock,
     Callout,
     Steps,

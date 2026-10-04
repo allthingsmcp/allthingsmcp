@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import {
   ArrowRight,
   BookOpen,
@@ -39,13 +39,21 @@ function label(value: string) {
 
 export function GuideOverviewExperience({
   guide,
+  authors,
 }: {
   guide: GuideOverviewData;
+  authors: ReactNode;
 }) {
-  return <StandardGuideOverview guide={guide} />;
+  return <StandardGuideOverview guide={guide} authors={authors} />;
 }
 
-function StandardGuideOverview({ guide }: { guide: GuideOverviewData }) {
+function StandardGuideOverview({
+  guide,
+  authors,
+}: {
+  guide: GuideOverviewData;
+  authors: ReactNode;
+}) {
   const stepIds = useMemo(
     () => guide.steps.map((step) => step.id),
     [guide.steps],
@@ -87,6 +95,7 @@ function StandardGuideOverview({ guide }: { guide: GuideOverviewData }) {
                 </span>
               )}
             </div>
+            {authors}
           </div>
           <div className="guide-progress-summary" aria-live="polite">
             <span>Your progress</span>

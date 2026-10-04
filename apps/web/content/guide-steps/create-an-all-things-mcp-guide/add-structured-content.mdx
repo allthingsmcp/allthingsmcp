@@ -1,20 +1,20 @@
 ---
 title: Add Structured Content
-description: Present alternatives, related choices, reference metadata, and technical flows with safe and accessible structured components.
+description: Present alternatives, interactive workspace actions, reference metadata, and technical flows with safe and accessible structured components.
 contentType: guide-step
 section: build
 guideSlug: create-an-all-things-mcp-guide
 guideStepId: add-structured-content
 guideStepOrder: 5
-authors: [All Things MCP Editors]
+authors: [Gbadebo Bello]
 status: published
-tags: [guide-step, contributing, mdx, diagrams]
+tags: [guide-step, contributing, mdx, interactive, diagrams]
 publishedAt: 2026-08-31
-updatedAt: 2026-08-31
+updatedAt: 2026-10-04
 difficulty: beginner
-estimatedMinutes: 10
+estimatedMinutes: 20
 specVersion: 2025-11-25
-lastVerified: 2026-08-31
+lastVerified: 2026-10-04
 ---
 
 The remaining components accept constrained data rather than arbitrary scripts. This keeps contributed MDX reviewable, accessible, and safe to build.
@@ -99,24 +99,86 @@ Use this panel for version scope, source provenance, compatibility, or other ref
   verified on 2026-08-31.
 </MetadataPanel>
 
-## Protocol diagram for a simple flow
+## Add interactive blocks for workspace actions
 
-Use the diagram component for a short labelled flow. The `label` is the accessible text equivalent, so it must communicate the same relationship as the visual.
+Every Guide uses the same `guide` content type, overview, and ordered step structure. A Guide can also include interactive blocks when readers need to configure, run, inspect, or test something in a workspace.
+
+Explore the existing interactive Guide before proposing one:
+
+<CardGrid
+  items={[
+    {
+      title: 'Building Your First MCP Server',
+      description:
+        'See how interactive blocks carry one workspace through configuration, protocol inspection, testing, and export.',
+      href: '/guides/building-your-first-mcp-server',
+    },
+  ]}
+/>
+
+Add an interactive block only when the action helps the reader achieve or verify the Guide’s outcome. A diagram, checklist, code sample, or set of tabs belongs in the authored content and does not require a workspace.
+
+The Guide overview declares a registered `interactiveGuideId`:
+
+```yaml title="Guide overview frontmatter"
+interactiveGuideId: building-your-first-mcp-server
+```
+
+A step document places an `InteractiveGuideBlock` with a registered literal scene where the workspace should appear:
+
+```text title="Guide step body"
+InteractiveGuideBlock(scene="add-tools")
+```
+
+The ID and scenes must already exist in the TypeScript interactive Guide registry. Authors cannot invent them in MDX, and authored content cannot contain executable runtime logic. Interactive blocks therefore require maintainer support and code changes outside the content files. Agree the workspace behavior with a maintainer before adding the field or block.
+
+## Protocol diagrams for technical flows
+
+Use `ProtocolDiagram` when the order or relationship between MCP participants is easier to understand visually. Start with the teaching question, then include only the nodes needed to answer it. Use official entity names such as **host**, **MCP client**, and **MCP server**.
+
+This example answers: “How does a tool request move from the application to the system that fulfills it?”
 
 ```mdx
 <ProtocolDiagram
-  label="A contributor plans, writes, validates, and submits a Guide for review."
-  nodes={['Plan', 'Write', 'Validate', 'Review']}
+  label="A user action reaches the host, which uses its MCP client to send a tool request to an MCP server; the server calls the tool handler, which accesses an external service and returns the result through the same path."
+  nodes={[
+    'User',
+    'Host',
+    'MCP client',
+    'MCP server',
+    'Tool handler',
+    'External service',
+  ]}
 />
 ```
 
 <ProtocolDiagram
-  label="A contributor plans, writes, validates, and submits a Guide for review."
-  nodes={['Plan', 'Write', 'Validate', 'Review']}
+  label="A user action reaches the host, which uses its MCP client to send a tool request to an MCP server; the server calls the tool handler, which accesses an external service and returns the result through the same path."
+  nodes={[
+    'User',
+    'Host',
+    'MCP client',
+    'MCP server',
+    'Tool handler',
+    'External service',
+  ]}
 />
 
-<Callout title="Need a richer technical diagram?" type="note">
-  Propose a reusable diagram asset or component with an accessible text
-  equivalent. Do not recreate complex architecture with unreviewed HTML inside a
-  content file.
+### Use the component
+
+`ProtocolDiagram` draws one straight flow. The `nodes` array controls the boxes and their order:
+
+- List the nodes in the order the reader should follow them.
+- Keep each node name short, such as `Host`, `MCP client`, or `MCP server`.
+- Use the official protocol names for the specification version in the document metadata.
+
+On desktop, the nodes appear from left to right. On a narrow screen, they stack from top to bottom.
+
+The `label` is the text description for readers who cannot see the diagram. Write it as a complete sentence that explains how the nodes relate to one another.
+
+<Callout title="When ProtocolDiagram is not enough" type="note">
+  This component cannot draw branches, trust boundaries, or different kinds of
+  arrows. Ask a maintainer for a reusable component or reviewed diagram asset
+  when the explanation needs those features. Do not add custom HTML to the MDX
+  file.
 </Callout>

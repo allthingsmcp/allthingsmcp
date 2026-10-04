@@ -1,0 +1,61 @@
+---
+title: Preview the Post
+description: Run the local website and inspect the draft’s article page, author profile, blog card, and responsive layout.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-blog
+guideStepId: preview-the-post
+guideStepOrder: 5
+authors: [Gbadebo Bello]
+status: published
+tags: [guide-step, blog, preview, accessibility]
+publishedAt: 2026-10-04
+updatedAt: 2026-10-04
+difficulty: beginner
+estimatedMinutes: 5
+specVersion: 2025-11-25
+lastVerified: 2026-10-04
+---
+
+Run these commands from the repository root. If the project is already installed and the development server is running, use that server.
+
+```bash
+nvm use
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+`nvm use` selects the Node.js version pinned in `.nvmrc`. If you use another version manager, select that version with its equivalent command.
+
+## Open the article and its cards
+
+Visit `http://localhost:3000/blog/choosing-an-mcp-transport`, replacing the last segment with your filename without `.mdx`. If the server reports another port, use that port.
+
+Also open `/blog` and the homepage’s blog section at `/#blog`. Articles are discovered from their metadata; you do not need to create a new page component or manually add a card.
+
+<Callout title="Drafts are visible in previews" type="note">
+  Local development and Vercel preview deployments include draft articles.
+  Production hides them. A local production build uses production filtering, so
+  keep using the development server to inspect an unpublished draft.
+</Callout>
+
+## Check the complete reading experience
+
+<Checklist
+  items={[
+    'The title and description match the intended reader and promise',
+    'The article appears under the expected blog topic',
+    'The author name, photo, role, and biography are correct',
+    'Table-of-contents links reach the matching headings',
+    'Code blocks copy correctly and images load',
+    'Source links and internal links reach their intended destinations',
+    'The article and its cards remain readable at a narrow mobile width',
+    'Keyboard navigation reaches links and interactive controls',
+  ]}
+/>
+
+Inspect the card date too. Cards use `publishedAt` when present and label it “Published”; otherwise they display `updatedAt` as “Updated.” Draft cards also show “Draft preview.”
+
+If the article is missing locally, check `contentType: article`, its filename, and the terminal for validation or MDX errors. If the author byline is missing, check the profile’s exact `name` match. For a broken image, confirm that its URL maps to a real file under `apps/web/public/`.
+
+**Checkpoint:** you have read the complete draft in the browser and checked its cards on both desktop and mobile widths.

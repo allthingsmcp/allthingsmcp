@@ -1,0 +1,273 @@
+.page {
+  padding-bottom: 16px;
+}
+
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: 40px;
+  padding-block: 64px 48px;
+}
+
+.introCopy {
+  min-width: 0;
+}
+
+.intro h1 {
+  margin-top: 16px;
+  font-size: clamp(2.5rem, 4.5vw, 3.75rem);
+  text-wrap: balance;
+}
+
+.intro h1 span {
+  color: var(--blue);
+}
+
+.description {
+  max-width: 720px;
+  margin-top: 20px;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.collection {
+  padding-block: 32px 40px;
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 96px;
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.heading h2 {
+  font-size: 1.65rem;
+}
+
+.heading p {
+  font-size: 0.875rem;
+}
+
+.guides,
+.posts {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.guides {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.posts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.guides > li,
+.posts > li {
+  min-width: 0;
+}
+
+.page :global(.content-card) {
+  height: 100%;
+  padding: 24px;
+}
+
+.guides :global(.content-card) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: 38px minmax(0, 1fr);
+  gap: 20px 12px;
+}
+
+.guides :global(.card-icon) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.guides :global(.card-copy) {
+  display: flex;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+}
+
+.guides :global(.card-arrow) {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+}
+
+.posts :global(.blog-post-card) {
+  height: 100%;
+  padding: 24px;
+}
+
+.posts :global(.blog-cover) {
+  min-height: 160px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+}
+
+.posts :global(.blog-post-card) h3 {
+  font-size: 1.125rem;
+  line-height: 1.35;
+}
+
+.posts :global(.blog-post-card) > p {
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.posts :global(.blog-post-meta) {
+  padding-right: 24px;
+  font-size: 0.75rem;
+}
+
+.posts :global(.blog-post-meta) b {
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.64rem;
+}
+
+.page :global(.card-title-row) {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.page :global(.card-title-row) h3 {
+  font-size: 1.125rem;
+  line-height: 1.35;
+}
+
+.page :global(.card-copy) p {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.page :global(.card-meta) {
+  padding-top: 20px;
+  margin-top: auto;
+  font-size: 0.75rem;
+}
+
+.page :global(.badge) {
+  background: var(--surface);
+  color: var(--muted);
+  text-transform: none;
+}
+
+.recommended :global(.content-card) {
+  border-color: var(--blue);
+  background: var(--surface-blue);
+}
+
+.recommended :global(.badge) {
+  background: var(--blue);
+  color: white;
+}
+
+.empty {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 1000px) {
+  .intro {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .guides {
+    grid-template-columns: 1fr;
+  }
+
+  .guides :global(.content-card) {
+    display: flex;
+    gap: 16px;
+  }
+
+  .guides :global(.card-arrow) {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .intro {
+    padding-block: 40px 32px;
+  }
+
+  .intro :global(.guide-visual-connector:last-of-type) {
+    display: grid;
+  }
+
+  .description {
+    margin-top: 16px;
+    font-size: 0.95rem;
+  }
+
+  .collection {
+    padding-block: 24px 32px;
+  }
+
+  .heading {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .posts {
+    grid-template-columns: 1fr;
+  }
+
+  .posts :global(.blog-post-card) {
+    padding: 20px;
+  }
+
+  .posts :global(.blog-cover) {
+    min-height: 140px;
+  }
+
+  .page :global(.content-card) {
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .page :global(.card-icon) {
+    display: none;
+  }
+
+  .page :global(.card-arrow) {
+    flex-shrink: 0;
+  }
+
+  .page :global(.card-meta) {
+    padding-top: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page :global(.content-card),
+  .posts :global(.blog-post-card) {
+    transition: none;
+  }
+
+  .page :global(.content-card):hover,
+  .posts :global(.blog-post-card):hover {
+    transform: none;
+  }
+}

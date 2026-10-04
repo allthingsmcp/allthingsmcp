@@ -31,6 +31,7 @@ export function GuideStepExperience({
   steps,
   activeStep,
   page,
+  authors,
   actions,
   children,
   interactiveGuideId,
@@ -40,6 +41,7 @@ export function GuideStepExperience({
   steps: GuideStep[];
   activeStep: GuideStep;
   page: StepPageData;
+  authors: ReactNode;
   actions: ReactNode;
   children: ReactNode;
   interactiveGuideId?: InteractiveGuideId;
@@ -135,6 +137,7 @@ export function GuideStepExperience({
             <span>Spec {page.specVersion}</span>
             <span>Updated {page.updatedAt}</span>
           </div>
+          {authors}
         </header>
 
         <div className="prose guide-step-prose">{articleContent}</div>

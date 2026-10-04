@@ -6,18 +6,18 @@ section: build
 guideSlug: create-an-all-things-mcp-guide
 guideStepId: create-the-manifest
 guideStepOrder: 2
-authors: [All Things MCP Editors]
+authors: [Gbadebo Bello]
 status: published
 tags: [guide-step, contributing, frontmatter]
 publishedAt: 2026-08-31
-updatedAt: 2026-08-31
+updatedAt: 2026-10-04
 difficulty: beginner
 estimatedMinutes: 10
 specVersion: 2025-11-25
-lastVerified: 2026-08-31
+lastVerified: 2026-10-04
 ---
 
-Create the overview at `content/guides/your-guide-slug.mdx`. Its filename becomes the canonical Guide URL.
+Create the overview at `apps/web/content/guides/your-guide-slug.mdx`. Put the YAML metadata at the very top of that file, between the opening and closing `---` lines. The prose for the overview begins immediately after the closing `---`. The filename becomes the canonical Guide URL.
 
 ```yaml
 ---
@@ -58,12 +58,54 @@ guideSteps:
   review.
 </Callout>
 
+## Know the available statuses
+
+The Guide `status` field accepts two values:
+
+| Status      | Use it when…                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| `draft`     | The content is being written or reviewed. It appears in local and pull-request previews only.     |
+| `published` | Editorial and technical review are complete. It appears in production and requires `publishedAt`. |
+
+## Add yourself as an author
+
+Use the same author name in the overview and every step document:
+
+```yaml
+authors: [Ada Lovelace]
+```
+
+For multiple authors, keep each full name as a separate list item:
+
+```yaml
+authors:
+  - Ada Lovelace
+  - Grace Hopper
+```
+
+To add a reusable author profile, create `apps/web/content/authors/your-name.yaml`:
+
+```yaml title="apps/web/content/authors/ada-lovelace.yaml"
+name: Ada Lovelace
+role: MCP contributor
+bio: Writes practical guides about protocol clients, servers, and developer tooling.
+image: /authors/ada-lovelace.jpg
+github: https://github.com/your-handle
+linkedin: https://www.linkedin.com/in/your-handle/
+x: https://x.com/your-handle
+website: https://example.com
+```
+
+Add the referenced image under `apps/web/public/authors/`. The profile `name` must exactly match the value in each document’s `authors` array. The name, role, biography, and image fields are required. `github`, `linkedin`, `x`, and `website` are optional: replace the example links with your own full HTTP or HTTPS URLs, and omit any you do not want to share. An existing `url` field remains a fallback for `website`.
+
+Guide overviews and steps show a byline with the author’s name, photo, role, and available profile links; the biography is available on hover or keyboard focus. Contributors without a matching profile are still credited by name. Each step uses its own `authors` list, so credit everyone who contributed to that step.
+
 ## Keep the manifest and files aligned
 
 Every `guideSteps` ID must have one matching step document. IDs must be unique, lowercase, and hyphenated; the array order determines navigation and progress.
 
 <MetadataPanel>
-  **Path contract:** an overview at `content/guides/build-a-client.mdx` with a
-  step ID of `connect-and-invoke` maps to
+  **Path contract:** an overview at `apps/web/content/guides/build-a-client.mdx`
+  with a step ID of `connect-and-invoke` maps to
   `/guides/build-a-client/connect-and-invoke`.
 </MetadataPanel>

@@ -13,8 +13,12 @@ export function SiteHeader() {
   const pathname = usePathname();
   const { openSearch } = useSearchDialog();
   const [open, setOpen] = useState(false);
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (path?: string) =>
+    Boolean(path && (pathname === path || pathname.startsWith(`${path}/`)));
+  const mobileNav: typeof primaryNav = [
+    ...primaryNav,
+    { label: 'Newsletter', href: '/#newsletter' },
+  ];
   const toggleMenu = () => setOpen((value) => !value);
 
   return (
@@ -29,7 +33,7 @@ export function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className={cn(isActive(item.href) && 'is-active')}
+              className={cn(isActive(item.activePath) && 'is-active')}
             >
               {item.label}
             </Link>
@@ -77,18 +81,16 @@ export function SiteHeader() {
           aria-label="Mobile navigation"
         >
           <div className="shell mobile-nav__inner">
-            {[...primaryNav, { label: 'Newsletter', href: '/#newsletter' }].map(
-              (item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(isActive(item.href) && 'is-active')}
-                >
-                  {item.label}
-                </Link>
-              ),
-            )}
+            {mobileNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={cn(isActive(item.activePath) && 'is-active')}
+              >
+                {item.label}
+              </Link>
+            ))}
             <button
               type="button"
               onClick={() => {

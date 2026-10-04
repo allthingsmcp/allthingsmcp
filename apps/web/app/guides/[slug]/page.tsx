@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { ContentAuthors } from '@/components/content-authors';
 import { GuideOverviewExperience } from '@/components/guide-overview-experience';
 import type { ContentFrontmatter } from '@/lib/content-schema';
 import { socialCardMetadata } from '@/lib/social-card';
@@ -66,6 +67,7 @@ export default async function GuideOverviewPage({
   return (
     <main id="main-content" className="guide-overview-page">
       <GuideOverviewExperience
+        authors={<ContentAuthors names={data.authors} label="Guide authors" />}
         guide={{
           slug,
           title: data.title,

@@ -5,10 +5,10 @@ import type {
   McpWorkspace,
   McpWorkspaceConfiguration,
 } from '@all-things-mcp/contracts';
+import type { InteractiveGuideId } from '@/lib/interactive-guide-ids';
 
-export const interactiveGuideIds = ['building-your-first-mcp-server'] as const;
-
-export type InteractiveGuideId = (typeof interactiveGuideIds)[number];
+export { interactiveGuideIds } from '@/lib/interactive-guide-ids';
+export type { InteractiveGuideId } from '@/lib/interactive-guide-ids';
 
 export const interactiveGuideScenes = [
   'create-server',

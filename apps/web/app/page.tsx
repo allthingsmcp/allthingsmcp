@@ -1,158 +1,164 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowRight, BookOpen, FileText } from 'lucide-react';
+import type { Metadata } from 'next';
+import { BlogPostCard, type BlogTopic } from '@/components/blog-post-card';
 import { ContentCard } from '@/components/content-card';
+import { GuidesOverviewVisual } from '@/components/guides-overview-visual';
 import { NewsletterPanel } from '@/components/newsletter-panel';
-import { Button } from '@/components/ui/button';
+import type { ContentFrontmatter } from '@/lib/content-schema';
+import type { CardItem } from '@/lib/site-data';
+import { source } from '@/lib/source';
+import styles from './home.module.css';
 
-const paths = [
-  {
-    eyebrow: 'Guides',
-    title: 'Build with MCP.',
-    description:
-      'Follow practical, step-by-step guidance from first concepts to production systems.',
-    href: '/guides',
-    label: 'Browse guides',
-    icon: BookOpen,
-  },
-  {
-    eyebrow: 'Blog',
-    title: 'Understand the system.',
-    description:
-      'Read technical analysis, architecture explainers, and independent perspectives.',
-    href: '/blog',
-    label: 'Read the blog',
-    icon: FileText,
-  },
-];
+export const metadata: Metadata = {
+  title: { absolute: 'All Things MCP' },
+  description:
+    'Practical guides and independent writing for people building with the Model Context Protocol.',
+  alternates: { canonical: '/' },
+  robots: { index: true, follow: true },
+};
+
+const startingGuide = 'build-a-minimal-mcp-server';
+
+function sentenceCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
 
 export default function HomePage() {
+  const production =
+    process.env.VERCEL_ENV === 'production' ||
+    (!process.env.VERCEL_ENV && process.env.NODE_ENV === 'production');
+  const content = source
+    .getPages()
+    .map((page) => ({
+      data: page.data as ContentFrontmatter,
+      slug: page.slugs.at(-1) ?? '',
+    }))
+    .filter(({ data }) => !production || data.status === 'published')
+    .sort(
+      (a, b) =>
+        (b.data.publishedAt ?? b.data.updatedAt).localeCompare(
+          a.data.publishedAt ?? a.data.updatedAt,
+        ) || a.data.title.localeCompare(b.data.title),
+    );
+
+  const guides = content
+    .filter(
+      ({ data }) =>
+        data.contentType === 'guide' &&
+        ['learn', 'build', 'operate', 'security'].includes(data.section),
+    )
+    .sort(
+      (a, b) =>
+        Number(b.slug === startingGuide) - Number(a.slug === startingGuide),
+    );
+  const posts = content.filter(({ data }) => data.contentType === 'article');
+
   return (
-    <main id="main-content">
-      <section className="shell home-hero">
-        <div className="home-hero__copy">
-          <h1>
-            Learn. Build.
-            <br />
-            Ship with <span>MCP.</span>
+    <main id="main-content" className={`shell ${styles.page}`}>
+      <section className={styles.intro} aria-labelledby="home-title">
+        <div className={styles.introCopy}>
+          <p className="eyebrow">An independent field guide</p>
+          <h1 id="home-title">
+            Learn. Build. Ship with <span>MCP.</span>
           </h1>
-          <p>
-            Practical guides, technical analysis, and specification updates for
-            people building with the Model Context Protocol.
+          <p className={styles.description}>
+            Practical guides and clear explanations for building with the Model
+            Context Protocol. Pick a guide and get hands-on, or explore the
+            ideas behind the protocol.
           </p>
-          <div className="button-row">
-            <Button href="/guides">Start learning</Button>
-            <Button href="/guides#build" variant="secondary">
-              Explore the docs
-            </Button>
-          </div>
         </div>
-        <div className="home-hero__visual">
-          <Image
-            className="home-hero__image"
-            src="/images/mcp-ecosystem-hero.png"
-            alt="MCP ecosystem diagram connecting hosts, clients, servers, tools, prompts, and resources around a secure protocol core."
-            width={1448}
-            height={1086}
-            sizes="(max-width: 760px) calc(100vw - 56px), (max-width: 1100px) 50vw, 620px"
-            priority
-          />
-        </div>
+        <GuidesOverviewVisual />
       </section>
-      <section className="section-block">
-        <div className="shell">
-          <div className="path-intro">
-            <p className="eyebrow">Two ways to use All Things MCP</p>
-            <p>Follow practical guides and explore the ideas behind MCP.</p>
-          </div>
-          <div className="path-grid product-path-grid">
-            {paths.map(({ icon: Icon, ...path }) => (
-              <Link
-                className="path-card product-path-card"
-                href={path.href}
-                key={path.title}
-              >
-                <span>
-                  <Icon />
-                </span>
-                <small>{path.eyebrow}</small>
-                <h3>{path.title}</h3>
-                <p>{path.description}</p>
-                <b>
-                  {path.label} <ArrowRight />
-                </b>
-              </Link>
+
+      <section
+        id="guides"
+        className={styles.collection}
+        aria-labelledby="guides-title"
+      >
+        <div className={styles.heading}>
+          <h2 id="guides-title">Guides</h2>
+          <p>Build something, one step at a time.</p>
+        </div>
+        {guides.length ? (
+          <ul className={styles.guides}>
+            {guides.map(({ data, slug }) => {
+              const recommended =
+                slug === startingGuide && data.status === 'published';
+              const item: CardItem = {
+                title: data.title,
+                description: data.description,
+                icon: 'code',
+                href: `/guides/${slug}`,
+                badge:
+                  data.status === 'draft'
+                    ? 'Draft preview'
+                    : recommended
+                      ? 'Start here'
+                      : undefined,
+                meta: [
+                  data.guideSteps?.length && `${data.guideSteps.length} steps`,
+                  data.estimatedMinutes && `${data.estimatedMinutes} min`,
+                  data.difficulty && sentenceCase(data.difficulty),
+                ]
+                  .filter(Boolean)
+                  .join(' · '),
+              };
+              return (
+                <li
+                  className={recommended ? styles.recommended : undefined}
+                  key={slug}
+                >
+                  <ContentCard item={item} />
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className={styles.empty}>
+            The first guides are being prepared. Get new guides in your inbox
+            through the newsletter below.
+          </p>
+        )}
+      </section>
+
+      <section
+        id="blog"
+        className={styles.collection}
+        aria-labelledby="blog-title"
+      >
+        <div className={styles.heading}>
+          <h2 id="blog-title">From the blog</h2>
+          <p>Understand the protocol and the decisions around it.</p>
+        </div>
+        {posts.length ? (
+          <ul className={styles.posts}>
+            {posts.map(({ data, slug }) => (
+              <li key={slug}>
+                <BlogPostCard
+                  compactCover={false}
+                  post={{
+                    title: data.title,
+                    description: data.description,
+                    href: `/blog/${slug}`,
+                    topic: data.blogTopic as BlogTopic,
+                    authors: data.authors,
+                    publishedAt: data.publishedAt,
+                    updatedAt: data.updatedAt,
+                    estimatedMinutes: data.estimatedMinutes,
+                    status: data.status,
+                  }}
+                />
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        ) : (
+          <p className={styles.empty}>
+            The first articles are being reviewed. Subscribe below to hear when
+            they are published.
+          </p>
+        )}
       </section>
-      <section className="section-block section-block--subtle">
-        <div className="shell home-columns">
-          <div>
-            <div className="section-heading">
-              <h2>Popular guides</h2>
-              <Link href="/guides">
-                View all <ArrowRight />
-              </Link>
-            </div>
-            <div className="stack-list">
-              {[
-                {
-                  title: 'Build a minimal MCP server',
-                  description:
-                    'Create and inspect a focused server in small steps.',
-                  icon: 'code',
-                  meta: '4 steps · 55 min · Beginner',
-                  href: '/guides/build-a-minimal-mcp-server',
-                },
-              ].map((item) => (
-                <ContentCard key={item.title} item={item} />
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="section-heading">
-              <h2>Latest from the blog</h2>
-              <Link href="/blog">
-                View all <ArrowRight />
-              </Link>
-            </div>
-            <div className="stack-list">
-              {[
-                {
-                  title: 'What is MCP?',
-                  description:
-                    'A practical mental model for the protocol and where it fits.',
-                  icon: 'book',
-                  meta: 'Concepts · 10 min',
-                  href: '/blog/what-is-mcp',
-                },
-                {
-                  title: 'MCP architecture',
-                  description:
-                    'Hosts, clients, servers, sessions, and primitives in context.',
-                  icon: 'network',
-                  meta: 'Architecture · 18 min',
-                  href: '/blog/mcp-architecture',
-                },
-                {
-                  title: 'MCP in production',
-                  description:
-                    'What changes when identities, networks, and failures become real.',
-                  icon: 'rocket',
-                  meta: 'Production · 22 min',
-                  href: '/blog/mcp-in-production',
-                },
-              ].map((item) => (
-                <ContentCard key={item.title} item={item} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-      <div className="shell">
-        <NewsletterPanel />
-      </div>
+
+      <NewsletterPanel />
     </main>
   );
 }
