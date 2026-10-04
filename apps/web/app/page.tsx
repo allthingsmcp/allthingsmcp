@@ -11,7 +11,7 @@ import styles from './home.module.css';
 export const metadata: Metadata = {
   title: { absolute: 'All Things MCP' },
   description:
-    'Practical guides and independent writing for people building with the Model Context Protocol.',
+    'Practical guides and independent analysis for MCP, its official extensions, and the ecosystem around it.',
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
 };
@@ -61,9 +61,10 @@ export default function HomePage() {
             Learn. Build. Ship with <span>MCP.</span>
           </h1>
           <p className={styles.description}>
-            Practical guides and clear explanations for building with the Model
-            Context Protocol. Pick a guide and get hands-on, or explore the
-            ideas behind the protocol.
+            Practical guides and independent analysis for MCP and the ecosystem
+            growing around it. Learn the protocol, build with official
+            extensions, and understand the apps, infrastructure, security, and
+            emerging standards shaping how agents interact with software.
           </p>
         </div>
         <GuidesOverviewVisual />
@@ -127,7 +128,10 @@ export default function HomePage() {
       >
         <div className={styles.heading}>
           <h2 id="blog-title">From the blog</h2>
-          <p>Understand the protocol and the decisions around it.</p>
+          <p>
+            Understand the protocol, its extensions, and the ecosystem forming
+            around it.
+          </p>
         </div>
         {posts.length ? (
           <ul className={styles.posts}>

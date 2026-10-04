@@ -4057,16 +4057,22 @@ a.content-card:hover {
     padding: 12px;
   }
   .guides-overview-visual__content {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: 140px 24px 220px 24px 170px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
   }
   .guide-visual-stage--operate,
   .guide-visual-connector:last-of-type {
     display: block;
   }
+  .guide-visual-stage {
+    scroll-snap-align: start;
+  }
   .guide-visual-connector {
-    min-height: 18px;
-    transform: rotate(90deg);
+    min-height: 0;
+    transform: none;
   }
   .guide-visual-stage .code-window pre {
     font-size: 0.5rem;
