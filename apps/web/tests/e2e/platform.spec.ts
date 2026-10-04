@@ -63,6 +63,16 @@ test('desktop navigation reflects the focused content model', async ({
       .getByRole('navigation', { name: 'Primary navigation' })
       .getByRole('link'),
   ).toHaveText(['Guides', 'Blog']);
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Primary navigation' })
+      .getByRole('link', { name: 'Guides', exact: true }),
+  ).toHaveAttribute('href', '/#guides');
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Primary navigation' })
+      .getByRole('link', { name: 'Blog', exact: true }),
+  ).toHaveAttribute('href', '/#blog');
 });
 
 test('account controls hydrate without changing their initial text', async ({
@@ -269,6 +279,12 @@ test('footer prioritizes content, newsletter, and search', async ({
     ).toBeVisible();
   }
   await expect(
+    footer.getByRole('link', { name: 'Guides', exact: true }),
+  ).toHaveAttribute('href', '/guides');
+  await expect(
+    footer.getByRole('link', { name: 'Blog', exact: true }),
+  ).toHaveAttribute('href', '/blog');
+  await expect(
     footer.getByRole('button', { name: 'Search', exact: true }),
   ).toBeVisible();
 });
@@ -396,10 +412,10 @@ test('homepage features guides and blog without unpublished sections', async ({
   await page.goto('/');
   const main = page.getByRole('main');
   await expect(
-    main.getByRole('heading', { name: 'Popular guides' }),
+    main.getByRole('heading', { name: 'Guides', exact: true }),
   ).toBeVisible();
   await expect(
-    main.getByRole('heading', { name: 'Latest from the blog' }),
+    main.getByRole('heading', { name: 'From the blog' }),
   ).toBeVisible();
   await expect(main.getByText('Spec Watch', { exact: true })).toHaveCount(0);
   await expect(

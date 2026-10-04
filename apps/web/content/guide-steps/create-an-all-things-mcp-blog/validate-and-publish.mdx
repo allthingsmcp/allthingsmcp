@@ -1,0 +1,71 @@
+---
+title: Validate and Publish
+description: Check the article, prepare an editorial and technical review, and set the correct metadata when it is approved for publication.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-blog
+guideStepId: validate-and-publish
+guideStepOrder: 6
+authors: [Gbadebo Bello]
+status: published
+tags: [guide-step, blog, validation, publishing]
+publishedAt: 2026-10-04
+updatedAt: 2026-10-04
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-10-04
+---
+
+Format the files you changed, then validate the content. Run commands from the repository root and substitute your article’s filename:
+
+```bash
+pnpm --filter @all-things-mcp/web exec prettier --write content/guides/choosing-an-mcp-transport.mdx
+pnpm content:validate
+pnpm check
+```
+
+Format any author profile you added too. `pnpm content:validate` checks metadata and the project’s content rules. `pnpm check` also runs formatting, linting, type checks, unit tests, and the production build. Passing those checks does not verify the accuracy of the article’s claims; that needs technical review.
+
+## Prepare a focused pull request
+
+Include the article, its images, and any new author profile. Keep unrelated site changes out of the contribution. In the pull request, explain:
+
+- Who the post is for and which question it answers.
+- The local preview URL and any screenshots that help reviewers.
+- The primary sources, protocol revision, and software versions checked.
+- Which examples you ran and what results you observed.
+- Any claims or tradeoffs that need particular attention during review.
+
+Keep the post as a draft until editorial and technical review are complete.
+
+## Set publication metadata after approval
+
+When the post is ready, update the existing frontmatter fields rather than adding a second metadata block:
+
+```yaml
+status: published
+publishedAt: 2026-10-04
+updatedAt: 2026-10-04
+lastVerified: 2026-10-04
+```
+
+Use the actual publication, revision, and verification dates; they do not have to be the same. Preserve the original `publishedAt` on later edits. Update `updatedAt` when the article changes and `lastVerified` when you recheck its technical content.
+
+Rerun the checks after changing the status. Once the approved changes are merged and the production deployment succeeds, verify the live article and its cards. Editing a local file does not publish it to the live site.
+
+## Link a Substack edition if one exists
+
+If the article has a separately published Substack edition, add its full URL in the optional `substackUrl` field. The article page will show a “Read the Substack edition” link. This field does not create, sync, or publish a newsletter post.
+
+<Checklist
+  items={[
+    'Editorial and technical review are complete',
+    'The article and author profile use the correct names and assets',
+    'Publication and verification dates reflect what actually happened',
+    'The required checks pass with the final metadata',
+    'The deployed article, card, images, and links have been checked',
+  ]}
+/>
+
+**Checkpoint:** the draft is ready for review, or the approved post has been deployed and verified at its canonical `/blog/` URL.

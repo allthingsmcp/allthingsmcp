@@ -12,14 +12,22 @@ pnpm install
 pnpm dev
 ```
 
-Use Node 24 LTS (pinned in `.nvmrc`, package engines, and CI). Restart running
-development servers after updating dependencies. The normal dev command disables
-Node server source maps to mitigate generated-source-map retention during hot
+Use Node 24 LTS (pinned in `.nvmrc`, package engines, and CI). pnpm selects
+the version in `pnpm-workspace.yaml` automatically for project commands, even
+when the shell has another Node version. Run `pnpm install --frozen-lockfile`
+after pulling dependency updates, then restart development servers. The normal
+dev command disables Node server source maps to mitigate generated-source-map retention during hot
 reloads. This changes server stack-trace debugging, not the production build.
 Use `pnpm dev:debug` only when mapped server stacks are needed; restart that
 session periodically. Raising the heap limit does not fix retained objects.
+Both dev commands cap the JavaScript old-space heap at 2 GiB, instead of
+Next's default of half the machine's physical RAM. Native compiler memory
+is additional; this cap is a safeguard, not a memory-leak fix.
 
 For production, use `pnpm build` followed by `pnpm start`, never `pnpm dev`.
+Use those commands for a lighter local preview too: `pnpm start` serves the
+built site without the development compiler or hot-reload watchers. Rebuild
+after changing source files, or use `pnpm dev` while actively editing.
 After building, run `pnpm test:memory` to check repeated requests against an
 isolated local production server. CI runs this check too. It measures post-GC
 heap growth and memory peaks without adding a public diagnostic endpoint.

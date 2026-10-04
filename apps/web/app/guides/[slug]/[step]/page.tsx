@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { ContentAuthors } from '@/components/content-authors';
 import { ContentMeta } from '@/components/content-meta';
 import { GuideStepExperience } from '@/components/guide-step-experience';
 import { getMDXComponents } from '@/components/mdx';
@@ -96,6 +97,7 @@ export default async function GuideStepPage({
   return (
     <main id="main-content" className="guide-step-page">
       <GuideStepExperience
+        authors={<ContentAuthors names={data.authors} label="Step authors" />}
         guideSlug={slug}
         guideTitle={guide.title}
         steps={guide.guideSteps}

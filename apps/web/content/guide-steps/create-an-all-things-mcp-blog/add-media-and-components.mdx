@@ -1,0 +1,76 @@
+---
+title: Add Media and Components
+description: Use the shared code blocks and callouts, add accessible article images, and understand the generated blog-card artwork.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-blog
+guideStepId: add-media-and-components
+guideStepOrder: 4
+authors: [Gbadebo Bello]
+status: published
+tags: [guide-step, blog, images, components]
+publishedAt: 2026-10-04
+updatedAt: 2026-10-04
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-10-04
+---
+
+Add a component when it makes the explanation easier to follow. Blog posts use the same reviewed Markdown and MDX components as Guides, so you do not need to import anything into the article.
+
+## Add code with context
+
+Use a fenced code block with a language. A title can identify the file, and `lineNumbers` can help when the prose refers to particular lines.
+
+````md
+```ts title="article-metadata.ts"
+const article = {
+  contentType: 'article',
+  status: 'draft',
+};
+```
+````
+
+The rendered result uses the shared code-block styling and copy control:
+
+```ts title="article-metadata.ts"
+const article = {
+  contentType: 'article',
+  status: 'draft',
+};
+```
+
+## Add a focused callout
+
+Use a note for helpful context. Reserve a warning for a concrete risk the reader needs to understand before acting.
+
+```mdx
+<Callout title="State the version" type="note">
+  Name the versions covered by an example so readers can reproduce it.
+</Callout>
+```
+
+<Callout title="State the version" type="note">
+  Name the versions covered by an example so readers can reproduce it.
+</Callout>
+
+For checklists, tabs, and other supported components, see [Use writing components](/guides/create-an-all-things-mcp-guide/use-writing-components) and [Add structured content](/guides/create-an-all-things-mcp-guide/add-structured-content). Keep contributed MDX free of imports, exports, executable JavaScript, and custom HTML. Interactive workspace blocks require a registered interactive Guide and are not a blog-post feature.
+
+## Add an image inside the article
+
+Put article assets in a descriptive folder such as `apps/web/public/blog/choosing-an-mcp-transport/`. Reference the image from the site root, without the `public` directory in the URL:
+
+```md
+![Deployment settings showing the selected transport](/blog/choosing-an-mcp-transport/deployment-settings.png)
+
+The selected setting in this screenshot belongs to the example deployment.
+```
+
+Add the actual image before using this example. Write alternative text that communicates the useful information in the image, and explain complex visuals in nearby prose. Check that text remains readable on a narrow screen. Crop screenshots to the relevant area and remove credentials or personal data. Include attribution when the asset’s license requires it.
+
+## Understand the card cover
+
+The current blog cards generate their cover graphics from `blogTopic`. There is no custom `coverImage` frontmatter field wired into the card. An image inside the article will appear in the body; it will not replace that generated cover.
+
+**Checkpoint:** code has language labels and context, callouts have a clear purpose, and every article image exists at its referenced path with useful alternative text.

@@ -18,7 +18,7 @@ test('approved branding loads throughout the shared shell and metadata', async (
     'src',
     `${brandRoot}/svg/horizontal-dark.svg`,
   );
-  await expect(page.locator('h1')).toHaveText('Learn. Build.Ship with MCP.');
+  await expect(page.locator('h1')).toHaveText('Learn. Build. Ship with MCP.');
   await expect(footer).toContainText('Learn. Build. Ship with MCP.');
   await expect(
     page.locator('link[rel="icon"][type="image/svg+xml"]'),

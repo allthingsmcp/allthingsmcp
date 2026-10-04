@@ -6,6 +6,12 @@ import {
 import { z } from 'zod';
 import { contentSchema } from './lib/content-schema';
 
+const authorLink = z
+  .string()
+  .url()
+  .refine((value) => /^https?:\/\//i.test(value), 'Use an HTTP or HTTPS URL')
+  .optional();
+
 export const docs = defineDocs({
   dir: 'content',
   docs: {
@@ -22,7 +28,11 @@ export const authors = defineCollections({
     role: z.string().min(1),
     bio: z.string().min(20),
     image: z.string().startsWith('/'),
-    url: z.string().url().optional(),
+    github: authorLink,
+    linkedin: authorLink,
+    x: authorLink,
+    website: authorLink,
+    url: authorLink,
   }),
 });
 

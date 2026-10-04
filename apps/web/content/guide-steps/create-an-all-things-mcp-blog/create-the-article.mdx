@@ -1,0 +1,83 @@
+---
+title: Create the Article
+description: Add the blog’s MDX file, supply the required frontmatter, and connect an author profile for the article byline.
+contentType: guide-step
+section: build
+guideSlug: create-an-all-things-mcp-blog
+guideStepId: create-the-article
+guideStepOrder: 2
+authors: [Gbadebo Bello]
+status: published
+tags: [guide-step, blog, frontmatter, authors]
+publishedAt: 2026-10-04
+updatedAt: 2026-10-04
+difficulty: beginner
+estimatedMinutes: 10
+specVersion: 2025-11-25
+lastVerified: 2026-10-04
+---
+
+Create `apps/web/content/guides/choosing-an-mcp-transport.mdx`. Use a short, lowercase, hyphenated filename that you can keep after publication.
+
+<Callout title="Why is a blog post in the guides folder?" type="note">
+  Existing articles share this content folder with Guide overviews. The
+  `contentType: article` field identifies a blog post. The example filename
+  becomes `/blog/choosing-an-mcp-transport`; it does not create a Guide.
+</Callout>
+
+## Add the metadata
+
+Put this frontmatter at the very start of the file. The article body begins after the second `---` line.
+
+```yaml title="apps/web/content/guides/choosing-an-mcp-transport.mdx"
+---
+title: Choosing an MCP Transport
+description: Compare MCP transport options against the environment and deployment constraints of your integration.
+contentType: article
+section: blog
+blogTopic: architecture
+authors: [Your Name]
+status: draft
+tags: [transport, architecture, deployment]
+updatedAt: 2026-10-04
+difficulty: intermediate
+estimatedMinutes: 8
+specVersion: 2025-11-25
+lastVerified: 2026-10-04
+---
+```
+
+Replace the sample title, description, author, tags, and technical metadata with values that describe your own post. Descriptions must contain at least 24 characters. Use `beginner`, `intermediate`, or `advanced` for `difficulty`, and a positive whole number for the estimated reading time.
+
+Dates use `YYYY-MM-DD`. Set `updatedAt` when you revise the article. Set `lastVerified` to the date you actually checked its technical claims, and `specVersion` to the protocol revision those claims cover. The sample values are examples, not evidence of verification.
+
+The current schema requires `difficulty`, `estimatedMinutes`, `specVersion`, and `lastVerified` for every article, including opinion posts. Keep `status: draft` while writing and reviewing. Add `publishedAt` when the post is approved for publication.
+
+## Connect an author profile
+
+Use the author’s exact profile name in `authors`. Multiple authors are supported:
+
+```yaml
+authors:
+  - Ada Lovelace
+  - Grace Hopper
+```
+
+If a profile already exists in `apps/web/content/authors/`, reuse it. Otherwise create a YAML file such as `apps/web/content/authors/ada-lovelace.yaml`:
+
+```yaml title="apps/web/content/authors/ada-lovelace.yaml"
+name: Ada Lovelace
+role: MCP contributor
+bio: Writes practical explanations of protocol architecture and developer tooling.
+image: /authors/ada-lovelace.jpg
+github: https://github.com/your-handle
+linkedin: https://www.linkedin.com/in/your-handle/
+x: https://x.com/your-handle
+website: https://example.com
+```
+
+Replace these sample details and add the referenced image to `apps/web/public/authors/`. The profile requires a name, role, biography of at least 20 characters, and a local image path. The profile `name` must exactly match the article’s `authors` entry for the full byline to appear.
+
+The `github`, `linkedin`, `x`, and `website` fields are optional. Use your own full HTTP or HTTPS URLs and omit platforms you do not want to share. Available links appear beneath your role on blog posts and Guides. Older profiles can keep `url` as a website fallback; when both are present, `website` takes precedence.
+
+**Checkpoint:** your article has complete draft metadata, a stable filename, and an author name that resolves to the intended profile.
