@@ -2,3 +2,6 @@ interface:
   display_name: 'All Things MCP Diagrams'
   short_description: 'Create clear branded MCP technical diagrams'
   default_prompt: 'Use $diagrams to create an All Things MCP technical diagram.'
+  icon_small: '../brand-system/assets/logo/open-junction/icons/favicon.svg'
+  icon_large: '../brand-system/assets/logo/open-junction/icons/avatar.svg'
+  brand_color: '#2563EB'

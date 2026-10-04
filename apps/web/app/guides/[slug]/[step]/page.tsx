@@ -6,6 +6,7 @@ import { getMDXComponents } from '@/components/mdx';
 import type { ContentFrontmatter } from '@/lib/content-schema';
 import { source } from '@/lib/source';
 import { interactiveGuideIds } from '@/lib/interactive-guides';
+import { socialCardMetadata } from '@/lib/social-card';
 
 function getGuide(slug: string) {
   return source.getPages().find((page) => {
@@ -49,6 +50,12 @@ export async function generateMetadata({
     title: page.data.title,
     description: page.data.description,
     alternates: { canonical: `/guides/${slug}/${step}` },
+    ...socialCardMetadata({
+      title: page.data.title,
+      description: page.data.description,
+      kind: 'guide-step',
+      slug: `${slug}/${step}`,
+    }),
   };
 }
 

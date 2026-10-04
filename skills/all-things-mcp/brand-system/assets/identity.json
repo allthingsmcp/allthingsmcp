@@ -1,0 +1,51 @@
+{
+  "version": 3,
+  "name": "All Things MCP",
+  "positioning": "Learn. Build. Ship with MCP.",
+  "website": "allthingsmcp.com",
+  "color": {
+    "blue": "#2563EB",
+    "navy": "#0F172A",
+    "white": "#FFFFFF",
+    "blueOnDark": "#60A5FA",
+    "paleBlue": "#EFF6FF",
+    "ink": "#0F172A",
+    "mist": "#F8FAFC",
+    "success": "#0B9F5A",
+    "warning": "#DC6925",
+    "violet": "#7047EB",
+    "orange": "#DC6925",
+    "danger": "#DC2626",
+    "blueDark": "#1D4ED8",
+    "secondary": "#3E4C66",
+    "muted": "#53657B",
+    "border": "#DCE4EE"
+  },
+  "font": {
+    "display": "Geist",
+    "body": "Inter",
+    "caption": "Inter",
+    "code": "JetBrains Mono"
+  },
+  "logoFamily": "Open Junction — iteration 02",
+  "logo": {
+    "compactOnLight": "brand/open-junction/svg/horizontal-light.svg",
+    "compactOnDark": "brand/open-junction/svg/horizontal-dark.svg",
+    "primaryOnLight": "brand/open-junction/svg/primary-light.svg",
+    "primaryOnDark": "brand/open-junction/svg/primary-dark.svg",
+    "stackedOnLight": "brand/open-junction/svg/stacked-light.svg",
+    "stackedOnDark": "brand/open-junction/svg/stacked-dark.svg",
+    "mark": "brand/open-junction/svg/mark-blue.svg",
+    "markOnDark": "brand/open-junction/svg/mark-on-dark.svg",
+    "wordmark": "brand/open-junction/svg/wordmark-navy.svg",
+    "wordmarkOnDark": "brand/open-junction/svg/wordmark-white.svg",
+    "monoOnLight": "brand/open-junction/svg/horizontal-mono-navy.svg",
+    "monoOnDark": "brand/open-junction/svg/horizontal-mono-white.svg",
+    "markMonoOnLight": "brand/open-junction/svg/mark-mono-navy.svg",
+    "markMonoOnDark": "brand/open-junction/svg/mark-mono-white.svg"
+  },
+  "icon": {
+    "favicon": "brand/open-junction/icons/favicon.svg",
+    "avatar": "brand/open-junction/icons/avatar.svg"
+  }
+}

@@ -3,6 +3,7 @@ import { Rss } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { SearchDialogTrigger } from '@/components/search-dialog';
 import { siteConfig } from '@/lib/config';
+import { brandIdentity } from '@/lib/brand';
 
 function GitHubMark() {
   return (
@@ -82,7 +83,7 @@ export function SiteFooter() {
       <div className="shell footer-bottom">
         <div>
           <Logo inverse />
-          <p>Independent. Developer-first. MCP focused.</p>
+          <p>{brandIdentity.positioning}</p>
         </div>
         <div className="footer-social">
           <Link

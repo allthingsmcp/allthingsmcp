@@ -8,5 +8,9 @@ export const siteConfig = {
     'https://github.com/allthingsmcp/allthingsmcp',
   substackUrl:
     process.env.NEXT_PUBLIC_SUBSTACK_URL ?? 'https://allthingsmcp.substack.com',
-  substackEmbedUrl: process.env.NEXT_PUBLIC_SUBSTACK_EMBED_URL ?? '',
+  substackEmbedUrl:
+    process.env.NEXT_PUBLIC_SUBSTACK_EMBED_URL ??
+    'https://allthingsmcp.substack.com/embed',
+  googleAnalyticsId:
+    process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID ?? 'G-G6ZS6SHP49',
 };

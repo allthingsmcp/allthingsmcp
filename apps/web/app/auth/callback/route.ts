@@ -22,13 +22,5 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(`${next}?auth=failed`, url.origin));
   }
 
-  const { data } = await supabase.auth.getUser();
-  if (data.user) {
-    await supabase
-      .from('profiles')
-      .update({ newsletter_opt_in: url.searchParams.get('newsletter') === '1' })
-      .eq('id', data.user.id);
-  }
-
   return NextResponse.redirect(new URL(next, url.origin));
 }

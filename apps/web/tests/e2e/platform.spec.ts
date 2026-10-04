@@ -173,11 +173,31 @@ test('guides use a structured overview and temporary anonymous progress', async 
   await expect(authDialog).toContainText(
     'Sign in or create an account to keep completed steps across reloads and devices.',
   );
-  await expect(
-    authDialog.getByRole('checkbox', { name: /Keep me ahead of MCP/ }),
-  ).toBeChecked();
+  await expect(authDialog.getByRole('checkbox')).toHaveCount(0);
   await expect(authDialog).not.toContainText('GitHub provides identity');
   await expect(authDialog).not.toContainText('Reading and simulation work');
+});
+
+test('newsletter uses the official Substack signup embed', async ({ page }) => {
+  await page.goto('/');
+  const newsletter = page.locator('#newsletter');
+  const embed = newsletter.getByTitle('Subscribe to All Things MCP');
+
+  await expect(embed).toHaveAttribute(
+    'src',
+    'https://allthingsmcp.substack.com/embed',
+  );
+  await expect(embed).toHaveAttribute('height', '320');
+  await expect(embed).toBeVisible();
+  await expect
+    .poll(() =>
+      embed.evaluate(
+        (element) =>
+          element.getBoundingClientRect().right <=
+          document.documentElement.clientWidth,
+      ),
+    )
+    .toBe(true);
 });
 
 test('MDX component examples retain syntax highlighting', async ({ page }) => {

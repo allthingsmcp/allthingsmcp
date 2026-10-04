@@ -28,6 +28,10 @@ export function NewsletterPanel({ compact = false }: { compact?: boolean }) {
           <iframe
             title="Subscribe to All Things MCP"
             src={siteConfig.substackEmbedUrl}
+            width="480"
+            height="320"
+            frameBorder="0"
+            scrolling="no"
             loading="lazy"
           />
         ) : (

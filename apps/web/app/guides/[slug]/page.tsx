@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { GuideOverviewExperience } from '@/components/guide-overview-experience';
 import type { ContentFrontmatter } from '@/lib/content-schema';
+import { socialCardMetadata } from '@/lib/social-card';
 import { source } from '@/lib/source';
 
 function getGuide(slug: string) {
@@ -30,6 +31,12 @@ export async function generateMetadata({
     title: page.data.title,
     description: page.data.description,
     alternates: { canonical: `/guides/${slug}` },
+    ...socialCardMetadata({
+      title: page.data.title,
+      description: page.data.description,
+      kind: 'guide',
+      slug,
+    }),
   };
 }
 
