@@ -12,7 +12,6 @@ export type CardItem = {
 export const primaryNav = [
   { label: 'Guides', href: '/guides' },
   { label: 'Blog', href: '/blog' },
-  { label: 'Spec Watch', href: '/spec-watch' },
 ];
 
 export const hubs: Record<

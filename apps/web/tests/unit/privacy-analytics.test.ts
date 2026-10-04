@@ -1,22 +1,45 @@
+// @vitest-environment jsdom
+import { createElement } from 'react';
+import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { trackPrivacySafeEvent } from '@/components/privacy-analytics';
-import { siteConfig } from '@/lib/config';
+import {
+  PrivacyAnalytics,
+  trackPrivacySafeEvent,
+} from '@/components/privacy-analytics';
+
+vi.mock('@vercel/analytics/next', () => ({
+  Analytics: () => createElement('script', { 'data-vercel-analytics': true }),
+}));
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllEnvs();
+  delete window.va;
+});
 
 describe('privacy-safe analytics', () => {
-  afterEach(() => vi.unstubAllGlobals());
+  it('loads Vercel Analytics in production without a consent prompt', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    render(createElement(PrivacyAnalytics));
 
-  it('uses the configured GA4 property', () => {
-    expect(siteConfig.googleAnalyticsId).toBe('G-G6ZS6SHP49');
+    expect(document.querySelector('[data-vercel-analytics]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('#google-analytics')).toBeNull();
   });
 
-  it('sends event names without user-entered data', () => {
+  it('does not load deployment analytics during local development', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    render(createElement(PrivacyAnalytics));
+
+    expect(document.querySelector('[data-vercel-analytics]')).toBeNull();
+  });
+
+  it('sends named events without user-entered data', () => {
     const va = vi.fn();
-    const gtag = vi.fn();
-    vi.stubGlobal('window', { va, gtag });
+    window.va = va;
 
     trackPrivacySafeEvent('newsletter_cta');
 
     expect(va).toHaveBeenCalledWith('event', { name: 'newsletter_cta' });
-    expect(gtag).toHaveBeenCalledWith('event', 'newsletter_cta');
   });
 });

@@ -5,6 +5,7 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ContentMeta } from '@/components/content-meta';
 import { getMDXComponents } from '@/components/mdx';
 import type { ContentFrontmatter } from '@/lib/content-schema';
+import { isProductionDeployment } from '@/lib/deployment';
 import { source } from '@/lib/source';
 
 export function generateStaticParams() {
@@ -17,16 +18,17 @@ export default async function LibraryPage({
   params: Promise<{ slug?: string[] }>;
 }) {
   const { slug } = await params;
-  const production =
-    process.env.VERCEL_ENV === 'production' ||
-    (!process.env.VERCEL_ENV && process.env.NODE_ENV === 'production');
+  const production = isProductionDeployment();
+  if (production) notFound();
+
   if (!slug?.length) {
     const pages = source
       .getPages()
       .filter(
         (page) =>
-          !production ||
-          (page.data as { status?: string }).status === 'published',
+          (page.data as ContentFrontmatter).section !== 'spec-watch' &&
+          (!production ||
+            (page.data as { status?: string }).status === 'published'),
       );
     return (
       <main id="main-content">
@@ -66,6 +68,7 @@ export default async function LibraryPage({
   const page = source.getPage(slug);
   if (!page) notFound();
   const data = page.data as typeof page.data & ContentFrontmatter;
+  if (data.section === 'spec-watch') notFound();
   if (production && data.status === 'draft') notFound();
   if (data.contentType === 'article') {
     redirect(`/blog/${slug.at(-1)}`);
