@@ -19,7 +19,6 @@ const groups = [
     links: [
       ['Guides', '/guides'],
       ['Blog', '/blog'],
-      ['Spec Watch', '/spec-watch'],
     ],
   },
   {

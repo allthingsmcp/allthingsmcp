@@ -8,7 +8,6 @@ import {
   FileText,
   LoaderCircle,
   Newspaper,
-  Radio,
   Search,
   X,
 } from 'lucide-react';
@@ -28,7 +27,6 @@ const categories = [
   ['all', 'All'],
   ['guides', 'Guides'],
   ['blog', 'Blog'],
-  ['spec-watch', 'Spec Watch'],
   ['glossary', 'Glossary'],
   ['pages', 'Pages'],
 ] as const;
@@ -67,7 +65,6 @@ function ResultIcon({ category }: { category: SearchResult['category'] }) {
   const Icon = {
     guides: BookOpen,
     blog: Newspaper,
-    'spec-watch': Radio,
     glossary: BookMarked,
     pages: FileText,
   }[category];
@@ -231,7 +228,7 @@ function SearchDialog({
             aria-activedescendant={
               activeIndex >= 0 ? `search-result-${activeIndex}` : undefined
             }
-            placeholder="Search guides, articles, terms, and spec updates…"
+            placeholder="Search guides, articles, terms, and pages…"
           />
           {status === 'loading' ? (
             <LoaderCircle
@@ -283,9 +280,6 @@ function SearchDialog({
                 </Link>
                 <Link href="/blog" onClick={close}>
                   Read the Blog <ArrowRight aria-hidden="true" />
-                </Link>
-                <Link href="/spec-watch" onClick={close}>
-                  Follow Spec Watch <ArrowRight aria-hidden="true" />
                 </Link>
               </div>
             </div>

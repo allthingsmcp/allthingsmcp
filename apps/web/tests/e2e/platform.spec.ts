@@ -11,7 +11,6 @@ const routes = [
   '/operate',
   '/security',
   '/ecosystem',
-  '/spec-watch',
   '/tools',
   '/glossary',
   '/contribute',
@@ -45,7 +44,7 @@ test('mobile navigation exposes the focused destinations', async ({
     page
       .getByRole('navigation', { name: 'Mobile navigation' })
       .getByRole('link'),
-  ).toHaveText(['Guides', 'Blog', 'Spec Watch', 'Newsletter']);
+  ).toHaveText(['Guides', 'Blog', 'Newsletter']);
   await expect(
     page
       .getByRole('navigation', { name: 'Mobile navigation' })
@@ -63,7 +62,7 @@ test('desktop navigation reflects the focused content model', async ({
     page
       .getByRole('navigation', { name: 'Primary navigation' })
       .getByRole('link'),
-  ).toHaveText(['Guides', 'Blog', 'Spec Watch']);
+  ).toHaveText(['Guides', 'Blog']);
 });
 
 test('account controls hydrate without changing their initial text', async ({
@@ -78,6 +77,9 @@ test('account controls hydrate without changing their initial text', async ({
       hydrationErrors.push(message.text());
     }
   });
+
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Sign in' })).toHaveCount(0);
 
   await page.goto('/guides/build-a-minimal-mcp-server');
   await expect(
@@ -200,6 +202,25 @@ test('newsletter uses the official Substack signup embed', async ({ page }) => {
     .toBe(true);
 });
 
+test('production uses privacy-focused analytics without a consent prompt', async ({
+  page,
+}) => {
+  test.skip(
+    !process.env.PLAYWRIGHT_BASE_URL,
+    'Deployment analytics are production-only.',
+  );
+  await page.goto('/');
+
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(
+    page.locator('script[src*="googletagmanager.com/gtag"]'),
+  ).toHaveCount(0);
+  await expect(
+    page.locator('script[data-sdkn^="@vercel/analytics"]'),
+  ).toHaveCount(1);
+  await expect(page.getByTitle('Subscribe to All Things MCP')).toBeVisible();
+});
+
 test('MDX component examples retain syntax highlighting', async ({ page }) => {
   await page.goto(
     '/guides/create-an-all-things-mcp-guide/use-writing-components',
@@ -236,8 +257,13 @@ test('footer prioritizes content, newsletter, and search', async ({
       .filter({ hasText: 'Stay current' })
       .locator('summary')
       .click();
+    await footer
+      .locator('details')
+      .filter({ hasText: 'Project' })
+      .locator('summary')
+      .click();
   }
-  for (const label of ['Guides', 'Blog', 'Spec Watch', 'Newsletter']) {
+  for (const label of ['Guides', 'Blog', 'Newsletter']) {
     await expect(
       footer.getByRole('link', { name: label, exact: true }),
     ).toBeVisible();
@@ -364,7 +390,7 @@ test('blog posts show authors and track the active section', async ({
     .not.toBe('0% read');
 });
 
-test('homepage features guides, blog, and spec watch content', async ({
+test('homepage features guides and blog without unpublished sections', async ({
   page,
 }) => {
   await page.goto('/');
@@ -375,13 +401,58 @@ test('homepage features guides, blog, and spec watch content', async ({
   await expect(
     main.getByRole('heading', { name: 'Latest from the blog' }),
   ).toBeVisible();
-  await expect(
-    main.getByRole('heading', { name: 'Latest from Spec Watch' }),
-  ).toBeVisible();
+  await expect(main.getByText('Spec Watch', { exact: true })).toHaveCount(0);
   await expect(
     main.getByRole('heading', { name: 'Featured tools' }),
   ).toHaveCount(0);
   await expect(main.getByText('Ecosystem snapshot')).toHaveCount(0);
+});
+
+test('spec watch is unavailable until the section is ready', async ({
+  page,
+}) => {
+  const route = await page.goto('/spec-watch');
+  expect(route?.status()).toBe(404);
+
+  const entry = await page.goto('/library/spec-watch/current-protocol');
+  expect(entry?.status()).toBe(404);
+});
+
+test('privacy page is not published', async ({ request }) => {
+  const response = await request.get('/privacy');
+  expect(response.status()).toBe(404);
+});
+
+test('production hides unreleased directory and library routes', async ({
+  request,
+}) => {
+  test.skip(
+    !process.env.PLAYWRIGHT_BASE_URL,
+    'These routes remain visible in local authoring environments.',
+  );
+  for (const route of ['/tools', '/ecosystem', '/library']) {
+    expect((await request.get(route)).status()).toBe(404);
+  }
+});
+
+test('robots and sitemap expose only launch-ready discovery routes', async ({
+  request,
+}) => {
+  const robots = await request.get('/robots.txt');
+  expect(robots.ok()).toBe(true);
+  const robotsText = await robots.text();
+  expect(robotsText).toContain('User-Agent: *');
+  expect(robotsText).toContain('Disallow: /api/');
+  expect(robotsText).toContain('Sitemap:');
+
+  const sitemap = await request.get('/sitemap.xml');
+  expect(sitemap.ok()).toBe(true);
+  const sitemapText = await sitemap.text();
+  expect(sitemapText).toContain('/guides/build-a-minimal-mcp-server');
+  expect(sitemapText).not.toContain('/privacy');
+  expect(sitemapText).not.toContain('/spec-watch');
+  expect(sitemapText).not.toContain('/tools');
+  expect(sitemapText).not.toContain('/ecosystem');
 });
 
 test('homepage has no serious accessibility violations', async ({ page }) => {

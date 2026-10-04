@@ -672,7 +672,7 @@ a.content-card:hover {
   font-size: 1rem;
 }
 .product-path-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .path-card.product-path-card {
   display: flex;
@@ -786,7 +786,7 @@ a.content-card:hover {
 }
 .home-columns {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 28px;
 }
 .stack-list {

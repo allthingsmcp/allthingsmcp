@@ -6,13 +6,7 @@ import type { ContentFrontmatter } from '@/lib/content-schema';
 import { glossaryTerms } from '@/lib/glossary-data';
 import { source } from '@/lib/source';
 
-const searchCategories = [
-  'guides',
-  'blog',
-  'spec-watch',
-  'glossary',
-  'pages',
-] as const;
+const searchCategories = ['guides', 'blog', 'glossary', 'pages'] as const;
 
 type SearchCategory = (typeof searchCategories)[number];
 
@@ -32,9 +26,6 @@ function canonicalUrl(page: ReturnType<typeof source.getPages>[number]) {
   if (data.contentType === 'guide-step' && data.guideSlug && data.guideStepId) {
     return `/guides/${data.guideSlug}/${data.guideStepId}`;
   }
-  if (data.contentType.startsWith('spec-')) {
-    return `/spec-watch#${page.slugs.at(-1)}`;
-  }
   return page.url;
 }
 
@@ -43,7 +34,6 @@ function categoryFor(data: ContentFrontmatter): SearchCategory | undefined {
     return 'guides';
   }
   if (data.contentType === 'article') return 'blog';
-  if (data.contentType.startsWith('spec-')) return 'spec-watch';
   return undefined;
 }
 
@@ -68,7 +58,6 @@ function breadcrumbsFor(data: ContentFrontmatter, category: SearchCategory) {
   if (category === 'blog' && data.blogTopic) {
     return [formatLabel(data.blogTopic)];
   }
-  if (category === 'spec-watch') return ['Protocol updates'];
   return [];
 }
 
@@ -162,13 +151,6 @@ const pageRecords: SearchRecord[] = [
       'Technical explainers, architecture deep dives, and independent analysis of MCP.',
     url: '/blog',
     content: 'blog articles concepts architecture security production opinion',
-  },
-  {
-    title: 'Spec Watch',
-    description:
-      'MCP specification releases, proposals, implementation impact, and migration guidance.',
-    url: '/spec-watch',
-    content: 'specification releases proposals changelog protocol versions',
   },
   {
     title: 'MCP glossary',

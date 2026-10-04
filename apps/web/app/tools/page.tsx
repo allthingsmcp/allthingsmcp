@@ -1,9 +1,13 @@
+import { notFound } from 'next/navigation';
 import { DirectoryHero } from '@/components/directory-hero';
 import { ContentCard } from '@/components/content-card';
 import { NewsletterPanel } from '@/components/newsletter-panel';
 import { toolFixtures } from '@/lib/site-data';
+import { isProductionDeployment } from '@/lib/deployment';
 
 export default function ToolsPage() {
+  if (isProductionDeployment()) notFound();
+
   return (
     <main id="main-content">
       <DirectoryHero

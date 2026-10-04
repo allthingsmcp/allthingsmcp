@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react';
 import { DirectoryHero } from '@/components/directory-hero';
 import { NewsletterPanel } from '@/components/newsletter-panel';
 import { StatusBadge } from '@/components/status-badge';
+import { isProductionDeployment } from '@/lib/deployment';
 
 const projects = [
   {
@@ -36,6 +38,8 @@ const projects = [
 ];
 
 export default function EcosystemPage() {
+  if (isProductionDeployment()) notFound();
+
   return (
     <main id="main-content">
       <DirectoryHero
