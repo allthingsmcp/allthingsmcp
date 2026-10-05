@@ -553,6 +553,13 @@ test('real Weather Guide completes through the BFF and MCP runtime and survives 
   await serverName.fill('lagos-weather-server');
   await page.getByRole('button', { name: 'Create server' }).click();
   await expect(page.getByText('Runtime workspace ready')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Mark as incomplete' }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Mark as incomplete' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Mark step complete' }),
+  ).toBeVisible();
 
   await page.getByRole('tab', { name: 'Code' }).click();
   await expect(page.locator('.interactive-code-panel')).toContainText(

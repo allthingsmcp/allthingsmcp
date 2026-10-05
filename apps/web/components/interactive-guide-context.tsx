@@ -142,6 +142,7 @@ export function InteractiveGuideProvider({
   const [runtimeBusy, setBusy] = useState(true);
   const [claimConflict, setConflict] = useState(false);
   const conflictRef = useRef(false);
+  const objectiveCompletionRef = useRef<Record<string, boolean>>({});
 
   const commitState = useCallback((next: InteractiveGuideStateV1) => {
     stateRef.current = next;
@@ -462,15 +463,20 @@ export function InteractiveGuideProvider({
       runtimeStatus !== 'ready' ||
       runtimeBusy ||
       claimConflict ||
-      !progressReady ||
-      !workspace
+      !progressReady
     )
       return;
-    if (
+    const objectiveComplete = Boolean(
       getGuideObjectives(state).find((item) => item.stepId === activeStepId)
-        ?.complete
-    )
-      onComplete(activeStepId);
+        ?.complete,
+    );
+    const previous = objectiveCompletionRef.current[activeStepId];
+    objectiveCompletionRef.current[activeStepId] = objectiveComplete;
+
+    // Loading an already-satisfied objective must not override a reader who
+    // deliberately marked the step incomplete. Auto-complete only when the
+    // objective changes from incomplete to complete while this page is open.
+    if (previous === false && objectiveComplete) onComplete(activeStepId);
   }, [
     activeStepId,
     claimConflict,
@@ -479,7 +485,6 @@ export function InteractiveGuideProvider({
     runtimeBusy,
     runtimeStatus,
     state,
-    workspace,
   ]);
 
   const resolveClaimConflict = useCallback(

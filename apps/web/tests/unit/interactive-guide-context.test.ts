@@ -145,6 +145,28 @@ describe('real Guide workspace client', () => {
       'get-forecast',
     ]);
     expect(result.current.runtimeError).toBeNull();
+    expect(onComplete).toHaveBeenCalledWith('create-your-server');
+  });
+
+  it('does not re-complete an already-satisfied step when progress is manually cleared', async () => {
+    const existing = workspace({
+      serverName: 'saved-weather-server',
+      enabledCapabilityIds: [],
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ workspace: existing })),
+    );
+
+    const { result, rerender } = renderHook(useInteractiveGuide, {
+      wrapper: Wrapper,
+    });
+    await waitFor(() => expect(result.current.runtimeBusy).toBe(false));
+    expect(result.current.state.server.created).toBe(true);
+    expect(onComplete).not.toHaveBeenCalled();
+
+    rerender();
+    expect(onComplete).not.toHaveBeenCalled();
   });
 
   it('imports supported legacy capability IDs once without retaining fabricated exchanges', async () => {
