@@ -211,39 +211,6 @@ export function useAuthDialog() {
   return context;
 }
 
-export function AuthTrigger({ className }: { className?: string }) {
-  const { openAuth } = useAuthDialog();
-  const { data: session, isPending } = authClient.useSession();
-  const hydrated = useHydrated();
-  const resolvedSession = hydrated ? session : null;
-  const pending = !hydrated || isPending;
-  return (
-    <button
-      className={cn(
-        'auth-trigger',
-        resolvedSession && 'is-authenticated',
-        className,
-      )}
-      type="button"
-      onClick={() => openAuth('account')}
-      aria-label={
-        resolvedSession
-          ? `Account for ${resolvedSession.user.name || resolvedSession.user.email}`
-          : 'Sign in'
-      }
-    >
-      <UserRound aria-hidden="true" />
-      <span>
-        {pending
-          ? 'Account'
-          : resolvedSession
-            ? resolvedSession.user.name?.split(' ')[0] || 'Account'
-            : 'Sign in'}
-      </span>
-    </button>
-  );
-}
-
 export function AuthNudge({
   reason = 'progress',
   label = 'Sign in to save progress',
@@ -261,9 +228,18 @@ export function AuthNudge({
   if (!hydrated || isPending) return null;
   if (session) {
     return (
-      <span className={cn('auth-status', `auth-status--${tone}`, className)}>
+      <button
+        className={cn(
+          'auth-status auth-status--action',
+          `auth-status--${tone}`,
+          className,
+        )}
+        type="button"
+        onClick={() => openAuth('account')}
+        aria-label="Account connected. Open account options"
+      >
         <Cloud aria-hidden="true" /> Account connected
-      </span>
+      </button>
     );
   }
   return (
@@ -283,7 +259,7 @@ const progressStatusCopy: Record<
 > = {
   loading: 'Loading saved progress…',
   saving: 'Saving progress…',
-  saved: 'Progress saved to your account',
+  saved: 'Account progress synced',
   error: 'Progress could not be saved',
 };
 
@@ -327,16 +303,19 @@ export function GuideProgressStatus({
         ? AlertCircle
         : Cloud;
   return (
-    <span
+    <button
       className={cn(
-        'auth-status',
+        'auth-status auth-status--action',
         `auth-status--${tone}`,
         status === 'error' && 'is-error',
         className,
       )}
-      role={status === 'error' ? 'alert' : undefined}
+      type="button"
+      onClick={() => openAuth('account')}
+      aria-label={`${progressStatusCopy[status]}. Open account options`}
+      aria-live={status === 'error' ? 'assertive' : undefined}
     >
       <Icon aria-hidden="true" /> {progressStatusCopy[status]}
-    </span>
+    </button>
   );
 }

@@ -12,11 +12,15 @@ const returnStateLifetime = 15 * 60 * 1000;
 export function safeAuthReturnPath(value: unknown) {
   if (typeof value !== 'string' || !value.startsWith('/')) return null;
 
-  const base = new URL('https://all-things-mcp.invalid');
-  const resolved = new URL(value, base);
-  if (resolved.origin !== base.origin) return null;
+  try {
+    const base = new URL('https://all-things-mcp.invalid');
+    const resolved = new URL(value, base);
+    if (resolved.origin !== base.origin) return null;
 
-  return `${resolved.pathname}${resolved.search}${resolved.hash}`;
+    return `${resolved.pathname}${resolved.search}${resolved.hash}`;
+  } catch {
+    return null;
+  }
 }
 
 export function parseAuthReturnState(

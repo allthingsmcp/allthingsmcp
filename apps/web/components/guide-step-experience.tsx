@@ -53,8 +53,6 @@ export function GuideStepExperience({
   const nextStep = steps[activeIndex + 1];
   const previousStep = steps[activeIndex - 1];
   const isComplete = progress.completed.includes(activeStep.id);
-  const usesInteractiveCompletion =
-    !!interactiveGuideId && activeStep.id !== 'what-is-mcp';
   const articleContent = interactiveGuideId ? (
     <InteractiveGuideProvider
       activeStepId={activeStep.id}
@@ -142,33 +140,33 @@ export function GuideStepExperience({
 
         <div className="prose guide-step-prose">{articleContent}</div>
 
-        {!usesInteractiveCompletion && (
-          <div className="guide-step-completion">
-            <div>
-              <p className="eyebrow">Step {activeIndex + 1}</p>
-              <h2>{isComplete ? 'Step completed' : 'Ready to continue?'}</h2>
-              <p>
-                {isComplete
-                  ? 'You completed this step.'
+        <div className="guide-step-completion">
+          <div>
+            <p className="eyebrow">Step {activeIndex + 1}</p>
+            <h2>{isComplete ? 'Step completed' : 'Ready to continue?'}</h2>
+            <p>
+              {isComplete
+                ? 'You completed this step.'
+                : interactiveGuideId
+                  ? 'Complete the activity above, or mark the step complete yourself.'
                   : 'Mark this step complete when you have finished the checks above.'}
-              </p>
-              <GuideProgressStatus status={progress.persistence} />
-            </div>
-            <button
-              className={isComplete ? 'is-complete' : undefined}
-              type="button"
-              disabled={!progress.ready}
-              onClick={() => progress.toggle(activeStep.id)}
-            >
-              <Check aria-hidden="true" />
-              {!progress.ready
-                ? 'Loading progress…'
-                : isComplete
-                  ? 'Mark as incomplete'
-                  : 'Mark step complete'}
-            </button>
+            </p>
+            <GuideProgressStatus status={progress.persistence} />
           </div>
-        )}
+          <button
+            className={isComplete ? 'is-complete' : undefined}
+            type="button"
+            disabled={!progress.ready}
+            onClick={() => progress.toggle(activeStep.id)}
+          >
+            <Check aria-hidden="true" />
+            {!progress.ready
+              ? 'Loading progress…'
+              : isComplete
+                ? 'Mark as incomplete'
+                : 'Mark step complete'}
+          </button>
+        </div>
 
         <nav className="guide-step-pagination" aria-label="Guide steps">
           {previousStep ? (

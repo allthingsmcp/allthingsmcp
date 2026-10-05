@@ -190,6 +190,20 @@ test('guides use a structured overview and temporary anonymous progress', async 
   await expect(authDialog).not.toContainText('Reading and simulation work');
 });
 
+test('interactive Guide steps retain a manual completion action', async ({
+  page,
+}) => {
+  await page.goto('/guides/building-your-first-mcp-server/add-tools');
+  await expect(
+    page.getByRole('button', { name: 'Mark step complete' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      'Complete the activity above, or mark the step complete yourself.',
+    ),
+  ).toBeVisible();
+});
+
 test('newsletter uses the official Substack signup embed', async ({ page }) => {
   await page.goto('/');
   const newsletter = page.locator('#newsletter');

@@ -303,27 +303,6 @@ p {
   color: var(--muted);
   font: 600 0.68rem var(--font-mono);
 }
-.auth-trigger {
-  display: inline-flex;
-  min-height: 38px;
-  align-items: center;
-  gap: 7px;
-  padding: 0 11px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--ink-soft);
-  cursor: pointer;
-  font-size: 0.76rem;
-  font-weight: 650;
-}
-.auth-trigger:hover {
-  border-color: #a9c1ff;
-  color: var(--blue);
-}
-.auth-trigger svg {
-  width: 15px;
-}
 .menu-button {
   display: none;
   width: 42px;
@@ -3503,6 +3482,15 @@ a.content-card:hover {
   color: var(--blue);
   text-decoration-color: currentColor;
 }
+.auth-status--action {
+  cursor: pointer;
+}
+.auth-status--action:hover {
+  color: var(--blue);
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-underline-offset: 3px;
+}
 .auth-nudge svg,
 .auth-status svg {
   width: 13px;
@@ -4002,16 +3990,6 @@ a.content-card:hover {
     justify-content: center;
     padding: 0;
     border: 0;
-  }
-  .auth-trigger {
-    width: 42px;
-    height: 42px;
-    justify-content: center;
-    padding: 0;
-    border: 0;
-  }
-  .auth-trigger span {
-    display: none;
   }
   .menu-button {
     display: inline-flex;
