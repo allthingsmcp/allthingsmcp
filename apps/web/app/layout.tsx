@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { NextProvider } from 'fumadocs-core/framework/next';
 import { PrivacyAnalytics } from '@/components/privacy-analytics';
 import { AuthDialogProvider } from '@/components/auth-dialog';
+import { AuthReturnRestorer } from '@/components/auth-return-restorer';
 import { SearchDialogProvider } from '@/components/search-dialog';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
@@ -86,6 +87,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   {children}
                   <SiteFooter />
                   <PrivacyAnalytics />
+                  <AuthReturnRestorer />
                 </SearchDialogProvider>
               </GuideProgressProvider>
             </AuthDialogProvider>

@@ -11,6 +11,7 @@ import {
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 import { supabaseConfigured } from '@/lib/supabase/config';
+import { pendingAuthReturnKey } from '@/lib/auth-return';
 
 type AuthSession = {
   user: {
@@ -103,15 +104,20 @@ async function signInWithGitHub({
 
   const callback = new URL('/auth/callback', window.location.origin);
   const requestedReturn = new URL(callbackURL, window.location.origin);
-  callback.searchParams.set(
-    'next',
-    `${requestedReturn.pathname}${requestedReturn.search}${requestedReturn.hash}`,
+  sessionStorage.setItem(
+    pendingAuthReturnKey,
+    JSON.stringify({
+      path: `${requestedReturn.pathname}${requestedReturn.search}${requestedReturn.hash}`,
+      scrollY: window.scrollY,
+      createdAt: Date.now(),
+    }),
   );
 
   const { error } = await client.auth.signInWithOAuth({
     provider: 'github',
     options: { redirectTo: callback.toString() },
   });
+  if (error) sessionStorage.removeItem(pendingAuthReturnKey);
   return { error };
 }
 
