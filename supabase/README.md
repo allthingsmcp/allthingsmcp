@@ -6,8 +6,11 @@ database used by Guide Runtime.
 1. Link this directory to the Supabase project and run `supabase db push`.
 2. Enable GitHub under Authentication → Providers. Set GitHub's OAuth callback
    to the callback URL shown by Supabase.
-3. Add `http://localhost:3000/auth/callback` and the production equivalent to
-   Authentication → URL Configuration → Redirect URLs.
+3. Set the Authentication Site URL to `https://www.allthingsmcp.com`. Add
+   `http://localhost:3000/auth/callback`,
+   `https://allthingsmcp.com/auth/callback`, and
+   `https://www.allthingsmcp.com/auth/callback` to Authentication → URL
+   Configuration → Redirect URLs.
 4. Deploy the welcome email function with
    `supabase functions deploy welcome-email --no-verify-jwt`.
 5. Set `RESEND_API_KEY`, `WELCOME_EMAIL_FROM`,

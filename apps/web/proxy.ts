@@ -1,8 +1,12 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { recoverOAuthCallbackUrl } from '@/lib/auth-return';
 import { supabaseConfigured } from '@/lib/supabase/config';
 
 export async function proxy(request: NextRequest) {
+  const recoveredCallback = recoverOAuthCallbackUrl(request.nextUrl);
+  if (recoveredCallback) return NextResponse.redirect(recoveredCallback);
+
   let response = NextResponse.next({ request });
   if (!supabaseConfigured) return response;
 

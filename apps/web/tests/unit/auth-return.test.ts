@@ -1,7 +1,34 @@
 import { describe, expect, it } from 'vitest';
-import { parseAuthReturnState, safeAuthReturnPath } from '@/lib/auth-return';
+import {
+  authCallbackOrigin,
+  parseAuthReturnState,
+  recoverOAuthCallbackUrl,
+  safeAuthReturnPath,
+} from '@/lib/auth-return';
 
 describe('authentication return state', () => {
+  it('uses the authorized apex callback for the canonical production host', () => {
+    expect(authCallbackOrigin('https://www.allthingsmcp.com')).toBe(
+      'https://allthingsmcp.com',
+    );
+    expect(authCallbackOrigin('http://localhost:3000')).toBe(
+      'http://localhost:3000',
+    );
+  });
+
+  it('recovers an OAuth code that Supabase sends to the site root', () => {
+    expect(
+      recoverOAuthCallbackUrl(
+        new URL('https://www.allthingsmcp.com/?code=oauth-code'),
+      )?.toString(),
+    ).toBe('https://www.allthingsmcp.com/auth/callback?code=oauth-code');
+    expect(
+      recoverOAuthCallbackUrl(
+        new URL('https://www.allthingsmcp.com/guides?code=oauth-code'),
+      ),
+    ).toBeNull();
+  });
+
   it('keeps a guide path, query, and fragment on the current origin', () => {
     expect(
       safeAuthReturnPath(

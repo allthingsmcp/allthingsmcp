@@ -9,6 +9,28 @@ export type AuthReturnState = {
 
 const returnStateLifetime = 15 * 60 * 1000;
 
+export function authCallbackOrigin(currentOrigin: string) {
+  const origin = new URL(currentOrigin);
+
+  // Supabase currently authorizes the apex production callback while the site
+  // itself canonicalizes to www. The platform redirect preserves the OAuth
+  // code, and returning to www keeps access to the original sessionStorage.
+  if (origin.hostname === 'www.allthingsmcp.com') {
+    origin.hostname = 'allthingsmcp.com';
+  }
+
+  return origin.origin;
+}
+
+export function recoverOAuthCallbackUrl(url: URL) {
+  const code = url.pathname === '/' ? url.searchParams.get('code') : null;
+  if (!code) return null;
+
+  const callback = new URL('/auth/callback', url.origin);
+  callback.searchParams.set('code', code);
+  return callback;
+}
+
 export function safeAuthReturnPath(value: unknown) {
   if (typeof value !== 'string' || !value.startsWith('/')) return null;
 

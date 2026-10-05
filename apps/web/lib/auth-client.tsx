@@ -11,7 +11,7 @@ import {
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 import { supabaseConfigured } from '@/lib/supabase/config';
-import { pendingAuthReturnKey } from '@/lib/auth-return';
+import { authCallbackOrigin, pendingAuthReturnKey } from '@/lib/auth-return';
 
 type AuthSession = {
   user: {
@@ -102,7 +102,10 @@ async function signInWithGitHub({
   const client = createBrowserSupabaseClient();
   if (!client) return { error: new Error('Authentication is not configured.') };
 
-  const callback = new URL('/auth/callback', window.location.origin);
+  const callback = new URL(
+    '/auth/callback',
+    authCallbackOrigin(window.location.origin),
+  );
   const requestedReturn = new URL(callbackURL, window.location.origin);
   sessionStorage.setItem(
     pendingAuthReturnKey,
