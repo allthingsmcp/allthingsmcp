@@ -32,6 +32,7 @@ export function GuideStepExperience({
   activeStep,
   page,
   authors,
+  share,
   actions,
   children,
   interactiveGuideId,
@@ -42,6 +43,7 @@ export function GuideStepExperience({
   activeStep: GuideStep;
   page: StepPageData;
   authors: ReactNode;
+  share: ReactNode;
   actions: ReactNode;
   children: ReactNode;
   interactiveGuideId?: InteractiveGuideId;
@@ -135,7 +137,10 @@ export function GuideStepExperience({
             <span>Spec {page.specVersion}</span>
             <span>Updated {page.updatedAt}</span>
           </div>
-          {authors}
+          <div className="guide-step-article__byline">
+            {authors}
+            {share}
+          </div>
         </header>
 
         <div className="prose guide-step-prose">{articleContent}</div>

@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   TriangleAlert,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { AnalyticsLink } from '@/components/analytics-link';
 import { isStale, type ContentFrontmatter } from '@/lib/content-schema';
 import { siteConfig } from '@/lib/config';
@@ -15,11 +16,13 @@ export function ContentMeta({
   path,
   pagePath,
   showAuthors = true,
+  share,
 }: {
   data: ContentFrontmatter;
   path: string;
   pagePath: string;
   showAuthors?: boolean;
+  share?: ReactNode;
 }) {
   const editUrl = `${siteConfig.githubRepo}/edit/main/content/${path}`;
   const pageUrl = new URL(pagePath, siteConfig.siteUrl).toString();
@@ -64,6 +67,7 @@ export function ContentMeta({
           <ExternalLink />
           Report outdated content
         </AnalyticsLink>
+        {share}
       </div>
     </>
   );

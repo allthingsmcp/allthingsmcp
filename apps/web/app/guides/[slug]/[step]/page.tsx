@@ -8,6 +8,9 @@ import type { ContentFrontmatter } from '@/lib/content-schema';
 import { source } from '@/lib/source';
 import { interactiveGuideIds } from '@/lib/interactive-guides';
 import { socialCardMetadata } from '@/lib/social-card';
+import { JsonLd, contentStructuredData } from '@/components/json-ld';
+import { ContentShareMenu } from '@/components/content-share-menu';
+import { formatContentMarkdown } from '@/lib/content-share';
 
 function getGuide(slug: string) {
   return source.getPages().find((page) => {
@@ -47,10 +50,14 @@ export async function generateMetadata({
   const { slug, step } = await params;
   const page = getStep(slug, step);
   if (!page) return {};
+  const guide = getGuide(slug);
   return {
-    title: page.data.title,
+    title: `${page.data.title} | ${guide?.data.title ?? 'MCP Guide'}`,
     description: page.data.description,
     alternates: { canonical: `/guides/${slug}/${step}` },
+    ...(page.data.status === 'draft' || guide?.data.status === 'draft'
+      ? { robots: { index: false, follow: false } }
+      : {}),
     ...socialCardMetadata({
       title: page.data.title,
       description: page.data.description,
@@ -93,11 +100,39 @@ export default async function GuideStepPage({
   const interactiveGuideId = interactiveGuideIds.find(
     (id) => id === guide.interactiveGuideId,
   );
+  const pathname = `/guides/${slug}/${step}`;
+  const markdown = formatContentMarkdown({
+    data,
+    pathname,
+    body: await stepPage.data.getText('processed'),
+    guide,
+  });
 
   return (
     <main id="main-content" className="guide-step-page">
+      {data.status === 'published' && guide.status === 'published' && (
+        <JsonLd
+          data={contentStructuredData({
+            data,
+            path: `/guides/${slug}/${step}`,
+            breadcrumbs: [
+              { name: 'Home', path: '/' },
+              { name: 'Guides', path: '/guides' },
+              { name: guide.title, path: `/guides/${slug}` },
+              { name: data.title, path: `/guides/${slug}/${step}` },
+            ],
+          })}
+        />
+      )}
       <GuideStepExperience
         authors={<ContentAuthors names={data.authors} label="Step authors" />}
+        share={
+          <ContentShareMenu
+            pathname={pathname}
+            markdown={markdown}
+            variant="inline"
+          />
+        }
         guideSlug={slug}
         guideTitle={guide.title}
         steps={guide.guideSteps}

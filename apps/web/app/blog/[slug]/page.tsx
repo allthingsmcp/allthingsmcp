@@ -10,6 +10,9 @@ import { getMDXComponents } from '@/components/mdx';
 import type { ContentFrontmatter } from '@/lib/content-schema';
 import { socialCardMetadata } from '@/lib/social-card';
 import { source } from '@/lib/source';
+import { JsonLd, contentStructuredData } from '@/components/json-ld';
+import { ContentShareMenu } from '@/components/content-share-menu';
+import { formatContentMarkdown } from '@/lib/content-share';
 
 function getPost(slug: string) {
   return source.getPages().find((page) => {
@@ -39,6 +42,9 @@ export async function generateMetadata({
     title: page.data.title,
     description: page.data.description,
     alternates: { canonical: `/blog/${slug}` },
+    ...(page.data.status === 'draft'
+      ? { robots: { index: false, follow: false } }
+      : {}),
     ...socialCardMetadata({
       title: page.data.title,
       description: page.data.description,
@@ -62,8 +68,28 @@ export default async function BlogPostPage({
     (!process.env.VERCEL_ENV && process.env.NODE_ENV === 'production');
   if (production && data.status === 'draft') notFound();
   const MDX = page.data.body;
+  const pathname = `/blog/${slug}`;
+  const markdown = formatContentMarkdown({
+    data,
+    pathname,
+    body: await page.data.getText('processed'),
+  });
   return (
     <main id="main-content">
+      {data.status === 'published' && (
+        <JsonLd
+          data={contentStructuredData({
+            data,
+            path: `/blog/${slug}`,
+            breadcrumbs: [
+              { name: 'Home', path: '/' },
+              { name: 'Blog', path: '/blog' },
+              { name: data.title, path: `/blog/${slug}` },
+            ],
+            type: 'BlogPosting',
+          })}
+        />
+      )}
       <div className="shell">
         <Breadcrumbs
           items={[{ label: 'Blog', href: '/blog' }, { label: data.title }]}
@@ -81,6 +107,13 @@ export default async function BlogPostPage({
               path={`${page.slugs.join('/')}.mdx`}
               pagePath={`/blog/${slug}`}
               showAuthors={false}
+              share={
+                <ContentShareMenu
+                  pathname={pathname}
+                  markdown={markdown}
+                  variant="inline"
+                />
+              }
             />
             <ContentAuthors names={data.authors} label="Article authors" />
             {data.substackUrl && (

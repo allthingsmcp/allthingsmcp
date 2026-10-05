@@ -146,6 +146,9 @@ test('guides use a structured overview and temporary anonymous progress', async 
     page.getByRole('heading', { name: 'Work through the guide' }),
   ).toBeVisible();
   await expect(
+    page.getByRole('heading', { name: 'Who this guide is for' }),
+  ).toBeVisible();
+  await expect(
     page.getByRole('progressbar', { name: 'Guide progress' }),
   ).toHaveAttribute('aria-valuenow', '0');
   await expect(page.getByText('In this article')).toHaveCount(0);
@@ -492,6 +495,7 @@ test('robots and sitemap expose only launch-ready discovery routes', async ({
   const robotsText = await robots.text();
   expect(robotsText).toContain('User-Agent: *');
   expect(robotsText).toContain('Disallow: /api/');
+  expect(robotsText).toContain('Allow: /api/social-card/v2');
   expect(robotsText).toContain('Sitemap:');
 
   const sitemap = await request.get('/sitemap.xml');
@@ -502,6 +506,188 @@ test('robots and sitemap expose only launch-ready discovery routes', async ({
   expect(sitemapText).not.toContain('/spec-watch');
   expect(sitemapText).not.toContain('/tools');
   expect(sitemapText).not.toContain('/ecosystem');
+});
+
+test('guide steps expose specific search metadata and structured data', async ({
+  page,
+}) => {
+  await page.goto('/guides/build-a-minimal-mcp-server/add-a-tool');
+  await expect(page).toHaveTitle(
+    'Add a Typed Tool | Build a Minimal MCP Server · All Things MCP',
+  );
+  const structuredData = await page
+    .locator('script[type="application/ld+json"]')
+    .allTextContents();
+  const nodes = structuredData.flatMap((value) => JSON.parse(value)['@graph']);
+  expect(nodes).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ '@type': 'Organization' }),
+      expect.objectContaining({ '@type': 'WebSite' }),
+      expect.objectContaining({
+        '@type': 'BreadcrumbList',
+        itemListElement: expect.arrayContaining([
+          expect.objectContaining({ name: 'Build a Minimal MCP Server' }),
+        ]),
+      }),
+      expect.objectContaining({
+        '@type': 'Article',
+        headline: 'Add a Typed Tool',
+        datePublished: '2026-08-31',
+      }),
+    ]),
+  );
+});
+
+test('guide authors link to a visible profile', async ({ page }) => {
+  await page.goto('/guides/build-a-minimal-mcp-server');
+  await page.getByRole('link', { name: 'Gbadebo Bello', exact: true }).click();
+  await expect(page).toHaveURL(/\/authors\/gbadebo-bello$/);
+  await expect(
+    page.getByRole('heading', { name: 'Gbadebo Bello' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Build a Minimal MCP Server' }),
+  ).toBeVisible();
+});
+
+test('content pages can be copied and viewed as Markdown', async ({
+  page,
+  request,
+}) => {
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  const path = '/guides/build-a-minimal-mcp-server/add-a-tool';
+  await page.goto(path);
+
+  const copyPage = page.getByRole('button', { name: 'Copy page' });
+  const toggle = page.getByRole('button', { name: 'More page options' });
+  const shareMenu = page.locator('.content-share-menu');
+  await expect(
+    page.locator('.guide-step-article__byline').getByRole('button', {
+      name: 'Copy page',
+    }),
+  ).toBeVisible();
+  await expect(
+    page.locator('.guide-step-actions').getByRole('link', {
+      name: /Edit this page on GitHub/,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.locator('.guide-step-actions').getByRole('link', {
+      name: /Report outdated content/,
+    }),
+  ).toBeVisible();
+  await expect(copyPage).toHaveCSS('border-top-width', '0px');
+  await copyPage.click();
+  await expect(shareMenu.getByRole('status')).toContainText(
+    'Page text copied.',
+  );
+  const plainText = await page.evaluate(() => navigator.clipboard.readText());
+  expect(plainText).toContain('Add a Typed Tool');
+  expect(plainText).not.toContain('# Add a Typed Tool');
+
+  await toggle.click();
+  const options = page.getByRole('group', { name: 'More page options' });
+  await expect(
+    options.getByRole('button', { name: /Copy link/ }),
+  ).toBeVisible();
+  await expect(
+    options.getByRole('button', { name: /Copy as Markdown/ }),
+  ).toBeVisible();
+  await expect(
+    options.getByRole('link', { name: /View as Markdown/ }),
+  ).toHaveAttribute('href', `/markdown${path}`);
+  await expect(
+    options.getByRole('link', { name: /Open in ChatGPT/ }),
+  ).toHaveAttribute('href', 'https://chatgpt.com/');
+  await expect(
+    options.getByRole('link', { name: /Open in Claude/ }),
+  ).toHaveAttribute('href', 'https://claude.ai/new');
+
+  await options.getByRole('button', { name: /Copy link/ }).click();
+  await expect(shareMenu.getByRole('status')).toContainText(
+    'Page link copied.',
+  );
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    new URL(path, page.url()).toString(),
+  );
+
+  await toggle.click();
+  await options.getByRole('button', { name: /Copy as Markdown/ }).click();
+  await expect(shareMenu.getByRole('status')).toContainText(
+    'Page Markdown copied.',
+  );
+  const clipboardMarkdown = await page.evaluate(() =>
+    navigator.clipboard.readText(),
+  );
+  expect(clipboardMarkdown).toContain('# Add a Typed Tool');
+  expect(clipboardMarkdown).toContain('MCP specification: 2025-11-25');
+  expect(clipboardMarkdown).toContain('```python');
+
+  const markdownResponse = await request.get(`/markdown${path}`);
+  expect(markdownResponse.ok()).toBe(true);
+  expect(markdownResponse.headers()['content-type']).toContain('text/markdown');
+  expect(markdownResponse.headers()['x-robots-tag']).toBe('noindex, follow');
+  expect(await markdownResponse.text()).toBe(clipboardMarkdown);
+
+  const overviewResponse = await request.get(
+    '/markdown/guides/build-a-minimal-mcp-server',
+  );
+  const overviewMarkdown = await overviewResponse.text();
+  expect(overviewMarkdown).toContain('## Steps');
+  expect(overviewMarkdown).toContain('## Prerequisites');
+
+  await page.goto('/guides/build-a-minimal-mcp-server');
+  await expect(page.getByRole('button', { name: 'Copy page' })).toHaveCount(0);
+
+  const interactiveResponse = await request.get(
+    '/markdown/guides/building-your-first-mcp-server/create-your-server',
+  );
+  const interactiveMarkdown = await interactiveResponse.text();
+  expect(interactiveMarkdown).toContain(
+    'Interactive activity: complete this exercise',
+  );
+  expect(interactiveMarkdown).not.toContain('InteractiveGuideBlock');
+  expect(interactiveMarkdown).not.toContain('<Callout');
+  const componentResponse = await request.get(
+    '/markdown/guides/building-your-first-mcp-server/what-is-mcp',
+  );
+  const componentMarkdown = await componentResponse.text();
+  expect(componentMarkdown).toContain('**Tools** — Callable operations');
+  expect(componentMarkdown).toContain('Protocol diagram: A host contains');
+  expect(componentMarkdown).not.toContain('<CardGrid');
+  const blogMarkdown = await request.get('/markdown/blog/what-is-mcp');
+  expect(blogMarkdown.ok()).toBe(true);
+  expect(blogMarkdown.headers()['x-robots-tag']).toBe('noindex, follow');
+  expect(await blogMarkdown.text()).toContain(
+    '# What Is MCP? A Practical Introduction',
+  );
+  await page.goto('/blog/what-is-mcp');
+  const articleShare = page
+    .locator('.page-actions')
+    .getByRole('button', { name: 'Copy page' });
+  await expect(articleShare).toBeVisible();
+  await expect(articleShare).toHaveCSS('border-top-width', '0px');
+  await page.getByRole('button', { name: 'More page options' }).click();
+  await expect(
+    page.getByRole('link', { name: /View as Markdown/ }),
+  ).toHaveAttribute('href', '/markdown/blog/what-is-mcp');
+
+  await page.goto('/guides/building-your-first-mcp-server/add-tools');
+  await page.getByRole('button', { name: 'More page options' }).click();
+  const bounds = await page
+    .getByRole('group', { name: 'More page options' })
+    .evaluate((panel) => {
+      const box = panel.getBoundingClientRect();
+      return {
+        left: box.left,
+        right: box.right,
+        viewport: window.innerWidth,
+        pageWidth: document.documentElement.scrollWidth,
+      };
+    });
+  expect(bounds.left).toBeGreaterThanOrEqual(0);
+  expect(bounds.right).toBeLessThanOrEqual(bounds.viewport);
+  expect(bounds.pageWidth).toBeLessThanOrEqual(bounds.viewport);
 });
 
 test('homepage has no serious accessibility violations', async ({ page }) => {

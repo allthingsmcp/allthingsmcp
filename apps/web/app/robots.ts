@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
+      allow: ['/', '/api/social-card/v2'],
       disallow: ['/api/', '/auth/'],
     },
     sitemap: new URL('/sitemap.xml', siteConfig.siteUrl).toString(),

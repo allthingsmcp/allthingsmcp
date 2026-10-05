@@ -12,6 +12,7 @@ import { GuideProgressProvider } from '@/components/use-guide-progress';
 import { AuthSessionProvider } from '@/lib/auth-client';
 import { siteConfig } from '@/lib/config';
 import { brandAssets, brandIdentity } from '@/lib/brand';
+import { JsonLd, siteStructuredData } from '@/components/json-ld';
 import './globals.css';
 
 const geist = Geist({
@@ -34,6 +35,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.siteUrl),
   title: { default: 'All Things MCP', template: '%s · All Things MCP' },
   description: siteConfig.description,
+  robots:
+    process.env.VERCEL_ENV === 'preview'
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
   icons: {
     icon: [
       { url: brandAssets.favicon, type: 'image/svg+xml' },
@@ -78,6 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${geist.variable} ${inter.variable} ${mono.variable}`}
     >
       <body>
+        <JsonLd data={siteStructuredData()} />
         <NextProvider>
           <AuthSessionProvider>
             <AuthDialogProvider>

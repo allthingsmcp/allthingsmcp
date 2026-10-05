@@ -40,19 +40,29 @@ function label(value: string) {
 export function GuideOverviewExperience({
   guide,
   authors,
+  introduction,
 }: {
   guide: GuideOverviewData;
   authors: ReactNode;
+  introduction: ReactNode;
 }) {
-  return <StandardGuideOverview guide={guide} authors={authors} />;
+  return (
+    <StandardGuideOverview
+      guide={guide}
+      authors={authors}
+      introduction={introduction}
+    />
+  );
 }
 
 function StandardGuideOverview({
   guide,
   authors,
+  introduction,
 }: {
   guide: GuideOverviewData;
   authors: ReactNode;
+  introduction: ReactNode;
 }) {
   const stepIds = useMemo(
     () => guide.steps.map((step) => step.id),
@@ -121,6 +131,13 @@ function StandardGuideOverview({
       </section>
 
       {guide.interactiveGuideId && <InteractiveGuideEnhancement />}
+
+      <section
+        className="shell guide-overview-introduction prose"
+        aria-label="Guide overview"
+      >
+        {introduction}
+      </section>
 
       <section className="shell guide-overview-layout">
         <div className="guide-step-list">

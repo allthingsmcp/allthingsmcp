@@ -13,7 +13,6 @@ export const metadata: Metadata = {
   description:
     'Practical guides and independent analysis for MCP, its official extensions, and the ecosystem around it.',
   alternates: { canonical: '/' },
-  robots: { index: true, follow: true },
 };
 
 const startingGuide = 'building-your-first-mcp-server';

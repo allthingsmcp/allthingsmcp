@@ -5,6 +5,8 @@ import { GuideOverviewExperience } from '@/components/guide-overview-experience'
 import type { ContentFrontmatter } from '@/lib/content-schema';
 import { socialCardMetadata } from '@/lib/social-card';
 import { source } from '@/lib/source';
+import { JsonLd, contentStructuredData } from '@/components/json-ld';
+import { getMDXComponents } from '@/components/mdx';
 
 function getGuide(slug: string) {
   return source.getPages().find((page) => {
@@ -32,6 +34,9 @@ export async function generateMetadata({
     title: page.data.title,
     description: page.data.description,
     alternates: { canonical: `/guides/${slug}` },
+    ...(page.data.status === 'draft'
+      ? { robots: { index: false, follow: false } }
+      : {}),
     ...socialCardMetadata({
       title: page.data.title,
       description: page.data.description,
@@ -63,11 +68,25 @@ export default async function GuideOverviewPage({
   ) {
     notFound();
   }
-
+  const MDX = page.data.body;
   return (
     <main id="main-content" className="guide-overview-page">
+      {data.status === 'published' && (
+        <JsonLd
+          data={contentStructuredData({
+            data,
+            path: `/guides/${slug}`,
+            breadcrumbs: [
+              { name: 'Home', path: '/' },
+              { name: 'Guides', path: '/guides' },
+              { name: data.title, path: `/guides/${slug}` },
+            ],
+          })}
+        />
+      )}
       <GuideOverviewExperience
         authors={<ContentAuthors names={data.authors} label="Guide authors" />}
+        introduction={<MDX components={getMDXComponents()} />}
         guide={{
           slug,
           title: data.title,

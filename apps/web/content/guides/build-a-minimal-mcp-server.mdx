@@ -7,7 +7,7 @@ authors: [Gbadebo Bello]
 status: published
 tags: [guide, server, python, hands-on]
 publishedAt: 2026-08-03
-updatedAt: 2026-08-31
+updatedAt: 2026-10-05
 difficulty: beginner
 estimatedMinutes: 55
 specVersion: 2025-11-25
@@ -43,4 +43,12 @@ guideSteps:
     estimatedMinutes: 20
 ---
 
-This Guide is intentionally small. It proves the protocol lifecycle and one capability before introducing remote transports, authorization, persistence, or deployment infrastructure.
+## Who this guide is for
+
+Use this guide if you know basic Python and want the smallest local MCP server you can run and inspect. You will need Python, uv, and a terminal. The goal is to see one working tool end to end before adding other capabilities or deployment concerns.
+
+## What you will build
+
+You will set up an isolated project, create a FastMCP server, expose a typed addition tool, and connect with MCP Inspector. The last step checks initialization, tool discovery, and invocation so you can tell whether the client and server actually communicate.
+
+This guide uses the [2025-11-25 MCP specification](https://modelcontextprotocol.io/specification/2025-11-25) and a local standard input/output connection. It does not cover remote transport, authorization, persistence, or hosting. For a broader TypeScript workspace with tools, resources, prompts, and export, use [Building Your First MCP Server](/guides/building-your-first-mcp-server).

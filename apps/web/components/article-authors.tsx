@@ -67,7 +67,13 @@ export function ArticleAuthors({
                 className="article-author__identity"
                 tabIndex={author.bio ? 0 : undefined}
               >
-                <strong>{author.name}</strong>
+                {author.url ? (
+                  <a className="article-author__name" href={author.url}>
+                    <strong>{author.name}</strong>
+                  </a>
+                ) : (
+                  <strong>{author.name}</strong>
+                )}
                 {author.role && (
                   <span className="article-author__role">{author.role}</span>
                 )}

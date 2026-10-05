@@ -14,6 +14,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: absoluteUrl('/blog'), changeFrequency: 'weekly', priority: 0.8 },
     { url: absoluteUrl('/about'), changeFrequency: 'monthly', priority: 0.5 },
     {
+      url: absoluteUrl('/authors/gbadebo-bello'),
+      changeFrequency: 'monthly',
+      priority: 0.4,
+    },
+    {
       url: absoluteUrl('/independence'),
       changeFrequency: 'monthly',
       priority: 0.4,

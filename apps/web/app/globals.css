@@ -1983,6 +1983,18 @@ a.content-card:hover {
 .article-authors strong {
   font-size: 0.76rem;
 }
+.article-author__name {
+  color: inherit;
+  text-decoration: none;
+}
+.article-author__name:hover {
+  color: var(--blue);
+  text-decoration: underline;
+}
+.article-author__name:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
 .article-author__bio {
   position: absolute;
   z-index: 10;
@@ -2752,6 +2764,157 @@ a.content-card:hover {
 }
 .page-actions svg {
   width: 14px;
+}
+.content-share-menu {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 18px;
+}
+.content-share-menu__controls {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+}
+.content-share-menu__copy,
+.content-share-menu__toggle {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+.content-share-menu__copy {
+  gap: 9px;
+  padding: 8px 12px;
+}
+.content-share-menu__toggle {
+  padding: 8px;
+  border-left: 1px solid var(--border-strong);
+}
+.content-share-menu__copy:hover,
+.content-share-menu__toggle:hover,
+.content-share-menu__toggle[aria-expanded='true'] {
+  color: var(--blue);
+}
+.content-share-menu__copy svg {
+  width: 16px;
+  height: 16px;
+}
+.content-share-menu__toggle svg {
+  width: 14px;
+  height: 14px;
+}
+.content-share-menu__toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+.content-share-menu__copy:focus-visible,
+.content-share-menu__toggle:focus-visible,
+.content-share-menu__panel :is(a, button):focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+.content-share-menu__panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  width: min(340px, calc(100vw - 32px));
+  padding: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--shadow);
+  color: var(--ink);
+}
+.content-share-menu__panel :is(a, button) {
+  display: flex;
+  width: 100%;
+  min-height: 56px;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.content-share-menu__panel :is(a, button):hover {
+  background: var(--blue-pale);
+}
+.content-share-menu__panel :is(a, button) > svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--blue);
+}
+.content-share-menu__panel :is(a, button) > svg:last-child:not(:first-child) {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+}
+.content-share-menu__panel :is(a, button) > span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+.content-share-menu__panel strong {
+  font-size: 0.74rem;
+  font-weight: 650;
+}
+.content-share-menu__panel small {
+  color: var(--muted);
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+.content-share-menu__feedback {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+.content-share-menu__feedback:empty {
+  display: none;
+}
+.content-share-menu--inline {
+  margin-top: 0;
+}
+.content-share-menu--inline .content-share-menu__controls {
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  color: var(--blue);
+}
+.content-share-menu--inline .content-share-menu__copy,
+.content-share-menu--inline .content-share-menu__toggle {
+  min-height: 0;
+  padding: 0;
+  font-size: 0.7rem;
+}
+.content-share-menu--inline .content-share-menu__toggle {
+  padding-left: 7px;
+  border: 0;
+}
+.content-share-menu--inline .content-share-menu__copy:hover,
+.content-share-menu--inline .content-share-menu__toggle:hover,
+.content-share-menu--inline .content-share-menu__toggle[aria-expanded='true'] {
+  color: var(--blue-dark);
+}
+.content-share-menu--inline .content-share-menu__controls svg {
+  width: 14px;
+  height: 14px;
 }
 .article-toc {
   position: sticky;
@@ -3529,6 +3692,13 @@ a.content-card:hover {
   gap: 32px;
   padding-block: 46px 72px;
 }
+.guide-overview-introduction {
+  max-width: 900px;
+  padding-top: 44px;
+}
+.guide-overview-introduction + .guide-overview-layout {
+  padding-top: 32px;
+}
 .guide-step-list {
   overflow: hidden;
   border: 1px solid var(--border);
@@ -3902,6 +4072,20 @@ a.content-card:hover {
 }
 .guide-step-pagination strong {
   font-size: 0.72rem;
+}
+.guide-step-article__byline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+}
+.guide-step-article__byline .content-share-menu {
+  margin-top: 18px;
+}
+.guide-step-article__byline .content-share-menu__panel {
+  right: 0;
+  left: auto;
 }
 .guide-step-actions {
   margin-top: 28px;
@@ -4591,6 +4775,10 @@ a.content-card:hover {
     gap: 24px;
     padding-block: 18px 54px;
   }
+  .guide-step-article__byline .content-share-menu__panel {
+    right: auto;
+    left: 0;
+  }
   .guide-step-nav {
     position: static;
     border-radius: 9px;
@@ -4791,6 +4979,9 @@ a.content-card:hover {
   grid-template-columns: 250px minmax(0, 1fr);
   justify-content: stretch;
   gap: 38px;
+}
+.guide-step-page:has(.interactive-guide-block) .guide-step-article > header {
+  max-width: 790px;
 }
 .guide-step-page:has(.interactive-guide-block)
   .guide-step-prose

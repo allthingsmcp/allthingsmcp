@@ -4,6 +4,14 @@ import {
   type ArticleAuthor,
 } from '@/components/article-authors';
 
+function localProfileUrl(url: string | undefined) {
+  if (!url) return undefined;
+  const parsed = new URL(url);
+  return parsed.hostname === 'www.allthingsmcp.com'
+    ? `${parsed.pathname}${parsed.search}${parsed.hash}`
+    : url;
+}
+
 export function ContentAuthors({
   names,
   label,
@@ -23,7 +31,7 @@ export function ContentAuthors({
           linkedin: profile.linkedin,
           x: profile.x,
           website: profile.website,
-          url: profile.url,
+          url: localProfileUrl(profile.url),
         }
       : { name };
   });
