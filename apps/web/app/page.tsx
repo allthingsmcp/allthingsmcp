@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-const startingGuide = 'build-a-minimal-mcp-server';
+const startingGuide = 'building-your-first-mcp-server';
 
 function sentenceCase(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
