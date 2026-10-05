@@ -114,6 +114,7 @@ export default async function GuideStepPage({
           <ContentMeta
             data={data}
             path={`${stepPage.slugs.join('/')}.mdx`}
+            pagePath={`/guides/${slug}/${step}`}
             showAuthors={false}
           />
         }

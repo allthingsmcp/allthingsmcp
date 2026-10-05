@@ -3843,7 +3843,7 @@ a.content-card:hover {
 .guide-step-completion .auth-status {
   margin-top: 9px;
 }
-.guide-step-completion button {
+.guide-step-completion > button {
   display: inline-flex;
   min-height: 42px;
   flex: 0 0 auto;
@@ -3858,12 +3858,12 @@ a.content-card:hover {
   font-size: 0.7rem;
   font-weight: 700;
 }
-.guide-step-completion button.is-complete {
+.guide-step-completion > button.is-complete {
   border-color: var(--green);
   background: #fff;
   color: var(--green);
 }
-.guide-step-completion button svg {
+.guide-step-completion > button svg {
   width: 15px;
 }
 .guide-step-pagination {
@@ -4635,7 +4635,7 @@ a.content-card:hover {
     align-items: stretch;
     flex-direction: column;
   }
-  .guide-step-completion button {
+  .guide-step-completion > button {
     justify-content: center;
   }
   .guide-step-pagination {

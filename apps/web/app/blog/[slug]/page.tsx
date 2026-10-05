@@ -79,6 +79,7 @@ export default async function BlogPostPage({
             <ContentMeta
               data={data}
               path={`${page.slugs.join('/')}.mdx`}
+              pagePath={`/blog/${slug}`}
               showAuthors={false}
             />
             <ContentAuthors names={data.authors} label="Article authors" />

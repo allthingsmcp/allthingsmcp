@@ -13,14 +13,21 @@ import { siteConfig } from '@/lib/config';
 export function ContentMeta({
   data,
   path,
+  pagePath,
   showAuthors = true,
 }: {
   data: ContentFrontmatter;
   path: string;
+  pagePath: string;
   showAuthors?: boolean;
 }) {
   const editUrl = `${siteConfig.githubRepo}/edit/main/content/${path}`;
-  const reportUrl = `${siteConfig.githubRepo}/issues/new?template=content.yml&title=${encodeURIComponent(`Content: ${data.title}`)}`;
+  const pageUrl = new URL(pagePath, siteConfig.siteUrl).toString();
+  const reportUrl = new URL(`${siteConfig.githubRepo}/issues/new`);
+  reportUrl.searchParams.set('template', 'content.yml');
+  reportUrl.searchParams.set('title', `Content: ${data.title}`);
+  reportUrl.searchParams.set('page', pageUrl);
+  reportUrl.searchParams.set('issue', 'This content is outdated because...');
   return (
     <>
       <div className="content-meta">
@@ -53,7 +60,7 @@ export function ContentMeta({
           <PencilLine />
           Edit this page on GitHub
         </AnalyticsLink>
-        <AnalyticsLink href={reportUrl} eventName="contribution_cta">
+        <AnalyticsLink href={reportUrl.toString()} eventName="contribution_cta">
           <ExternalLink />
           Report outdated content
         </AnalyticsLink>

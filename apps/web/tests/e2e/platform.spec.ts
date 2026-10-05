@@ -158,6 +158,25 @@ test('guides use a structured overview and temporary anonymous progress', async 
     /\/guides\/build-a-minimal-mcp-server\/prepare-your-environment$/,
   );
   await expect(page.getByText('Step 1 of 4')).toBeVisible();
+  const reportHref = await page
+    .getByRole('link', { name: 'Report outdated content' })
+    .getAttribute('href');
+  const reportUrl = new URL(reportHref!);
+  expect(reportUrl.searchParams.get('page')).toMatch(
+    /\/guides\/build-a-minimal-mcp-server\/prepare-your-environment$/,
+  );
+  expect(reportUrl.searchParams.get('issue')).toBe(
+    'This content is outdated because...',
+  );
+  const progressAccountControl = page
+    .locator('.guide-step-completion')
+    .getByRole('button', { name: 'Sign in to save progress' });
+  await expect(progressAccountControl).toHaveCSS(
+    'background-color',
+    'rgba(0, 0, 0, 0)',
+  );
+  await progressAccountControl.hover();
+  await expect(progressAccountControl).toHaveCSS('color', 'rgb(37, 99, 235)');
   await page.getByRole('button', { name: 'Mark step complete' }).click();
   await expect(
     page.getByRole('button', { name: 'Mark as incomplete' }),

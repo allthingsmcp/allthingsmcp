@@ -98,7 +98,11 @@ export default async function LibraryPage({
             </p>
             <h1>{data.title}</h1>
             <p className="article-deck">{data.description}</p>
-            <ContentMeta data={data} path={`${slug.join('/')}.mdx`} />
+            <ContentMeta
+              data={data}
+              path={`${slug.join('/')}.mdx`}
+              pagePath={`/library/${slug.join('/')}`}
+            />
           </header>
           <div className="prose">
             <MDX components={getMDXComponents()} />
