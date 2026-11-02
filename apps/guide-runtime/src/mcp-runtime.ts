@@ -1,32 +1,32 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
 import {
   CLIENT_CAPABILITIES_META_KEY,
   CLIENT_INFO_META_KEY,
   createMcpHandler,
   McpServer,
   PROTOCOL_VERSION_META_KEY,
-} from "@modelcontextprotocol/server";
-import { getMcpTemplate } from "@all-things-mcp/mcp-templates";
+} from '@modelcontextprotocol/server';
+import { getMcpTemplate } from '@all-things-mcp/mcp-templates';
 import type {
   McpProtocolEvent,
   McpWorkspace,
   McpWorkspaceCommand,
-} from "@all-things-mcp/contracts";
-import * as z from "zod/v4";
+} from '@all-things-mcp/contracts';
+import * as z from 'zod/v4';
 import {
   OpenMeteoProvider,
   openMeteoAttribution,
   WeatherProviderError,
-} from "./weather.js";
+} from './weather.js';
 
 const sensitiveKey = /authorization|token|credential|secret|cookie/i;
 export function redactProtocolValue(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redactProtocolValue);
-  if (value && typeof value === "object")
+  if (value && typeof value === 'object')
     return Object.fromEntries(
       Object.entries(value).map(([key, item]) => [
         key,
-        sensitiveKey.test(key) ? "[REDACTED]" : redactProtocolValue(item),
+        sensitiveKey.test(key) ? '[REDACTED]' : redactProtocolValue(item),
       ]),
     );
   return value;
@@ -39,9 +39,9 @@ function fieldSchema(field: {
 }) {
   let schema: z.ZodType = field.enumValues?.length
     ? z.enum(field.enumValues as [string, ...string[]])
-    : field.type === "number"
+    : field.type === 'number'
       ? z.number()
-      : field.type === "boolean"
+      : field.type === 'boolean'
         ? z.boolean()
         : z.string();
   if (!field.required) schema = schema.optional();
@@ -56,7 +56,7 @@ export function createWorkspaceMcpHandler(
     workspace.templateId,
     workspace.templateVersion,
   );
-  if (!template) throw new Error("Unknown MCP template version.");
+  if (!template) throw new Error('Unknown MCP template version.');
   const enabled = new Set(workspace.configuration.enabledCapabilityIds);
 
   return createMcpHandler(
@@ -68,7 +68,7 @@ export function createWorkspaceMcpHandler(
       for (const capability of template.capabilities.filter((item) =>
         enabled.has(item.id),
       )) {
-        if (capability.kind === "tool") {
+        if (capability.kind === 'tool') {
           const shape = Object.fromEntries(
             capability.fields.map((field) => [field.name, fieldSchema(field)]),
           );
@@ -82,20 +82,20 @@ export function createWorkspaceMcpHandler(
             async (input: Record<string, unknown>) => {
               try {
                 const result =
-                  capability.executorId === "weather.current"
+                  capability.executorId === 'weather.current'
                     ? await weather.current(
-                        String(input.location ?? ""),
-                        String(input.unit ?? "celsius"),
+                        String(input.location ?? ''),
+                        String(input.unit ?? 'celsius'),
                       )
-                    : capability.executorId === "weather.forecast"
-                      ? await weather.forecast(String(input.location ?? ""))
-                      : capability.executorId === "weather.search"
-                        ? await weather.search(String(input.query ?? ""))
+                    : capability.executorId === 'weather.forecast'
+                      ? await weather.forecast(String(input.location ?? ''))
+                      : capability.executorId === 'weather.search'
+                        ? await weather.search(String(input.query ?? ''))
                         : undefined;
-                if (!result) throw new Error("Unknown curated tool executor.");
+                if (!result) throw new Error('Unknown curated tool executor.');
                 return {
                   content: [
-                    { type: "text" as const, text: JSON.stringify(result) },
+                    { type: 'text' as const, text: JSON.stringify(result) },
                   ],
                   structuredContent: result,
                 };
@@ -103,13 +103,13 @@ export function createWorkspaceMcpHandler(
                 if (!(error instanceof WeatherProviderError)) throw error;
                 return {
                   isError: true,
-                  content: [{ type: "text" as const, text: error.message }],
-                  _meta: { "atm/error-code": error.code },
+                  content: [{ type: 'text' as const, text: error.message }],
+                  _meta: { 'atm/error-code': error.code },
                 };
               }
             },
           );
-        } else if (capability.kind === "resource") {
+        } else if (capability.kind === 'resource') {
           server.registerResource(
             capability.name,
             capability.uri!,
@@ -124,9 +124,9 @@ export function createWorkspaceMcpHandler(
                   uri: uri.href,
                   mimeType: capability.mimeType,
                   text:
-                    capability.executorId === "weather.cities"
+                    capability.executorId === 'weather.cities'
                       ? JSON.stringify({
-                          cities: ["Lagos", "London", "San Francisco"],
+                          cities: ['Lagos', 'London', 'San Francisco'],
                           attribution: openMeteoAttribution,
                         })
                       : `# Weather API usage\n\nLive data is supplied by [Open-Meteo](${openMeteoAttribution.url}) under CC BY 4.0.`,
@@ -148,16 +148,16 @@ export function createWorkspaceMcpHandler(
             (input: Record<string, unknown>) => ({
               messages: [
                 {
-                  role: "user" as const,
+                  role: 'user' as const,
                   content: {
-                    type: "text" as const,
+                    type: 'text' as const,
                     text: capability.fields.reduce(
                       (text, field) =>
                         text.replaceAll(
                           `{${field.name}}`,
-                          String(input[field.name] ?? ""),
+                          String(input[field.name] ?? ''),
                         ),
-                      capability.template ?? "",
+                      capability.template ?? '',
                     ),
                   },
                 },
@@ -168,7 +168,7 @@ export function createWorkspaceMcpHandler(
       }
       return server;
     },
-    { responseMode: "auto" },
+    { responseMode: 'auto' },
   );
 }
 
@@ -178,15 +178,15 @@ function requestFor(
   id: number,
 ) {
   return {
-    jsonrpc: "2.0",
+    jsonrpc: '2.0',
     id,
     method,
     params: {
       _meta: {
-        [PROTOCOL_VERSION_META_KEY]: "2026-07-28",
+        [PROTOCOL_VERSION_META_KEY]: '2026-07-28',
         [CLIENT_INFO_META_KEY]: {
-          name: "atm-learning-client",
-          version: "0.1.0",
+          name: 'atm-learning-client',
+          version: '0.1.0',
         },
         [CLIENT_CAPABILITIES_META_KEY]: {},
       },
@@ -202,20 +202,20 @@ export async function executeWorkspaceCommand(
 ) {
   const handler = createWorkspaceMcpHandler(workspace, weather);
   const exchanges: Array<{ method: string; params?: Record<string, unknown> }> =
-    command.type === "discover"
-      ? [{ method: "server/discover" }]
-      : command.type === "call-tool"
+    command.type === 'discover'
+      ? [{ method: 'server/discover' }]
+      : command.type === 'call-tool'
         ? [
             {
-              method: "tools/call",
+              method: 'tools/call',
               params: { name: command.name, arguments: command.arguments },
             },
           ]
-        : command.type === "read-resource"
-          ? [{ method: "resources/read", params: { uri: command.uri } }]
+        : command.type === 'read-resource'
+          ? [{ method: 'resources/read', params: { uri: command.uri } }]
           : [
               {
-                method: "prompts/get",
+                method: 'prompts/get',
                 params: { name: command.name, arguments: command.arguments },
               },
             ];
@@ -228,15 +228,15 @@ export async function executeWorkspaceCommand(
       const body = requestFor(exchange.method, exchange.params, index + 1);
       const started = performance.now();
       const headers: Record<string, string> = {
-        "content-type": "application/json",
-        "mcp-protocol-version": "2026-07-28",
-        "mcp-method": exchange.method,
+        'content-type': 'application/json',
+        'mcp-protocol-version': '2026-07-28',
+        'mcp-method': exchange.method,
       };
       const named = exchange.params?.name ?? exchange.params?.uri;
-      if (typeof named === "string") headers["mcp-name"] = named;
+      if (typeof named === 'string') headers['mcp-name'] = named;
       const response = await handler.fetch(
-        new Request("http://runtime.local/mcp", {
-          method: "POST",
+        new Request('http://runtime.local/mcp', {
+          method: 'POST',
           headers,
           body: JSON.stringify(body),
         }),
@@ -259,39 +259,39 @@ export async function executeWorkspaceCommand(
         id: randomUUID(),
         sequence: index + 1,
         method: exchange.method,
-        status: failed ? "error" : "response",
+        status: failed ? 'error' : 'response',
         request: redactProtocolValue(body) as Record<string, unknown>,
         response: redactProtocolValue(responseBody) as Record<string, unknown>,
         durationMs: performance.now() - started,
         createdAt: new Date().toISOString(),
       });
       if (failed) {
-        const providerCode = responseBody.result?._meta?.["atm/error-code"];
+        const providerCode = responseBody.result?._meta?.['atm/error-code'];
         const code =
-          typeof providerCode === "string"
+          typeof providerCode === 'string'
             ? providerCode
-            : "MCP_COMMAND_FAILED";
+            : 'MCP_COMMAND_FAILED';
         failure = {
           error:
             responseBody.error?.message ??
             responseBody.result?.content?.find((item) => item.text)?.text ??
-            "The MCP command failed.",
+            'The MCP command failed.',
           code,
           status:
-            code === "UPSTREAM_UNAVAILABLE"
+            code === 'UPSTREAM_UNAVAILABLE'
               ? 502
-              : code === "UPSTREAM_QUOTA_EXCEEDED"
+              : code === 'UPSTREAM_QUOTA_EXCEEDED'
                 ? 429
-                : code === "LOCATION_NOT_FOUND"
+                : code === 'LOCATION_NOT_FOUND'
                   ? 422
                   : 400,
         };
         break;
       }
-      if (exchange.method === "server/discover") {
+      if (exchange.method === 'server/discover') {
         // Only list capabilities actually negotiated by the SDK server. Empty
         // workspaces are valid while readers build their first server.
-        for (const capability of ["tools", "resources", "prompts"]) {
+        for (const capability of ['tools', 'resources', 'prompts']) {
           if (responseBody.result?.capabilities?.[capability])
             exchanges.push({ method: `${capability}/list` });
         }

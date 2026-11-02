@@ -1,16 +1,16 @@
-import { randomUUID } from "node:crypto";
-import type { Pool } from "pg";
+import { randomUUID } from 'node:crypto';
+import type { Pool } from 'pg';
 import type {
   McpProtocolEvent,
   McpWorkspace,
   McpWorkspaceConfiguration,
-} from "@all-things-mcp/contracts";
-import { createOpaqueCredential, hashCredential } from "./credentials.js";
+} from '@all-things-mcp/contracts';
+import { createOpaqueCredential, hashCredential } from './credentials.js';
 
 export class WorkspaceRevisionConflictError extends Error {}
 export class WorkspaceClaimConflictError extends Error {
   constructor(readonly existing: McpWorkspace) {
-    super("An owned workspace already exists for this Guide.");
+    super('An owned workspace already exists for this Guide.');
   }
 }
 
@@ -34,7 +34,7 @@ export interface WorkspaceRepository {
     configuration: McpWorkspaceConfiguration,
     expectedRevision: number,
   ): Promise<McpWorkspace>;
-  setStatus(id: string, status: "active" | "paused"): Promise<McpWorkspace>;
+  setStatus(id: string, status: 'active' | 'paused'): Promise<McpWorkspace>;
   claim(
     id: string,
     credential: string,
@@ -68,9 +68,9 @@ export class MemoryWorkspaceRepository implements WorkspaceRepository {
   readonly events = new Map<string, McpProtocolEvent[]>();
 
   async createAnonymous(
-    input: Parameters<WorkspaceRepository["createAnonymous"]>[0],
+    input: Parameters<WorkspaceRepository['createAnonymous']>[0],
   ) {
-    const credential = createOpaqueCredential("atm_tmp");
+    const credential = createOpaqueCredential('atm_tmp');
     const now = new Date();
     const workspace: StoredWorkspace = {
       id: randomUUID(),
@@ -81,7 +81,7 @@ export class MemoryWorkspaceRepository implements WorkspaceRepository {
       templateId: input.templateId,
       templateVersion: input.templateVersion,
       configuration: input.configuration,
-      status: "active",
+      status: 'active',
       revision: 1,
       anonymous: true,
       expiresAt: new Date(
@@ -131,10 +131,10 @@ export class MemoryWorkspaceRepository implements WorkspaceRepository {
     expectedRevision: number,
   ) {
     const value = this.workspaces.get(id);
-    if (!value) throw new Error("Workspace not found.");
+    if (!value) throw new Error('Workspace not found.');
     if (value.revision !== expectedRevision)
       throw new WorkspaceRevisionConflictError(
-        "Workspace changed after it was loaded.",
+        'Workspace changed after it was loaded.',
       );
     value.configuration = structuredClone(configuration);
     value.revision += 1;
@@ -143,9 +143,9 @@ export class MemoryWorkspaceRepository implements WorkspaceRepository {
     return publicWorkspace(value);
   }
 
-  async setStatus(id: string, status: "active" | "paused") {
+  async setStatus(id: string, status: 'active' | 'paused') {
     const value = this.workspaces.get(id);
-    if (!value) throw new Error("Workspace not found.");
+    if (!value) throw new Error('Workspace not found.');
     value.status = status;
     value.revision += 1;
     value.updatedAt = new Date().toISOString();
@@ -160,7 +160,7 @@ export class MemoryWorkspaceRepository implements WorkspaceRepository {
   ) {
     const value = this.workspaces.get(id);
     if (!value || !(await this.findAnonymous(id, credential)))
-      throw new Error("Temporary workspace is unavailable.");
+      throw new Error('Temporary workspace is unavailable.');
     const existing = [...this.workspaces.values()].find(
       (item) =>
         item.ownerUserId === userId && item.guideSlug === value.guideSlug,
@@ -183,7 +183,7 @@ export class MemoryWorkspaceRepository implements WorkspaceRepository {
 
   async issueAccessToken(workspaceId: string) {
     await this.revokeAccessTokens(workspaceId);
-    const credential = createOpaqueCredential("atm_mcp");
+    const credential = createOpaqueCredential('atm_mcp');
     this.accessTokens.set(credential.hash, { workspaceId, revoked: false });
     return { token: credential.token, tokenPrefix: credential.tokenPrefix };
   }
@@ -218,7 +218,7 @@ type WorkspaceRow = {
   template_id: string;
   template_version: number;
   configuration: McpWorkspaceConfiguration;
-  status: "active" | "paused";
+  status: 'active' | 'paused';
   revision: number;
   expires_at: Date | null;
   created_at: Date;
@@ -246,9 +246,9 @@ function fromRow(row: WorkspaceRow): StoredWorkspace {
 export class PostgresWorkspaceRepository implements WorkspaceRepository {
   constructor(private pool: Pool) {}
   async createAnonymous(
-    input: Parameters<WorkspaceRepository["createAnonymous"]>[0],
+    input: Parameters<WorkspaceRepository['createAnonymous']>[0],
   ) {
-    const credential = createOpaqueCredential("atm_tmp");
+    const credential = createOpaqueCredential('atm_tmp');
     const result = await this.pool.query<WorkspaceRow>(
       `insert into mcp_workspaces (id, public_id, anonymous_credential_hash, guide_slug, template_id, template_version, configuration, expires_at)
        values ($1,$2,$3,$4,$5,$6,$7::jsonb,now() + interval '7 days') returning *`,
@@ -269,21 +269,21 @@ export class PostgresWorkspaceRepository implements WorkspaceRepository {
   }
   async findOwned(userId: string, guideSlug: string) {
     const result = await this.pool.query<WorkspaceRow>(
-      "select * from mcp_workspaces where owner_user_id=$1 and guide_slug=$2",
+      'select * from mcp_workspaces where owner_user_id=$1 and guide_slug=$2',
       [userId, guideSlug],
     );
     return result.rows[0] ? publicWorkspace(fromRow(result.rows[0])) : null;
   }
   async findByPublicId(publicId: string) {
     const result = await this.pool.query<WorkspaceRow>(
-      "select * from mcp_workspaces where public_id=$1",
+      'select * from mcp_workspaces where public_id=$1',
       [publicId],
     );
     return result.rows[0] ? fromRow(result.rows[0]) : null;
   }
   async findAnonymous(id: string, credential: string) {
     const result = await this.pool.query<WorkspaceRow>(
-      "select * from mcp_workspaces where id=$1 and owner_user_id is null and anonymous_credential_hash=$2 and expires_at > now()",
+      'select * from mcp_workspaces where id=$1 and owner_user_id is null and anonymous_credential_hash=$2 and expires_at > now()',
       [id, hashCredential(credential)],
     );
     return result.rows[0] ? publicWorkspace(fromRow(result.rows[0])) : null;
@@ -294,25 +294,25 @@ export class PostgresWorkspaceRepository implements WorkspaceRepository {
     expectedRevision: number,
   ) {
     const result = await this.pool.query<WorkspaceRow>(
-      "update mcp_workspaces set configuration=$2::jsonb, revision=revision+1, updated_at=now() where id=$1 and revision=$3 returning *",
+      'update mcp_workspaces set configuration=$2::jsonb, revision=revision+1, updated_at=now() where id=$1 and revision=$3 returning *',
       [id, JSON.stringify(configuration), expectedRevision],
     );
     if (!result.rows[0])
       throw new WorkspaceRevisionConflictError(
-        "Workspace changed after it was loaded.",
+        'Workspace changed after it was loaded.',
       );
     await this.pool.query(
-      "delete from mcp_protocol_events where workspace_id=$1",
+      'delete from mcp_protocol_events where workspace_id=$1',
       [id],
     );
     return publicWorkspace(fromRow(result.rows[0]));
   }
-  async setStatus(id: string, status: "active" | "paused") {
+  async setStatus(id: string, status: 'active' | 'paused') {
     const result = await this.pool.query<WorkspaceRow>(
-      "update mcp_workspaces set status=$2, revision=revision+1, updated_at=now() where id=$1 returning *",
+      'update mcp_workspaces set status=$2, revision=revision+1, updated_at=now() where id=$1 returning *',
       [id, status],
     );
-    if (!result.rows[0]) throw new Error("Workspace not found.");
+    if (!result.rows[0]) throw new Error('Workspace not found.');
     return publicWorkspace(fromRow(result.rows[0]));
   }
   async claim(
@@ -323,21 +323,21 @@ export class PostgresWorkspaceRepository implements WorkspaceRepository {
   ) {
     const client = await this.pool.connect();
     try {
-      await client.query("begin");
+      await client.query('begin');
       const candidateResult = await client.query<WorkspaceRow>(
-        "select * from mcp_workspaces where id=$1 and anonymous_credential_hash=$2 and expires_at > now() for update",
+        'select * from mcp_workspaces where id=$1 and anonymous_credential_hash=$2 and expires_at > now() for update',
         [id, hashCredential(credential)],
       );
       const candidate = candidateResult.rows[0];
-      if (!candidate) throw new Error("Temporary workspace is unavailable.");
+      if (!candidate) throw new Error('Temporary workspace is unavailable.');
       // Serialize claims for an owner/guide even before its first owned row
       // exists, so concurrent create requests cannot violate the unique index.
       await client.query(
-        "select pg_advisory_xact_lock(hashtextextended($1, 0))",
+        'select pg_advisory_xact_lock(hashtextextended($1, 0))',
         [`${userId}:${candidate.guide_slug}`],
       );
       const existingResult = await client.query<WorkspaceRow>(
-        "select * from mcp_workspaces where owner_user_id=$1 and guide_slug=$2 for update",
+        'select * from mcp_workspaces where owner_user_id=$1 and guide_slug=$2 for update',
         [userId, candidate.guide_slug],
       );
       const existing = existingResult.rows[0];
@@ -346,42 +346,42 @@ export class PostgresWorkspaceRepository implements WorkspaceRepository {
           publicWorkspace(fromRow(existing)),
         );
       if (existing)
-        await client.query("delete from mcp_workspaces where id=$1", [
+        await client.query('delete from mcp_workspaces where id=$1', [
           existing.id,
         ]);
       const claimed = await client.query<WorkspaceRow>(
-        "update mcp_workspaces set owner_user_id=$2, anonymous_credential_hash=null, expires_at=null, revision=revision+1, updated_at=now() where id=$1 returning *",
+        'update mcp_workspaces set owner_user_id=$2, anonymous_credential_hash=null, expires_at=null, revision=revision+1, updated_at=now() where id=$1 returning *',
         [id, userId],
       );
-      await client.query("commit");
+      await client.query('commit');
       return publicWorkspace(fromRow(claimed.rows[0]!));
     } catch (error) {
-      await client.query("rollback");
+      await client.query('rollback');
       throw error;
     } finally {
       client.release();
     }
   }
   async issueAccessToken(workspaceId: string) {
-    const credential = createOpaqueCredential("atm_mcp");
+    const credential = createOpaqueCredential('atm_mcp');
     const client = await this.pool.connect();
     try {
-      await client.query("begin");
+      await client.query('begin');
       await client.query(
-        "select id from mcp_workspaces where id=$1 for update",
+        'select id from mcp_workspaces where id=$1 for update',
         [workspaceId],
       );
       await client.query(
-        "update mcp_access_tokens set revoked_at=now() where workspace_id=$1 and revoked_at is null",
+        'update mcp_access_tokens set revoked_at=now() where workspace_id=$1 and revoked_at is null',
         [workspaceId],
       );
       await client.query(
-        "insert into mcp_access_tokens (id, workspace_id, token_hash, token_prefix) values ($1,$2,$3,$4)",
+        'insert into mcp_access_tokens (id, workspace_id, token_hash, token_prefix) values ($1,$2,$3,$4)',
         [randomUUID(), workspaceId, credential.hash, credential.tokenPrefix],
       );
-      await client.query("commit");
+      await client.query('commit');
     } catch (error) {
-      await client.query("rollback");
+      await client.query('rollback');
       throw error;
     } finally {
       client.release();
@@ -397,20 +397,20 @@ export class PostgresWorkspaceRepository implements WorkspaceRepository {
   }
   async revokeAccessTokens(workspaceId: string) {
     await this.pool.query(
-      "update mcp_access_tokens set revoked_at=now() where workspace_id=$1 and revoked_at is null",
+      'update mcp_access_tokens set revoked_at=now() where workspace_id=$1 and revoked_at is null',
       [workspaceId],
     );
   }
   async appendEvents(workspaceId: string, events: McpProtocolEvent[]) {
     const client = await this.pool.connect();
     try {
-      await client.query("begin");
+      await client.query('begin');
       await client.query(
-        "select id from mcp_workspaces where id=$1 for update",
+        'select id from mcp_workspaces where id=$1 for update',
         [workspaceId],
       );
       const last = await client.query<{ sequence: number }>(
-        "select coalesce(max(sequence), 0) as sequence from mcp_protocol_events where workspace_id=$1",
+        'select coalesce(max(sequence), 0) as sequence from mcp_protocol_events where workspace_id=$1',
         [workspaceId],
       );
       let sequence = Number(last.rows[0]?.sequence ?? 0);
@@ -436,9 +436,9 @@ export class PostgresWorkspaceRepository implements WorkspaceRepository {
        (select id from mcp_protocol_events where workspace_id=$1 order by sequence desc limit 100)`,
         [workspaceId],
       );
-      await client.query("commit");
+      await client.query('commit');
     } catch (error) {
-      await client.query("rollback");
+      await client.query('rollback');
       throw error;
     } finally {
       client.release();
@@ -449,13 +449,13 @@ export class PostgresWorkspaceRepository implements WorkspaceRepository {
       id: string;
       sequence: number;
       method: string;
-      status: McpProtocolEvent["status"];
+      status: McpProtocolEvent['status'];
       request: Record<string, unknown>;
       response: Record<string, unknown>;
       duration_ms: number;
       created_at: Date;
     }>(
-      "select * from mcp_protocol_events where workspace_id=$1 order by sequence asc limit 100",
+      'select * from mcp_protocol_events where workspace_id=$1 order by sequence asc limit 100',
       [workspaceId],
     );
     return result.rows.map((row) => ({

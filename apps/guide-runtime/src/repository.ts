@@ -1,9 +1,9 @@
-import { randomUUID } from "node:crypto";
-import type { Pool } from "pg";
+import { randomUUID } from 'node:crypto';
+import type { Pool } from 'pg';
 import type {
   GuideRun,
   UpsertGuideRunRequest,
-} from "@all-things-mcp/contracts";
+} from '@all-things-mcp/contracts';
 
 export interface GuideRunRepository {
   find(userId: string, guideSlug: string): Promise<GuideRun | null>;
@@ -36,7 +36,7 @@ export class MemoryGuideRunRepository implements GuideRunRepository {
       input.expectedRevision !== current.revision
     ) {
       throw new GuideRunRevisionConflictError(
-        "The guide run changed after it was loaded.",
+        'The guide run changed after it was loaded.',
       );
     }
 
@@ -60,8 +60,8 @@ type GuideRunRow = {
   id: string;
   user_id: string;
   guide_slug: string;
-  progress: GuideRun["progress"];
-  simulator_state: GuideRun["simulatorState"];
+  progress: GuideRun['progress'];
+  simulator_state: GuideRun['simulatorState'];
   revision: number;
   created_at: Date;
   updated_at: Date;
@@ -127,7 +127,7 @@ export class PostgresGuideRunRepository implements GuideRunRepository {
     const row = result.rows[0];
     if (!row) {
       throw new GuideRunRevisionConflictError(
-        "The guide run changed after it was loaded.",
+        'The guide run changed after it was loaded.',
       );
     }
     return fromRow(row);

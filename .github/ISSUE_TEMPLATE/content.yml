@@ -1,6 +1,6 @@
 name: Content correction or request
 description: Report outdated material, an error, or a missing guide
-title: "Content: "
+title: 'Content: '
 labels: [content]
 body:
   - type: input

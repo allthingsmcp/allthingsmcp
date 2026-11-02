@@ -2,13 +2,13 @@ type Profile = {
   id: string;
   email: string;
   display_name: string | null;
-  welcome_email_status: "pending" | "sent" | "failed";
+  welcome_email_status: 'pending' | 'sent' | 'failed';
 };
 
 type InsertPayload = {
-  type: "INSERT";
-  table: "profiles";
-  schema: "public";
+  type: 'INSERT';
+  table: 'profiles';
+  schema: 'public';
   record: Profile;
   old_record: null;
 };
@@ -18,24 +18,24 @@ function escapeHtml(value: string) {
     /[&<>'"]/g,
     (character) =>
       ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        "'": "&#39;",
-        '"': "&quot;",
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;',
       })[character]!,
   );
 }
 
 function welcomeEmail(profile: Profile, siteUrl: string) {
   const firstName = escapeHtml(
-    profile.display_name?.trim().split(/\s+/)[0] || "there",
+    profile.display_name?.trim().split(/\s+/)[0] || 'there',
   );
   const guidesUrl = `${siteUrl}/guides`;
   const startUrl = `${siteUrl}/guides/building-your-first-mcp-server`;
 
   return {
-    subject: "Welcome to All Things MCP",
+    subject: 'Welcome to All Things MCP',
     text: `Hi ${firstName},\n\nWelcome to All Things MCP — a practical place to understand MCP, build with it, and keep up with the protocol.\n\nA good place to start:\n1. Browse the Guides: ${guidesUrl}\n2. Build your first MCP server: ${startUrl}\n3. Follow Spec Watch for changes that affect your implementation: ${siteUrl}/spec-watch\n\nSee you inside,\nAll Things MCP\nLearn. Build. Ship with MCP.`,
     html: `<!doctype html>
 <html lang="en">
@@ -64,44 +64,44 @@ function welcomeEmail(profile: Profile, siteUrl: string) {
 }
 
 Deno.serve(async (request) => {
-  const webhookSecret = Deno.env.get("WELCOME_EMAIL_WEBHOOK_SECRET");
-  const authorization = request.headers.get("authorization");
+  const webhookSecret = Deno.env.get('WELCOME_EMAIL_WEBHOOK_SECRET');
+  const authorization = request.headers.get('authorization');
   if (!webhookSecret || authorization !== `Bearer ${webhookSecret}`) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const payload = (await request.json()) as InsertPayload;
   if (
-    payload.type !== "INSERT" ||
-    payload.schema !== "public" ||
-    payload.table !== "profiles" ||
+    payload.type !== 'INSERT' ||
+    payload.schema !== 'public' ||
+    payload.table !== 'profiles' ||
     !payload.record?.email ||
-    payload.record.welcome_email_status !== "pending"
+    payload.record.welcome_email_status !== 'pending'
   ) {
     return Response.json({ ignored: true });
   }
 
-  const resendKey = Deno.env.get("RESEND_API_KEY");
-  const from = Deno.env.get("WELCOME_EMAIL_FROM");
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const resendKey = Deno.env.get('RESEND_API_KEY');
+  const from = Deno.env.get('WELCOME_EMAIL_FROM');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   const siteUrl = (
-    Deno.env.get("SITE_URL") || "https://allthingsmcp.com"
-  ).replace(/\/$/, "");
+    Deno.env.get('SITE_URL') || 'https://allthingsmcp.com'
+  ).replace(/\/$/, '');
   if (!resendKey || !from || !supabaseUrl || !serviceKey) {
     return Response.json(
-      { error: "Email delivery is not configured" },
+      { error: 'Email delivery is not configured' },
       { status: 503 },
     );
   }
 
   const message = welcomeEmail(payload.record, siteUrl);
-  const emailResponse = await fetch("https://api.resend.com/emails", {
-    method: "POST",
+  const emailResponse = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
     headers: {
       authorization: `Bearer ${resendKey}`,
-      "content-type": "application/json",
-      "idempotency-key": `welcome-${payload.record.id}`,
+      'content-type': 'application/json',
+      'idempotency-key': `welcome-${payload.record.id}`,
     },
     body: JSON.stringify({
       from,
@@ -112,13 +112,13 @@ Deno.serve(async (request) => {
     }),
   });
 
-  const status = emailResponse.ok ? "sent" : "failed";
+  const status = emailResponse.ok ? 'sent' : 'failed';
   await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${payload.record.id}`, {
-    method: "PATCH",
+    method: 'PATCH',
     headers: {
       apikey: serviceKey,
       authorization: `Bearer ${serviceKey}`,
-      "content-type": "application/json",
+      'content-type': 'application/json',
     },
     body: JSON.stringify({
       welcome_email_status: status,
@@ -129,7 +129,7 @@ Deno.serve(async (request) => {
 
   if (!emailResponse.ok) {
     return Response.json(
-      { error: "Welcome email could not be sent" },
+      { error: 'Welcome email could not be sent' },
       { status: 502 },
     );
   }

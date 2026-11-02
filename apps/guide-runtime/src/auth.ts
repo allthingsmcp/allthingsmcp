@@ -1,11 +1,11 @@
-import { jwtVerify } from "jose";
+import { jwtVerify } from 'jose';
 import {
   runtimePrincipalSchema,
   type RuntimePrincipal,
-} from "@all-things-mcp/contracts";
+} from '@all-things-mcp/contracts';
 
-export const runtimeTokenIssuer = "all-things-mcp-web";
-export const runtimeTokenAudience = "all-things-mcp-guide-runtime";
+export const runtimeTokenIssuer = 'all-things-mcp-web';
+export const runtimeTokenAudience = 'all-things-mcp-guide-runtime';
 
 export class RuntimeAuthenticationError extends Error {}
 
@@ -13,9 +13,9 @@ export async function verifyRuntimeToken(
   authorization: string | undefined,
   sharedSecret: string,
 ): Promise<RuntimePrincipal> {
-  const [scheme, token] = authorization?.split(" ") ?? [];
-  if (scheme !== "Bearer" || !token) {
-    throw new RuntimeAuthenticationError("A bearer token is required.");
+  const [scheme, token] = authorization?.split(' ') ?? [];
+  if (scheme !== 'Bearer' || !token) {
+    throw new RuntimeAuthenticationError('A bearer token is required.');
   }
 
   try {
@@ -25,7 +25,7 @@ export async function verifyRuntimeToken(
       {
         issuer: runtimeTokenIssuer,
         audience: runtimeTokenAudience,
-        algorithms: ["HS256"],
+        algorithms: ['HS256'],
       },
     );
 
@@ -36,6 +36,6 @@ export async function verifyRuntimeToken(
       image: payload.image ?? null,
     });
   } catch {
-    throw new RuntimeAuthenticationError("The bearer token is invalid.");
+    throw new RuntimeAuthenticationError('The bearer token is invalid.');
   }
 }
