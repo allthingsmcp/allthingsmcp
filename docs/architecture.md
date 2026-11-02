@@ -8,8 +8,8 @@
 - Content: Fumadocs MDX compiled from `apps/web/content/`; schemas live in
   `apps/web/lib/content-schema.ts` and `apps/web/source.config.ts`.
 - Search: Fumadocs Core server-side search at `/api/search`, presented through
-  the global command overlay. `/search` redirects to the overlay (see
-  `redirects()` in `apps/web/next.config.mjs`).
+  the global command overlay. `/search` is compatibility-only and opens the
+  overlay on the current shell rather than rendering a standalone search page.
 - Deployment: the website and Guide Runtime are independent deployment units.
   The website uses `apps/web` as its Vercel project root; `main` is production
   and pull requests receive previews.
@@ -32,7 +32,8 @@ Landing pages are intentional. The home page keeps `#guides` and `#blog`
 sections that the header links to (`/#guides`, `/#blog`) and shows only a
 curated selection. `/guides` and `/blog` are the full listings; a "view all"
 call to action on the home sections will link to them once the catalogs outgrow
-the home page. `/guide` is a permanent redirect to `/guides`.
+the home page. `/guide` is a permanent redirect to `/guides`
+(`app/guide/page.tsx`).
 
 Primary hubs are implemented from shared data in `apps/web/lib/site-data.ts`.
 Blog posts use `/blog/[slug]`; Guide overviews use `/guides/[slug]`; hands-on

@@ -19,8 +19,8 @@ grouped by date rather than by version until tagged releases begin.
 - Brand masters moved to `brand/`; human-facing docs moved from `skills/` to `docs/`.
 - Guide Runtime rate limiting no longer trusts `X-Forwarded-For` unless `TRUSTED_PROXY_COUNT` is set.
 - Guide Runtime image uses Node 24, runs as a non-root user, and includes a health check.
-- Redirect-only routes are declared in `apps/web/next.config.mjs`.
+- The `/all` and `/library/tutorials/minimal-server` redirects are declared in `apps/web/next.config.mjs`.
 
 ### Removed
 
-- The retired `/home-classic` page, the tracked `supabase/.temp` files, and `yarn-error.log`.
+- The tracked `supabase/.temp` files, and `yarn-error.log`.
