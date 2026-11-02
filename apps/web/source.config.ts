@@ -24,7 +24,14 @@ export const authors = defineCollections({
   type: 'meta',
   dir: 'content/authors',
   schema: z.object({
+    // Must match the file name, e.g. `jane-doe` for `jane-doe.yaml`.
+    slug: z
+      .string()
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use a lowercase slug'),
     name: z.string().min(1),
+    // People get a public profile page at /authors/[slug]; organizations do not.
+    kind: z.enum(['person', 'organization']).default('person'),
+    affiliation: z.string().min(1).optional(),
     role: z.string().min(1),
     bio: z.string().min(20),
     image: z.string().startsWith('/'),

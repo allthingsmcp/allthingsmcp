@@ -47,6 +47,25 @@ const knownLibraryUrls = new Set(
   ),
 );
 const errors: string[] = [];
+const warnings: string[] = [];
+const authorFiles = await fg('content/authors/*.{yaml,yml}', {
+  cwd: root,
+  absolute: true,
+});
+const authorNames = new Set<string>();
+for (const file of authorFiles) {
+  const profile = matter(`---\n${await readFile(file, 'utf8')}\n---`).data as {
+    slug?: string;
+    name?: string;
+  };
+  const expected = path.basename(file).replace(/\.ya?ml$/, '');
+  if (profile.slug !== expected) {
+    errors.push(
+      `${path.relative(root, file)}: slug must match the file name ("${expected}")`,
+    );
+  }
+  if (profile.name) authorNames.add(profile.name);
+}
 const guides = new Map<
   string,
   {
@@ -116,6 +135,14 @@ for (const file of files) {
   }
 
   if (result.success) {
+    for (const author of result.data.authors) {
+      if (!authorNames.has(author)) {
+        // Unmatched names are credited by name only, which is allowed.
+        warnings.push(
+          `${relative}: author "${author}" has no profile; add content/authors/<slug>.yaml to link a profile (see docs/authors.md)`,
+        );
+      }
+    }
     const directory = path
       .relative(path.join(root, 'content'), file)
       .split(path.sep)[0];
@@ -192,6 +219,8 @@ for (const [guideSlug, guide] of guides) {
     }
   }
 }
+
+for (const warning of warnings) console.warn(`warning: ${warning}`);
 
 if (errors.length) {
   console.error(`Content validation failed with ${errors.length} issue(s):\n`);

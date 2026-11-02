@@ -66,7 +66,9 @@ authors:
 If a profile already exists in `apps/web/content/authors/`, reuse it. Otherwise create a YAML file such as `apps/web/content/authors/ada-lovelace.yaml`:
 
 ```yaml title="apps/web/content/authors/ada-lovelace.yaml"
+slug: ada-lovelace
 name: Ada Lovelace
+kind: person
 role: MCP contributor
 bio: Writes practical explanations of protocol architecture and developer tooling.
 image: /authors/ada-lovelace.jpg
@@ -76,7 +78,7 @@ x: https://x.com/your-handle
 website: https://example.com
 ```
 
-Replace these sample details and add the referenced image to `apps/web/public/authors/`. The profile requires a name, role, biography of at least 20 characters, and a local image path. The profile `name` must exactly match the article’s `authors` entry for the full byline to appear.
+Replace these sample details and add the referenced image to `apps/web/public/authors/`. The profile requires a slug matching the file name, a name, role, biography of at least 20 characters, and a local image path. The profile `name` must exactly match the article’s `authors` entry for the full byline to appear.
 
 The `github`, `linkedin`, `x`, and `website` fields are optional. Use your own full HTTP or HTTPS URLs and omit platforms you do not want to share. Available links appear beneath your role on blog posts and Guides. Older profiles can keep `url` as a website fallback; when both are present, `website` takes precedence.
 

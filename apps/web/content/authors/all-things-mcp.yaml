@@ -1,4 +1,6 @@
+slug: all-things-mcp
 name: All Things MCP Editors
+kind: organization
 role: Editorial and technical team
 bio: Independent contributors documenting Model Context Protocol architecture, security, implementation, and operations.
 image: /brand/open-junction/icons/avatar-512.png

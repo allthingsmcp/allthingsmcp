@@ -86,7 +86,9 @@ authors:
 To add a reusable author profile, create `apps/web/content/authors/your-name.yaml`:
 
 ```yaml title="apps/web/content/authors/ada-lovelace.yaml"
+slug: ada-lovelace
 name: Ada Lovelace
+kind: person
 role: MCP contributor
 bio: Writes practical guides about protocol clients, servers, and developer tooling.
 image: /authors/ada-lovelace.jpg
@@ -96,7 +98,7 @@ x: https://x.com/your-handle
 website: https://example.com
 ```
 
-Add the referenced image under `apps/web/public/authors/`. The profile `name` must exactly match the value in each document’s `authors` array. The name, role, biography, and image fields are required. `github`, `linkedin`, `x`, and `website` are optional: replace the example links with your own full HTTP or HTTPS URLs, and omit any you do not want to share. An existing `url` field remains a fallback for `website`.
+Add the referenced image under `apps/web/public/authors/`. The profile `name` must exactly match the value in each document’s `authors` array. The `slug` is required, must match the file name, and becomes your profile page at `/authors/your-slug`. The name, role, biography, and image fields are also required; `kind` defaults to `person`, and `affiliation` is optional. `github`, `linkedin`, `x`, and `website` are optional: replace the example links with your own full HTTP or HTTPS URLs, and omit any you do not want to share. An existing `url` field remains a fallback for `website`.
 
 Guide overviews and steps show a byline with the author’s name, photo, role, and available profile links; the biography is available on hover or keyboard focus. Contributors without a matching profile are still credited by name. Each step uses its own `authors` list, so credit everyone who contributed to that step.
 
