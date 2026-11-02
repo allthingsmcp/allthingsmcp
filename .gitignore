@@ -16,3 +16,13 @@ pnpm-debug.log*
 # Regenerated interactive Guide concepts are intentionally not implementation references.
 /output/imagegen/interactive-guides-v2/
 /tmp/imagegen/
+
+# Local tooling and diagnostics
+supabase/.temp/
+yarn-error.log
+*-error.log
+npm-debug.log*
+.pnpm-store/
+**/.pnpm-store/
+.next-*/
+CLAUDE.local.md
