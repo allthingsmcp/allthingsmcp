@@ -17,6 +17,8 @@ const nextConfig = {
   // adding page files that only call redirect().
   async redirects() {
     return [
+      // /guides and /blog are intentional full-listing landing pages that sit
+      // behind the home page's #guides and #blog sections.
       { source: '/guide', destination: '/guides', permanent: true },
       { source: '/all', destination: '/', permanent: true },
       // The footer links to /search; the overlay is part of the page shell.

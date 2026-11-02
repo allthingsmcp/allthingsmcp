@@ -28,6 +28,12 @@
   optimistic revisions to prevent silent overwrites. It stores the Supabase
   user ID only as an opaque subject and does not query Auth tables.
 
+Landing pages are intentional. The home page keeps `#guides` and `#blog`
+sections that the header links to (`/#guides`, `/#blog`) and shows only a
+curated selection. `/guides` and `/blog` are the full listings; a "view all"
+call to action on the home sections will link to them once the catalogs outgrow
+the home page. `/guide` is a permanent redirect to `/guides`.
+
 Primary hubs are implemented from shared data in `apps/web/lib/site-data.ts`.
 Blog posts use `/blog/[slug]`; Guide overviews use `/guides/[slug]`; hands-on
 Guide steps use `/guides/[slug]/[step]`. The catch-all library route remains a
