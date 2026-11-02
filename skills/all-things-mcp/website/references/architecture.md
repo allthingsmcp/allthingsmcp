@@ -2,7 +2,7 @@
 
 - Workspace: pnpm monorepo with the website in `apps/web`, the backend boundary
   in `apps/guide-runtime`, and shared schemas in `packages/contracts`.
-- Website runtime: Node 22+, Next.js App Router, React, TypeScript.
+- Website runtime: Node 24 LTS (pinned in `.nvmrc`), Next.js App Router, React, TypeScript.
 - Styling: Tailwind CSS plus CSS custom properties in
   `apps/web/app/globals.css`.
 - Content: Fumadocs MDX compiled from `apps/web/content/`; schemas live in

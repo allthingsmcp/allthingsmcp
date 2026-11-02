@@ -57,14 +57,17 @@ test('approved branding loads throughout the shared shell and metadata', async (
         ),
     )
     .toBe(true);
-  await expect(header).toHaveScreenshot('brand-header.png', {
-    animations: 'disabled',
-  });
-  await footer.scrollIntoViewIfNeeded();
-  await expect(footer.locator('.footer-bottom')).toHaveScreenshot(
-    'brand-footer-lockup.png',
-    { animations: 'disabled', maxDiffPixels: 5 },
-  );
+  // Reviewed baselines exist for macOS only (see tests/e2e/README.md).
+  if (process.platform === 'darwin') {
+    await expect(header).toHaveScreenshot('brand-header.png', {
+      animations: 'disabled',
+    });
+    await footer.scrollIntoViewIfNeeded();
+    await expect(footer.locator('.footer-bottom')).toHaveScreenshot(
+      'brand-footer-lockup.png',
+      { animations: 'disabled', maxDiffPixels: 5 },
+    );
+  }
   const accessibility = await new AxeBuilder({ page })
     .include('.site-header')
     .include('.site-footer')

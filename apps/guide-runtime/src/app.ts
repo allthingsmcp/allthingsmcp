@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { secureHeaders } from "hono/secure-headers";
 import * as z from "zod/v4";
 import {
   createMcpWorkspaceRequestSchema,
@@ -24,6 +25,7 @@ import {
   createWorkspaceMcpHandler,
   executeWorkspaceCommand,
 } from "./mcp-runtime.js";
+import { resolveClientIp } from "./client-ip.js";
 import { RequestLimiter } from "./limits.js";
 import { OpenMeteoProvider } from "./weather.js";
 import {
@@ -56,6 +58,10 @@ export function createGuideRuntimeApp({
       .map((value) => value.trim())
       .filter(Boolean),
   );
+
+  // JSON API only: no CORS headers are emitted, so browsers cannot call it
+  // cross-origin. The web app calls it server-side.
+  app.use(secureHeaders());
 
   app.get("/health", (context) =>
     context.json({ status: "ok", service: "guide-runtime" }),
@@ -102,9 +108,7 @@ export function createGuideRuntimeApp({
   }
 
   function withinLimits(context: Context, workspaceId: string) {
-    const ip =
-      context.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    return limiter.check(workspaceId, ip);
+    return limiter.check(workspaceId, resolveClientIp(context));
   }
 
   async function executeCommand(context: Context, workspace: McpWorkspace) {

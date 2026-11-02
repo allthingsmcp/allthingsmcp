@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -45,3 +49,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @all-things-mcp/web exec playwright install --with-deps chromium
       - run: pnpm --filter @all-things-mcp/web test:e2e --project=desktop --project=mobile
+
+  runtime-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Guide Runtime image
+        run: docker build -f apps/guide-runtime/Dockerfile -t guide-runtime:ci .
+      - name: Check Node major matches .nvmrc
+        run: |
+          expected="$(cut -d. -f1 .nvmrc)"
+          actual="$(docker run --rm --entrypoint node guide-runtime:ci -p 'process.versions.node.split(".")[0]')"
+          test "$expected" = "$actual"
