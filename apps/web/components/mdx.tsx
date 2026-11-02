@@ -1,4 +1,5 @@
 import type { MDXComponents } from 'mdx/types';
+import { Image } from 'fumadocs-core/framework';
 import { ArrowRight, CheckCircle2, Info, TriangleAlert } from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
 import { MdxTabs, type MdxTabItem } from '@/components/mdx-tabs';
@@ -142,6 +143,7 @@ export function ProtocolDiagram({
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
+    img: Image,
     h2: H2,
     h3: H3,
     h4: H4,

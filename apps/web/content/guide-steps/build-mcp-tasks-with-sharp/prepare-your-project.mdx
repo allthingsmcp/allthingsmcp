@@ -1,0 +1,100 @@
+---
+title: Check prerequisites and get the project
+description: Set up your tools, download the starter and inspect the sample images.
+contentType: guide-step
+section: build
+guideSlug: build-mcp-tasks-with-sharp
+guideStepId: prepare-your-project
+guideStepOrder: 2
+authors: [Gbadebo Bello]
+status: draft
+tags: [guide-step, tasks, typescript, sharp]
+updatedAt: 2026-10-31
+difficulty: intermediate
+estimatedMinutes: 8
+specVersion: 2026-07-28
+lastVerified: 2026-10-31
+---
+
+Set up the local project for the Tasks implementation. Run the MCP server and
+MCP client in separate terminals, from the same project folder.
+
+## 1. Check the prerequisites
+
+You should have built an MCP server, registered tools, and called them from an
+MCP client. The examples assume you are comfortable with asynchronous JavaScript
+and can read TypeScript. No previous Tasks implementation is needed.
+
+Have a code editor and two terminals ready. The project runs locally without
+an API key or AI application.
+
+| Software                                  | Check            | Version used here |
+| ----------------------------------------- | ---------------- | ----------------- |
+| [Node.js](https://nodejs.org/en/download) | `node --version` | `v24.21.0`        |
+| [pnpm](https://pnpm.io/installation)      | `pnpm --version` | `10.20.0`         |
+
+Use these versions to match the tested environment. Package scripts run the
+TypeScript files directly.
+
+This walkthrough targets the **2026-07-28 Tasks extension**. Its messages differ
+from older experimental Tasks examples. Keep the supplied `package.json` and
+lockfile together. They pin MCP SDK client/server 2.4.0, Tasks extension 0.2.2,
+Node adapter 2.1.2 and Sharp 0.35.5.
+
+## 2. Download and install the starter
+
+[Download the starter](/downloads/mcp-tasks-thumbnails/starter.zip), extract it,
+and open the `mcp-tasks-thumbnails` folder in your editor. From that folder, run:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm run fixtures
+pnpm run verify
+```
+
+The last two commands generate and check the input images. Expect these lines,
+apart from pnpm's script headers:
+
+```text
+Ready: 6 sample images and 1 deliberate error fixture.
+Node 24.21.0; Sharp 0.35.5; 6 images verified.
+```
+
+If Sharp fails to load, check the Node version and rerun installation in this
+folder. The [Sharp installation guide](https://sharp.pixelplumbing.com/install/)
+explains platform-specific errors. If an image is missing, rerun `pnpm run fixtures`.
+
+The [completed project](/downloads/mcp-tasks-thumbnails/completed.zip) is available
+for comparison. You only need the starter to build along. Recovery downloads at
+the end of setup and coding steps let you continue if you get stuck; extract them
+into a new folder, install dependencies and regenerate fixtures there.
+
+## 3. Locate the Tasks integration points
+
+Open `fixtures/landscape.png`. The supplied Sharp function in `src/resize-image.ts`
+will create WebP copies at 320, 640 and 1280 pixels wide. `src/thumbnails.ts` repeats
+that operation for six images and records the outputs in `manifest.json`.
+These image helpers are ready to use so you can focus on MCP Tasks.
+
+You will write four files:
+
+| File                      | What you will implement                                       |
+| ------------------------- | ------------------------------------------------------------- |
+| `src/app.ts`              | Tool registration and the Tasks handler hook.                 |
+| `src/task-handlers.ts`    | Task creation, status retrieval and cancellation.             |
+| `scripts/tasks-client.ts` | An MCP client that declares Tasks support and calls the tool. |
+| `src/watch-task.ts`       | The loop that checks status and returns the result.           |
+
+The starter also supplies HTTP wiring, message validation, and a file-based
+worker/store. These are labelled project helpers, with code you can inspect;
+they are not extra SDK methods. The `TODO` files will be completed in steps 3–4.
+
+**Checkpoint:** the pinned dependencies are installed and verification finds six
+readable input images. `broken.png` is intentionally invalid; you will use it to
+test tool-error handling in the final step.
+
+[Recover to the end of step 2](/downloads/mcp-tasks-thumbnails/step-2.zip).
+
+Commands were checked on macOS arm64 on **31 October 2026**. Linux CI is configured
+but has not been observed running; Windows is untested. The 50-minute guide
+length is an editorial estimate pending a run by a developer new to Tasks.

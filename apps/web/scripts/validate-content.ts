@@ -3,6 +3,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
 import { contentSchema } from '../lib/content-schema';
+import { validateMdxBody, withoutFencedCode } from '../lib/mdx-validation';
 import {
   interactiveGuideDefinitions,
   interactiveGuideScenes,
@@ -54,6 +55,7 @@ for (const file of files) {
   const relative = path.relative(root, file);
   const raw = await readFile(file, 'utf8');
   const parsed = matter(raw);
+  const mdx = withoutFencedCode(parsed.content);
   const result = contentSchema.safeParse(parsed.data);
   if (!result.success) {
     for (const issue of result.error.issues)
@@ -74,9 +76,7 @@ for (const file of files) {
     result.data.guideStepOrder
   ) {
     const scenes = Array.from(
-      parsed.content.matchAll(
-        /<InteractiveGuideBlock\s+scene="([^"]+)"\s*\/>/g,
-      ),
+      mdx.matchAll(/<InteractiveGuideBlock\s+scene="([^"]+)"\s*\/>/g),
     ).map((match) => match[1]);
     const invalidScene = scenes.find(
       (scene) =>
@@ -87,10 +87,7 @@ for (const file of files) {
         `${relative}: unknown interactive Guide scene ${invalidScene}`,
       );
     }
-    if (
-      parsed.content.includes('<InteractiveGuideBlock') &&
-      scenes.length === 0
-    ) {
+    if (mdx.includes('<InteractiveGuideBlock') && scenes.length === 0) {
       errors.push(
         `${relative}: InteractiveGuideBlock requires a literal scene attribute`,
       );
@@ -116,28 +113,10 @@ for (const file of files) {
   if (duplicate) errors.push(`${relative}: duplicate slug with ${duplicate}`);
   slugs.set(slug, relative);
 
-  if (/^(?:import|export)\s/m.test(parsed.content))
-    errors.push(`${relative}: MDX imports and exports are not allowed`);
-  for (const match of parsed.content.matchAll(/<\/?([A-Z][A-Za-z0-9]*)\b/g)) {
-    if (!allowedComponents.has(match[1]))
-      errors.push(`${relative}: unapproved MDX component <${match[1]}>`);
-  }
+  for (const error of validateMdxBody(parsed.content, allowedComponents))
+    errors.push(`${relative}: ${error}`);
 
-  const withoutApprovedArrays = parsed.content.replace(
-    /items=\{\[[\s\S]*?\]\}/g,
-    '',
-  );
-  if (
-    /\{\s*(?:\([^)]*\)\s*=>|function\b|async\b|await\b|new\s+|[A-Za-z_$][\w$]*\s*\()/m.test(
-      withoutApprovedArrays,
-    )
-  ) {
-    errors.push(
-      `${relative}: executable JavaScript is not allowed in contributed MDX`,
-    );
-  }
-
-  for (const match of parsed.content.matchAll(/\]\((\/[\w\-/.#]+)\)/g)) {
+  for (const match of mdx.matchAll(/\]\((\/[\w\-/.#]+)\)/g)) {
     const target = match[1].split('#')[0].replace(/\/$/, '');
     if (target.startsWith('/library/') && !knownLibraryUrls.has(target))
       errors.push(`${relative}: broken internal reference ${target}`);

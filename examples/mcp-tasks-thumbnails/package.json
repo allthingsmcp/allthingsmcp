@@ -1,0 +1,38 @@
+{
+  "name": "atm-mcp-tasks-thumbnails",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=24.2.0 <25"
+  },
+  "scripts": {
+    "fixtures": "node --import tsx scripts/setup.ts",
+    "verify": "node --import tsx scripts/verify.ts",
+    "resize": "node --import tsx scripts/resize.ts",
+    "basic-client": "node --import tsx scripts/basic-client.ts",
+    "tasks-client": "node --import tsx scripts/tasks-client.ts",
+    "server": "node --import tsx src/server.ts",
+    "client": "node --import tsx src/client.ts",
+    "probe": "node --import tsx scripts/probe.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "package": "node --import tsx scripts/package.ts",
+    "checkpoints": "node --import tsx scripts/checkpoints.ts",
+    "snippets": "node --import tsx scripts/snippets.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.4.0",
+    "@modelcontextprotocol/ext-tasks": "0.2.2",
+    "@modelcontextprotocol/node": "2.1.2",
+    "@modelcontextprotocol/server": "2.4.0",
+    "sharp": "0.35.5",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "tsx": "4.23.5",
+    "typescript": "5.9.3"
+  }
+}

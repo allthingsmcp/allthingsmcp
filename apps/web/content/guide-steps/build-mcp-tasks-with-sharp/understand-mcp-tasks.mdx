@@ -1,0 +1,67 @@
+---
+title: Understand when Tasks help
+description: See when a tool call needs a task and how a client follows it to the result.
+contentType: guide-step
+section: build
+guideSlug: build-mcp-tasks-with-sharp
+guideStepId: understand-mcp-tasks
+guideStepOrder: 1
+authors: [Gbadebo Bello]
+status: draft
+tags: [guide-step, tasks, typescript, sharp]
+updatedAt: 2026-10-31
+difficulty: intermediate
+estimatedMinutes: 5
+specVersion: 2026-07-28
+lastVerified: 2026-10-31
+---
+
+Before writing code, trace what changes when an MCP server turns a tool call
+into a task. You will use this flow in the server and client steps that follow.
+
+## 1. When Tasks help
+
+An ordinary `tools/call` returns its result in that response. That can be fine
+for quick work. A long image batch, report, or approval gate may need to continue
+after the MCP client disconnects or a connection times out. The Tasks extension
+lets the MCP server return a handle while the work continues. The MCP client can
+check progress and retrieve the result later without submitting the work again.
+
+For an approval workflow, a task can enter `input_required`. The MCP client reads
+the pending input request and replies through `tasks/update`. This guide uses a
+thumbnail batch to teach polling and cancellation; it does not implement an
+approval prompt. See the [official Tasks overview](https://modelcontextprotocol.io/extensions/tasks/overview)
+for more use cases.
+
+Both sides declare Tasks support. The MCP server still decides per request
+whether to create a task, so a Tasks-capable MCP client must also handle an
+ordinary result.
+
+## 2. Follow a task to its result
+
+For this guide's batch, the exchange is:
+
+1. The MCP client calls `create_thumbnails` through `tools/call`.
+2. The MCP server saves a task, then returns a `taskId` instead of the final tool result.
+3. The MCP client calls `tasks/get` with that ID until it sees a final status and result.
+
+Keep the ID if the MCP client closes: a new connection can call `tasks/get` with
+the same ID. Calling `create_thumbnails` again would start another batch.
+
+A task's `status` tells the MCP client what to do:
+
+| Status           | Meaning                                                               |
+| ---------------- | --------------------------------------------------------------------- |
+| `working`        | Work is underway; check again later.                                  |
+| `input_required` | More input is needed; the MCP client responds through `tasks/update`. |
+| `completed`      | A tool result is available, which may itself report a tool error.     |
+| `failed`         | A protocol execution error prevented a normal result.                 |
+| `cancelled`      | Work stopped following cancellation.                                  |
+
+The last three states are final. A `tasks/cancel` request asks the MCP server to
+stop; its acknowledgement does not guarantee cancellation has taken effect.
+These states and messages come from the [Tasks specification](https://tasks.extensions.modelcontextprotocol.io/specification/2026-07-28/tasks).
+
+**Checkpoint:** If your MCP client disconnects after receiving a `taskId`, you
+can reconnect and call `tasks/get` with that ID. You do not call the image tool
+again. No local files change in this step; next you will set up the starter.
