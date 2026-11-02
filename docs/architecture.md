@@ -8,8 +8,8 @@
 - Content: Fumadocs MDX compiled from `apps/web/content/`; schemas live in
   `apps/web/lib/content-schema.ts` and `apps/web/source.config.ts`.
 - Search: Fumadocs Core server-side search at `/api/search`, presented through
-  the global command overlay. `/search` is compatibility-only and opens the
-  overlay on the current shell rather than rendering a standalone search page.
+  the global command overlay. `/search` redirects to the overlay (see
+  `redirects()` in `apps/web/next.config.mjs`).
 - Deployment: the website and Guide Runtime are independent deployment units.
   The website uses `apps/web` as its Vercel project root; `main` is production
   and pull requests receive previews.
@@ -39,7 +39,7 @@ MDX blocks resolve to an async workspace client backed by Guide Runtime;
 authored MDX must never contain executable runtime logic. Versioned declarative
 manifests live in `packages/mcp-templates`, while executable handlers remain in
 Guide Runtime. Consult
-`interactive-guide-inventory.md` for the supplied feature-semantics references.
+[`interactive-guides.md`](interactive-guides.md) for the supplied feature-semantics references.
 
 Anonymous reading, real temporary MCP execution, and project downloads are
 first-class behavior. Anonymous workspaces expire after seven days and can be

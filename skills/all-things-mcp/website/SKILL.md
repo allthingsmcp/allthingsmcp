@@ -5,7 +5,7 @@ description: Build and maintain the All Things MCP Next.js and Fumadocs knowledg
 
 # All Things MCP website
 
-Read `references/architecture.md` before changing platform structure and `references/content-contracts.md` before adding or editing content.
+Read [architecture](../../../docs/architecture.md) before changing platform structure and [content contracts](../../../docs/content-contracts.md) before adding or editing content.
 
 ## Workflow
 

@@ -7,8 +7,8 @@ description: Apply and maintain the All Things MCP visual identity for product U
 
 Open Junction (iteration 02) is the approved identity. Use the unmodified
 [logo masters](assets/logo/open-junction/svg), [brand values](assets/identity.json),
-and [brand constitution](references/brand-constitution.md) as the authority.
-Read [logo usage](references/logo-usage.md) when placing or exporting a logo.
+and [brand constitution](../../../docs/brand/brand-constitution.md) as the authority.
+Read [logo usage](../../../docs/brand/logo-usage.md) when placing or exporting a logo.
 Retired logo-bearing mockups have been removed; do not recover their artwork
 from Git history or earlier exports.
 
@@ -23,8 +23,7 @@ from Git history or earlier exports.
 7. Retain dark surfaces for code and the editorial footer. Do not add a theme toggle.
 8. Verify focus, contrast, reduced motion, wrapping, and touch targets before finishing.
 
-Current site components are the layout reference. Read
-[Figma inventory](references/figma-inventory.md) only when mapping an existing
-Figma pattern; its retired logo and palette do not override the current brand.
+Current site components are the layout reference. Historical Figma patterns do
+not override the current brand.
 The signature line is **Learn. Build. Ship with MCP.** Placement and inclusion
 follow the surface; it is not mandatory in every component.

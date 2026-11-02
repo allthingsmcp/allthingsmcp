@@ -6,7 +6,7 @@ Thank you for helping make MCP knowledge clearer and more reliable. You may open
 
 1. Find the appropriate collection under `apps/web/content/`.
 2. Copy a nearby document and update every frontmatter field.
-3. Use ordinary Markdown where possible. Reviewed MDX components are documented in `skills/all-things-mcp/website/references/content-contracts.md`.
+3. Use ordinary Markdown where possible. Reviewed MDX components are documented in [`docs/content-contracts.md`](docs/content-contracts.md).
 4. Cite primary sources for protocol behavior and record the specification version and verification date.
 5. Run `pnpm content:validate` and `pnpm check`.
 

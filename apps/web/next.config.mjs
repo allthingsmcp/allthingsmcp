@@ -13,6 +13,21 @@ const nextConfig = {
   experimental: {
     typedEnv: true,
   },
+  // Legacy and convenience URLs. Keep redirect-only routes here instead of
+  // adding page files that only call redirect().
+  async redirects() {
+    return [
+      { source: '/guide', destination: '/guides', permanent: true },
+      { source: '/all', destination: '/', permanent: true },
+      // The footer links to /search; the overlay is part of the page shell.
+      { source: '/search', destination: '/?search=1', permanent: false },
+      {
+        source: '/library/tutorials/minimal-server',
+        destination: '/guides/build-a-minimal-mcp-server',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const withMDX = createMDX();

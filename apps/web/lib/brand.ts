@@ -1,4 +1,4 @@
-import identity from '../../../skills/all-things-mcp/brand-system/assets/identity.json';
+import identity from '../../../brand/identity.json';
 
 export const brandIdentity = identity;
 

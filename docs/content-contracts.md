@@ -15,3 +15,19 @@ Supported `contentType` values:
 Use ISO `YYYY-MM-DD` dates. Use stable, lowercase, hyphenated slugs. Add `prerequisites` only when genuinely required. Tutorial fields may include language, SDK, SDK version, transport, authentication model, repository, and last-tested date.
 
 Contributed MDX may use: `Callout`, `Steps`, `Tabs`, `Checklist`, `CardGrid`, `MetadataPanel`, and `ProtocolDiagram`. Reviewed interactive Guide steps may also use `InteractiveGuideBlock` with a literal registered `scene` value. Scenario definitions and behavior live in the TypeScript registry, never in MDX. Do not import components or execute JavaScript inside content.
+
+## Where files live
+
+`pnpm content:validate` enforces that each `contentType` sits in its own folder under `apps/web/content/`.
+
+| Folder                        | `contentType`                   | Public URL              |
+| ----------------------------- | ------------------------------- | ----------------------- |
+| `guides/`                     | `guide`                         | `/guides/[slug]`        |
+| `guide-steps/[guide-slug]/`   | `guide-step`                    | `/guides/[slug]/[step]` |
+| `blog/`                       | `article`                       | `/blog/[slug]`          |
+| `learning-paths/`, `lessons/` | `learning-path`, `lesson`       | `/library/...`          |
+| `glossary/`                   | `glossary`                      | `/library/...`          |
+| `ecosystem/`                  | `ecosystem`                     | `/library/...`          |
+| `tools/`                      | `tool`                          | `/library/...`          |
+| `spec-watch/`                 | `spec-release`, `spec-proposal` | `/library/...`          |
+| `authors/`                    | author profiles (YAML)          | `/authors/[slug]`       |

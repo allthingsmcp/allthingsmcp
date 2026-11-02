@@ -23,6 +23,18 @@ const allowedComponents = new Set([
   'ProtocolDiagram',
   'InteractiveGuideBlock',
 ]);
+const contentDirectories: Record<string, string[]> = {
+  guide: ['guides'],
+  'guide-step': ['guide-steps'],
+  article: ['blog'],
+  'learning-path': ['learning-paths'],
+  lesson: ['lessons'],
+  glossary: ['glossary'],
+  ecosystem: ['ecosystem'],
+  tool: ['tools'],
+  'spec-release': ['spec-watch'],
+  'spec-proposal': ['spec-watch'],
+};
 const slugs = new Map<string, string>();
 const knownLibraryUrls = new Set(
   files.map(
@@ -101,6 +113,18 @@ for (const file of files) {
         interactiveGuideScenes.includes(scene as InteractiveGuideScene),
       ) as InteractiveGuideScene[],
     });
+  }
+
+  if (result.success) {
+    const directory = path
+      .relative(path.join(root, 'content'), file)
+      .split(path.sep)[0];
+    const allowed = contentDirectories[result.data.contentType];
+    if (allowed && !allowed.includes(directory)) {
+      errors.push(
+        `${relative}: contentType "${result.data.contentType}" belongs in content/${allowed[0]}/, not content/${directory}/`,
+      );
+    }
   }
 
   const slug = path

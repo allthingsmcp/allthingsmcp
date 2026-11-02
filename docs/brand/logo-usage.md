@@ -6,17 +6,17 @@ Use the outlined masters; do not redraw, retype, recolour, or distort them.
 
 ## Select the background variant
 
-All names below are under `assets/logo/open-junction/svg/`, relative to this skill.
+All names below are under `brand/logo/open-junction/svg/` at the repository root.
 
-| Placement | Light background | Dark background |
-| --- | --- | --- |
-| Navigation or footer, no tagline | `horizontal-light.svg` | `horizontal-dark.svg` |
-| Full name and signature line | `primary-light.svg` | `primary-dark.svg` |
-| Stacked lockup | `stacked-light.svg` | `stacked-dark.svg` |
-| Symbol | `mark-blue.svg` | `mark-on-dark.svg` |
-| Wordmark | `wordmark-navy.svg` | `wordmark-white.svg` |
-| Monochrome lockup | `horizontal-mono-navy.svg` | `horizontal-mono-white.svg` |
-| Monochrome symbol | `mark-mono-navy.svg` | `mark-mono-white.svg` |
+| Placement                        | Light background           | Dark background             |
+| -------------------------------- | -------------------------- | --------------------------- |
+| Navigation or footer, no tagline | `horizontal-light.svg`     | `horizontal-dark.svg`       |
+| Full name and signature line     | `primary-light.svg`        | `primary-dark.svg`          |
+| Stacked lockup                   | `stacked-light.svg`        | `stacked-dark.svg`          |
+| Symbol                           | `mark-blue.svg`            | `mark-on-dark.svg`          |
+| Wordmark                         | `wordmark-navy.svg`        | `wordmark-white.svg`        |
+| Monochrome lockup                | `horizontal-mono-navy.svg` | `horizontal-mono-white.svg` |
+| Monochrome symbol                | `mark-mono-navy.svg`       | `mark-mono-white.svg`       |
 
 The `light` and `dark` suffixes describe the background. Keep the hub transparent
 and one terminal diameter of clear space around visible artwork. Prefer the

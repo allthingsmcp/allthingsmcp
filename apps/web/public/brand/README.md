@@ -13,7 +13,7 @@ on dark backgrounds. `primary-*` includes **Learn. Build. Ship with MCP.**;
 Preserve proportions, the transparent hub, and one terminal diameter of clear
 space. Logo blue is `#2563EB`; the on-dark variant uses `#60A5FA` on `#0F172A`.
 
-The source of truth is `skills/all-things-mcp/brand-system/assets/logo/open-junction/`
+The source of truth is `brand/logo/open-junction/`
 at the repository root. `pnpm brand:generate` copies its approved artwork and
 rebuilds the social card; it never redraws or writes back to the masters.
 Website code uses `apps/web/lib/brand.ts` for versioned asset URLs.
