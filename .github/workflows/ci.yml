@@ -25,6 +25,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      - name: Check Node version pins agree
+        run: |
+          pinned="$(cat .nvmrc)"
+          test "$pinned" = "$(awk '/^useNodeVersion:/ {print $2}' pnpm-workspace.yaml)"
       - run: pnpm install --frozen-lockfile
       - run: pnpm format
       - run: pnpm lint

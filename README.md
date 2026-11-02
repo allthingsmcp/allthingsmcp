@@ -1,96 +1,53 @@
 # All Things MCP
 
-An independent, developer-first knowledge platform for learning, building, securing, and operating Model Context Protocol systems.
+An independent, developer-first knowledge platform for learning, building, securing, and operating
+[Model Context Protocol](https://modelcontextprotocol.io) systems. Guides, articles, and runnable examples are authored
+in Git and reviewed in public. Live site: <https://www.allthingsmcp.com>.
 
-## Local development
+## Quick start
 
 ```bash
-nvm install
-nvm use
+nvm install && nvm use   # Node 24 LTS
 corepack enable
 pnpm install
-pnpm dev
+pnpm dev                 # http://localhost:3000
 ```
 
-Use Node 24 LTS (pinned in `.nvmrc`, package engines, and CI). pnpm selects
-the version in `pnpm-workspace.yaml` automatically for project commands, even
-when the shell has another Node version. Run `pnpm install --frozen-lockfile`
-after pulling dependency updates, then restart development servers. The normal
-dev command disables Node server source maps to mitigate generated-source-map retention during hot
-reloads. This changes server stack-trace debugging, not the production build.
-Use `pnpm dev:debug` only when mapped server stacks are needed; restart that
-session periodically. Raising the heap limit does not fix retained objects.
-Both dev commands cap the JavaScript old-space heap at 2 GiB, instead of
-Next's default of half the machine's physical RAM. Native compiler memory
-is additional; this cap is a safeguard, not a memory-leak fix.
+Authentication and the database-backed runtime are optional for local work. See the
+[development guide](docs/development.md) for environment files, the full command list, and the Guide Runtime.
 
-For production, use `pnpm build` followed by `pnpm start`, never `pnpm dev`.
-Use those commands for a lighter local preview too: `pnpm start` serves the
-built site without the development compiler or hot-reload watchers. Rebuild
-after changing source files, or use `pnpm dev` while actively editing.
-After building, run `pnpm test:memory` to check repeated requests against an
-isolated local production server. CI runs this check too. It measures post-GC
-heap growth and memory peaks without adding a public diagnostic endpoint.
-This bounded smoke test is a regression guard, not a guarantee for arbitrary
-traffic, authenticated sessions, or the separately deployed Guide Runtime.
+## What is in this repository
 
-Copy `apps/web/.env.example` to `apps/web/.env.local` to configure the public
-site, repository, and Substack URLs. Content lives in `apps/web/content/` and is
-validated with `pnpm content:validate`.
+| Path                     | Purpose                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `apps/web`               | Next.js and Fumadocs website. Content lives in `apps/web/content/`              |
+| `apps/guide-runtime`     | Independently deployable service for multi-tenant MCP workspaces and Guide runs |
+| `packages/contracts`     | Versioned schemas shared by the website and runtime                             |
+| `packages/mcp-templates` | Declarative capability manifests for runtime workspaces                         |
+| `examples/`              | Runnable projects that accompany Guides                                         |
+| `brand/`                 | Approved logo masters and identity data                                         |
+| `docs/`                  | Contributor documentation ([index](docs/README.md))                             |
+| `skills/`                | Instructions for AI coding assistants (optional)                                |
+| `supabase/`              | Database migrations and the welcome-email Edge Function                         |
 
-Authentication is optional in local development. Anonymous reading, seven-day
-real MCP workspaces, and downloads remain available when it is disabled.
-Supabase owns authentication, sessions, profile preferences, and the welcome-email workflow. Follow
-`supabase/README.md`, then configure the Supabase URL and publishable key in
-`apps/web/.env.local`.
+The website and runtime share a repository but deploy separately. Supabase Auth owns browser sessions; the website
+calls the runtime with short-lived internal bearer tokens, so runtime credentials are never exposed to browsers. See
+[architecture](docs/architecture.md).
 
-The Guide Runtime uses a separate deployment and database boundary. Set the same
-`GUIDE_RUNTIME_SHARED_SECRET` in both apps, then run it with:
+## Contributing
 
-```bash
-pnpm dev:runtime
-```
+Contributions are welcome: corrections, new Guides and articles, and platform improvements. You can open a pull request
+directly.
 
-Keep the two environment files separate:
+1. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [editorial style](EDITORIAL_STYLE.md).
+2. For content, follow the [content contracts](docs/content-contracts.md) and add yourself via
+   [authors](docs/authors.md).
+3. Run `pnpm check` (and `pnpm content:validate` for content) before opening the pull request.
 
-- `apps/web/.env.local`: Supabase Auth URL and publishable key,
-  `GUIDE_RUNTIME_URL=http://localhost:8787`, and the shared secret.
-- `apps/guide-runtime/.env`: the same shared secret, runtime settings, and
-  `DATABASE_URL` containing the full Supabase PostgreSQL connection URI—not the
-  Supabase project URL or an API key. Never use a `NEXT_PUBLIC_` prefix for this
-  database credential or the shared secret.
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report security issues privately as described in
+[SECURITY.md](SECURITY.md).
 
-Apply the Supabase migrations before starting the database-backed runtime.
-Startup checks report connection failures or missing required tables immediately.
-Without `DATABASE_URL`, development uses memory storage and loses workspaces
-when the runtime restarts. Restart the relevant server after changing its env file.
+## License
 
-For a complete local guide demo, `pnpm dev:demo` starts both applications in
-one terminal (stop any existing servers on ports 3000 and 8787 first).
-Once both are running, `pnpm demo:verify` checks actual database persistence,
-all Weather capabilities against Open-Meteo, workspace claiming, and external
-token/pause/revocation behavior. It creates and then removes its own diagnostic
-workspace; it does not modify an existing account's workspace.
-
-## Repository structure
-
-- `apps/web` contains the existing Next.js and Fumadocs website.
-- `apps/guide-runtime` is the independently deployable, multi-tenant MCP and Guide-run boundary.
-- `packages/mcp-templates` contains versioned declarative capability manifests.
-- `packages/contracts` contains versioned schemas shared by both apps.
-- `skills` contains the project-local instructions and visual references.
-
-The website and runtime share this repository but remain separate deployment
-units. Configure the website project in Vercel with `apps/web` as its root
-directory.
-
-Supabase Auth owns browser sessions. The web app validates those sessions and
-calls Guide Runtime with short-lived internal bearer tokens, so runtime
-credentials and cross-domain cookies are never exposed to browsers. Guide
-Runtime stores Supabase user IDs as opaque subjects.
-
-## Licensing
-
-Source code is licensed under Apache-2.0. Authored content under
-`apps/web/content/` is licensed under CC BY 4.0. See `LICENSE` and
-`LICENSE-CONTENT`.
+Source code is licensed under [Apache-2.0](LICENSE). Authored content under `apps/web/content/` is licensed under
+[CC BY 4.0](LICENSE-CONTENT). Third-party names, trademarks, and linked materials remain subject to their owners' rights.

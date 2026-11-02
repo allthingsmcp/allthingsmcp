@@ -1,0 +1,11 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.zip binary
+
+pnpm-lock.yaml -diff linguist-generated
+apps/web/public/brand/** linguist-generated
+apps/web/public/downloads/** linguist-generated
+apps/web/tests/e2e/**-snapshots/** linguist-generated

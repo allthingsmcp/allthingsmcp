@@ -6,7 +6,7 @@ description: Apply and maintain the All Things MCP visual identity for product U
 # All Things MCP brand system
 
 Open Junction (iteration 02) is the approved identity. Use the unmodified
-[logo masters](assets/logo/open-junction/svg), [brand values](assets/identity.json),
+[logo masters](../../../brand/logo/open-junction/svg), [brand values](../../../brand/identity.json),
 and [brand constitution](../../../docs/brand/brand-constitution.md) as the authority.
 Read [logo usage](../../../docs/brand/logo-usage.md) when placing or exporting a logo.
 Retired logo-bearing mockups have been removed; do not recover their artwork
