@@ -17,6 +17,6 @@ Harassment, discriminatory language, personal attacks, sexualized behavior, trol
 
 ## Enforcement
 
-Report unacceptable behavior privately to the maintainers through the repository security contact. Maintainers may remove, edit, or reject contributions and may temporarily or permanently restrict participation when behavior is inappropriate, threatening, or harmful.
+Report unacceptable behavior privately to the maintainers using the private reporting flow described in [SECURITY.md](SECURITY.md) (mark the report as a Code of Conduct concern). Maintainers may remove, edit, or reject contributions and may temporarily or permanently restrict participation when behavior is inappropriate, threatening, or harmful.
 
 This policy is adapted from Contributor Covenant 2.1: https://www.contributor-covenant.org/version/2/1/code_of_conduct/

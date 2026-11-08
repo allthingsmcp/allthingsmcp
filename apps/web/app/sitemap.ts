@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { authors } from 'collections/server';
 import type { ContentFrontmatter } from '@/lib/content-schema';
 import { siteConfig } from '@/lib/config';
 import { source } from '@/lib/source';
@@ -14,11 +15,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: absoluteUrl('/blog'), changeFrequency: 'weekly', priority: 0.8 },
     { url: absoluteUrl('/about'), changeFrequency: 'monthly', priority: 0.5 },
     {
-      url: absoluteUrl('/authors/gbadebo-bello'),
-      changeFrequency: 'monthly',
-      priority: 0.4,
-    },
-    {
       url: absoluteUrl('/independence'),
       changeFrequency: 'monthly',
       priority: 0.4,
@@ -29,6 +25,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.4,
     },
   ];
+
+  const authorRoutes: MetadataRoute.Sitemap = authors
+    .filter((author) => author.kind === 'person')
+    .map((author) => ({
+      url: absoluteUrl(`/authors/${author.slug}`),
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    }));
 
   const contentRoutes: MetadataRoute.Sitemap = source
     .getPages()
@@ -62,5 +66,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ];
     });
 
-  return [...staticRoutes, ...contentRoutes];
+  return [...staticRoutes, ...authorRoutes, ...contentRoutes];
 }

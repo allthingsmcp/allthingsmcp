@@ -1,0 +1,71 @@
+---
+title: Build Your First MCP Task
+description: Build an MCP server and client that create thumbnail batches, then use Tasks to track progress, retrieve results and request cancellation.
+contentType: guide
+section: build
+authors: [Gbadebo Bello]
+status: draft
+tags: [guide, tasks, typescript, sharp, client, server]
+updatedAt: 2026-11-04
+difficulty: intermediate
+estimatedMinutes: 53
+specVersion: 2026-07-28
+lastVerified: 2026-10-31
+outcome: Implement the Tasks extension on an MCP server and MCP client, retrieve a task after reconnecting, and handle cancellation and errors.
+guideResources:
+  - title: Official introduction to MCP Tasks
+    url: https://modelcontextprotocol.io/extensions/tasks/overview
+  - title: Tasks extension specification
+    url: https://tasks.extensions.modelcontextprotocol.io/specification/2026-07-28/tasks
+  - title: Tasks TypeScript API
+    url: https://tasks.extensions.modelcontextprotocol.io/typescript/
+guideSteps:
+  - id: understand-mcp-tasks
+    title: Understand how MCP Tasks work
+    description: See why a long tool call needs a task, what a task is, and how an MCP client follows one to its result.
+    estimatedMinutes: 8
+  - id: prepare-your-project
+    title: Check prerequisites and get the project
+    description: Set up your tools, download the starter and inspect the sample images.
+    estimatedMinutes: 8
+  - id: create-the-server
+    title: Build an MCP server with Tasks support
+    description: Register the image tool, return a task ID and serve task status.
+    estimatedMinutes: 12
+  - id: call-from-a-client
+    title: Build an MCP client with Tasks support
+    description: Declare support, call the tool and poll for its result.
+    estimatedMinutes: 12
+  - id: follow-a-task
+    title: Reconnect to a task and cancel work
+    description: Save a task ID, return to the same batch and request cancellation.
+    estimatedMinutes: 8
+  - id: cancel-and-recover
+    title: Handle an error and try your own image
+    description: Read a tool error, recover and apply what you learned.
+    estimatedMinutes: 5
+---
+
+Some `tools/call` requests take longer than a request should stay open. A large
+image batch, a deployment, a step that waits for approval. **Tasks is the MCP
+extension that lets an MCP server answer such a call immediately with a task
+handle, then report progress and the final result through short follow-up
+requests.** The MCP client can disconnect, come back with the task ID and pick
+up the same work.
+
+This guide is for developers who have built an MCP server and are new to Tasks.
+The first step explains how Tasks work with diagrams of the full exchange. The remaining
+steps guide you through implementing the extension on both an MCP server and an MCP
+client, using a batch image resize as the example. For the concepts on their own,
+without the build, read [How MCP Tasks Work](/blog/how-mcp-tasks-work).
+
+## What you will build
+
+Your MCP server will use Sharp to turn six images into **eighteen thumbnails**:
+three widths per image. Your MCP client will start the batch as a task, report
+its progress and retrieve the result. Then you will reconnect to a running task
+using its saved ID, cancel one, and handle a tool error.
+
+![Three generated sample images resized to 320 pixels wide: landscape, portrait and square.](/images/guides/mcp-tasks-thumbnails.png)
+
+Get started with **Understand how MCP Tasks work** and building your first task workflow below.

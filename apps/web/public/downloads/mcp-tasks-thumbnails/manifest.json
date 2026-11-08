@@ -1,0 +1,16 @@
+{
+  "protocolVersion": "2026-07-28",
+  "verifiedOn": "2026-10-31",
+  "sha256": {
+    "starter.zip": "82ea0b577d30bf576ba7f149abcbf92b7623cc6587df1062f9960a087ce67a09",
+    "step-2.zip": "a2278ae56179aa5cc3e911807dd96571ef51345078d99424a3d4c4d67a68c8b4",
+    "step-3.zip": "653545493a6f2e1acb45a07476d5f17a58d20157d7edda15889d9fcfeeed9178",
+    "step-4.zip": "369430743b014b06822dfd9f523ab17f75c742bdb9d773c51628a74b3ee1143d",
+    "step-5.zip": "1a2902e5a1c6508a38f8ca578d256f3c0e954519888b56004a1704f78c1c2d1a",
+    "completed.zip": "7a5a028e66c6b52f9e89aa311667b627cb859b00bda9af7ae08ead5bed0f9092",
+    "source/app.ts.txt": "61e081a616268903385a54cef8a98faefce23e3d3920dfe8fade7432d4d53a1a",
+    "source/tasks-client.ts.txt": "7abc231eb1a125ad64e73041d0fd61202647394fe6e9f7bac27195540a20369c",
+    "source/task-handlers.ts.txt": "107a2463c446937883700db79982ac99133d412ce5231d1c87a201d03f84cbd5",
+    "source/watch-task.ts.txt": "f476fc7eb61b158f5451dab56e5974618a12f64e707a5107a3b40a62435cb27f"
+  }
+}

@@ -1,0 +1,209 @@
+---
+title: Understand how MCP Tasks work
+description: This guide step explains why a long tool call needs a task, what a task is, and how an MCP client follows one to its result.
+contentType: guide-step
+section: build
+guideSlug: build-mcp-tasks-with-sharp
+guideStepId: understand-mcp-tasks
+guideStepOrder: 1
+authors: [Gbadebo Bello]
+status: draft
+tags: [guide-step, tasks, typescript, sharp]
+updatedAt: 2026-11-04
+difficulty: intermediate
+estimatedMinutes: 8
+specVersion: 2026-07-28
+lastVerified: 2026-11-04
+---
+
+Let's start by creating a mental model around what an MCP task is, the next steps in this guide will require you
+to write some code. The goal of this step is to help you build a working picture of an MCP Tasks, the problem they solve,
+what a task is, and the messages that carry one from `tools/call` to its result. Every later step implements one part of this
+picture.
+
+## Why a long tool call needs a task
+
+An ordinary `tools/call` is one request and one response. The MCP client waits
+on that request until the MCP server returns the tool result. For a database
+lookup that takes milliseconds, that works. For a batch of eighteen image
+resizes, a CI run or a step that waits for a person, it breaks in three ways:
+
+| Problem       | What happens with one long request                                   |
+| ------------- | -------------------------------------------------------------------- |
+| Timeouts      | Clients and intermediaries close requests that stay open too long.   |
+| Lost results  | If the MCP client exits or the connection drops, the result is lost. |
+| No visibility | The MCP client can't see progress or ask the work to stop.           |
+
+**A task separates starting the work from collecting its result.** The MCP
+server answers the call right away with a task handle. The MCP client then
+checks on the task with short requests whenever it wants.
+
+![Two sequence diagrams. Without Tasks, the MCP client sends tools/call and waits on one open request while the MCP server resizes 18 images; a timeout or disconnect leaves the result with nowhere to go. With Tasks, the MCP server returns a task handle immediately, the MCP client sends short tasks/get requests and sees "working, Created 6 of 18", and the last tasks/get returns completed with the final result.](/images/guides/mcp-tasks/why-tasks.svg)
+
+## 2. What a task is
+
+A **task** is a record that the MCP server keeps for one `tools/call`. It has an
+unguessable ID, a status and a status message. When the task finishes, the
+record also holds the result. The MCP client never sees the work itself, only
+this record.
+
+When the MCP server decides to run a call as a task, it returns a **task
+handle** in place of the tool result. The server you will build returns handles
+like this one, shown here with annotations:
+
+```jsonc
+{
+  "resultType": "task", // "this is a task handle, not the tool result"
+  "taskId": "a1288bf1-305f-46ac-a49c-5c02a2828bc7", // keep this to check back
+  "status": "working",
+  "statusMessage": "Starting the image batch.", // human-readable progress
+  "createdAt": "2026-10-27T10:41:57.590Z",
+  "lastUpdatedAt": "2026-10-27T10:41:57.590Z",
+  "ttlMs": 3600000, // the server may discard the task after one hour
+  "pollIntervalMs": 500, // "please check no more than every 500 ms"
+}
+```
+
+`ttlMs` and `pollIntervalMs` are values this example's server chooses, not
+protocol defaults. A server may change either one during a task.
+
+## 3. Follow one task from call to result
+
+The diagram traces the exchange you will implement, including the worker and
+task store that this example's MCP server uses internally.
+
+![Sequence diagram with three participants: MCP client, MCP server and task store. 1: the MCP client sends tools/call and its _meta declares Tasks support. 2: the MCP server saves a task with status working. 3: the server returns a task handle with resultType task and a taskId. 4: a worker resizes images in the background and updates the store. 5: in a loop every pollIntervalMs, the client sends tasks/get with the taskId and receives status working with a message such as "Created 6 of 18 thumbnails." 6: the client can exit or lose its connection; the task keeps running and a new connection polls the saved taskId without a second tools/call. 7: tasks/get returns status completed with a result in the same shape tools/call returns.](/images/guides/mcp-tasks/task-exchange.svg)
+
+Four details in this flow matter when you write the code:
+
+- **The server saves the task before it returns the handle** (steps 2–3). The
+  specification requires this, so the MCP client's first `tasks/get` always
+  finds the task.
+- **The work runs outside the request** (step 4). The `tools/call` response is
+  already sent, so a worker or job queue has to own the batch.
+- **The task ID is how you resume** (step 6). Calling the tool again would start
+  a second batch. Calling `tasks/get` with the saved ID follows the original one.
+- **The final `tasks/get` carries the result** (step 7). Its `result` field holds
+  exactly what an ordinary `tools/call` would have returned. There is no separate
+  "fetch result" request.
+
+The extension adds three methods to the `tools/call` you already know:
+
+| Method         | The MCP client sends it to                                           | In this guide        |
+| -------------- | -------------------------------------------------------------------- | -------------------- |
+| `tools/call`   | Start the work. The response is a task handle or an ordinary result. | Steps 3–4            |
+| `tasks/get`    | Read the current status and, once finished, the result.              | Steps 3–6            |
+| `tasks/cancel` | Ask the MCP server to stop. The reply is an empty acknowledgement.   | Step 5               |
+| `tasks/update` | Answer a request the task is waiting on, such as an approval.        | Explained, not built |
+
+Over Streamable HTTP, the MCP client also sets the `Mcp-Name` header to the
+`taskId` on every `tasks/*` request. A load balancer can use it to route polls
+to the server instance that holds the task. The supplied connection helper does
+this for you.
+
+## 4. Read a task's status
+
+Every task is a small state machine. Your MCP client decides what to do next by
+reading `status`:
+
+![State diagram. A task starts in working after tools/call returns a task handle. It can move to input_required when it needs input and back to working after tasks/update; this guide's example never needs input. From working, a task ends in one of three terminal statuses that never change: completed when the result is ready, including when the tool result has isError true; failed for JSON-RPC errors only, not tool errors; and cancelled when tasks/cancel is honoured, although cancellation is cooperative and the task may still end as completed.](/images/guides/mcp-tasks/task-lifecycle.svg)
+
+| Status           | What your MCP client does                                               |
+| ---------------- | ----------------------------------------------------------------------- |
+| `working`        | Wait `pollIntervalMs`, then call `tasks/get` again.                     |
+| `input_required` | Show the requests in `inputRequests`, then reply with `tasks/update`.   |
+| `completed`      | Read `result`. Check its `isError` too, because tool errors land here.  |
+| `failed`         | Read `error`, a JSON-RPC error that prevented a normal result.          |
+| `cancelled`      | Stop waiting. In this example, files already created stay in `output/`. |
+
+<Callout type="warning" title="A tool error is not a failed task">
+  If the tool runs and reports a problem, such as an unreadable image, the task
+  is `completed` and its result has `isError: true`. Only a protocol-level
+  JSON-RPC error produces `failed`. You will see both cases in step 6.
+</Callout>
+
+`input_required` is how a task pauses for approval or other input. The server
+places standard requests, such as an elicitation, in the `tasks/get` response.
+The MCP client answers them with `tasks/update` and goes back to polling. The
+image batch never needs input, so this guide doesn't implement that path.
+
+## 5. Who decides to create a task
+
+Both sides opt in to the extension, but **the MCP server decides on each request
+whether to create a task**. The MCP client never asks for a task. It only states
+that it can handle one.
+
+![Flowchart. The MCP client sends tools/call. If the request's _meta does not declare the Tasks extension, the server never returns a task: it returns an ordinary result, or error -32021 if it cannot do the work without one. If the request declares the extension, the MCP server decides per request: an ordinary CallToolResult for quick work, or a task handle with resultType task for long work. Your client must handle both shapes on every call. In this guide, a declaring client always receives a task handle.](/images/guides/mcp-tasks/who-decides.svg)
+
+Each side declares support with the same extension identifier,
+`io.modelcontextprotocol/tasks`:
+
+```jsonc
+// MCP client: in every request's params._meta
+"io.modelcontextprotocol/clientCapabilities": {
+  "extensions": { "io.modelcontextprotocol/tasks": {} }
+}
+
+// MCP server: in its server/discover capabilities
+"capabilities": {
+  "tools": {},
+  "extensions": { "io.modelcontextprotocol/tasks": {} }
+}
+```
+
+Because the client declaration travels with each request, the server checks it
+every time. A server must never return a task to a request that didn't declare
+the extension. This guide's server falls back to an ordinary result in that
+case.
+
+## 6. When to reach for Tasks
+
+| Good fit                                                   | Usually unnecessary                          |
+| ---------------------------------------------------------- | -------------------------------------------- |
+| Batch work: image or media processing, imports, migrations | Lookups and simple API calls                 |
+| Pipelines and deployments that take minutes                | Work that reliably finishes in a few seconds |
+| Approval steps that wait for a person (`input_required`)   | Streaming output back as it is generated     |
+| Wrapping an API that already returns a job ID              |                                              |
+
+The [official Tasks overview](https://modelcontextprotocol.io/extensions/tasks/overview)
+lists more use cases. The statuses, methods and rules in this step come from the
+[Tasks specification](https://tasks.extensions.modelcontextprotocol.io/specification/2026-07-28/tasks).
+
+## 7. How the next steps map to this picture
+
+<Steps
+  items={[
+    {
+      title: '2. Prepare the project',
+      description:
+        'Install the starter. The image resizing, HTTP wiring and file-based task store are supplied.',
+    },
+    {
+      title: '3. Build the MCP server',
+      description:
+        'Advertise the extension, return a task handle from tools/call, and serve tasks/get and tasks/cancel.',
+    },
+    {
+      title: '4. Build the MCP client',
+      description:
+        'Declare support, branch on resultType and poll tasks/get until a terminal status.',
+    },
+    {
+      title: '5. Reconnect and cancel',
+      description:
+        'Resume a task from a saved ID, then see how cooperative cancellation ends.',
+    },
+    {
+      title: '6. Handle a tool error',
+      description:
+        'Confirm that a tool error completes the task with isError: true, then try your own image.',
+    },
+  ]}
+/>
+
+**Checkpoint:** before moving on, you should be able to answer three questions.
+What does the MCP server return in place of the tool result? _A task handle with
+a `taskId`._ How does an MCP client get the result after reconnecting? _It calls
+`tasks/get` with the saved ID, not `tools/call`._ Which status does a tool error
+produce? _`completed`, with `isError: true` in the result._ No local files change
+in this step.

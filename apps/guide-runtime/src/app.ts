@@ -1,5 +1,6 @@
-import { Hono, type Context } from "hono";
-import * as z from "zod/v4";
+import { Hono, type Context } from 'hono';
+import { secureHeaders } from 'hono/secure-headers';
+import * as z from 'zod/v4';
 import {
   createMcpWorkspaceRequestSchema,
   guideRunSchema,
@@ -10,27 +11,28 @@ import {
   upsertGuideRunRequestSchema,
   type RuntimePrincipal,
   type McpWorkspace,
-} from "@all-things-mcp/contracts";
+} from '@all-things-mcp/contracts';
 import {
   getMcpTemplate,
   getMcpTemplateForGuide,
-} from "@all-things-mcp/mcp-templates";
-import { RuntimeAuthenticationError, verifyRuntimeToken } from "./auth.js";
+} from '@all-things-mcp/mcp-templates';
+import { RuntimeAuthenticationError, verifyRuntimeToken } from './auth.js';
 import {
   GuideRunRevisionConflictError,
   type GuideRunRepository,
-} from "./repository.js";
+} from './repository.js';
 import {
   createWorkspaceMcpHandler,
   executeWorkspaceCommand,
-} from "./mcp-runtime.js";
-import { RequestLimiter } from "./limits.js";
-import { OpenMeteoProvider } from "./weather.js";
+} from './mcp-runtime.js';
+import { resolveClientIp } from './client-ip.js';
+import { RequestLimiter } from './limits.js';
+import { OpenMeteoProvider } from './weather.js';
 import {
   type WorkspaceRepository,
   WorkspaceClaimConflictError,
   WorkspaceRevisionConflictError,
-} from "./workspace-repository.js";
+} from './workspace-repository.js';
 
 type RuntimeVariables = { principal: RuntimePrincipal };
 
@@ -38,7 +40,7 @@ export function createGuideRuntimeApp({
   repository,
   workspaceRepository,
   sharedSecret,
-  publicBaseUrl = "http://localhost:8787",
+  publicBaseUrl = 'http://localhost:8787',
   limiter = new RequestLimiter(sharedSecret),
   weather = new OpenMeteoProvider(),
 }: {
@@ -51,36 +53,40 @@ export function createGuideRuntimeApp({
 }) {
   const app = new Hono<{ Variables: RuntimeVariables }>();
   const enabledGuides = new Set(
-    (process.env.REAL_MCP_GUIDES ?? "building-your-first-mcp-server")
-      .split(",")
+    (process.env.REAL_MCP_GUIDES ?? 'building-your-first-mcp-server')
+      .split(',')
       .map((value) => value.trim())
       .filter(Boolean),
   );
 
-  app.get("/health", (context) =>
-    context.json({ status: "ok", service: "guide-runtime" }),
+  // JSON API only: no CORS headers are emitted, so browsers cannot call it
+  // cross-origin. The web app calls it server-side.
+  app.use(secureHeaders());
+
+  app.get('/health', (context) =>
+    context.json({ status: 'ok', service: 'guide-runtime' }),
   );
 
-  app.use("/v1/*", async (context, next) => {
+  app.use('/v1/*', async (context, next) => {
     try {
       const principal = await verifyRuntimeToken(
-        context.req.header("authorization"),
+        context.req.header('authorization'),
         sharedSecret,
       );
-      context.set("principal", principal);
+      context.set('principal', principal);
       await next();
     } catch (error) {
       if (error instanceof RuntimeAuthenticationError) {
-        return context.json({ error: "Unauthorized" }, 401);
+        return context.json({ error: 'Unauthorized' }, 401);
       }
       throw error;
     }
   });
 
-  app.get("/v1/me", (context) => {
+  app.get('/v1/me', (context) => {
     const response = runtimeSessionResponseSchema.parse({
       authenticated: true,
-      principal: context.get("principal"),
+      principal: context.get('principal'),
     });
     return context.json(response);
   });
@@ -102,30 +108,28 @@ export function createGuideRuntimeApp({
   }
 
   function withinLimits(context: Context, workspaceId: string) {
-    const ip =
-      context.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    return limiter.check(workspaceId, ip);
+    return limiter.check(workspaceId, resolveClientIp(context));
   }
 
   async function executeCommand(context: Context, workspace: McpWorkspace) {
-    if (workspace.status === "paused")
+    if (workspace.status === 'paused')
       return context.json(
-        { error: "Workspace is paused.", code: "WORKSPACE_PAUSED" },
+        { error: 'Workspace is paused.', code: 'WORKSPACE_PAUSED' },
         423,
       );
     if (!withinLimits(context, workspace.id))
       return context.json(
         {
-          error: "Rate limit exceeded. Please try again shortly.",
-          code: "RATE_LIMIT_EXCEEDED",
+          error: 'Rate limit exceeded. Please try again shortly.',
+          code: 'RATE_LIMIT_EXCEEDED',
         },
         429,
       );
     if (!getMcpTemplate(workspace.templateId, workspace.templateVersion))
       return context.json(
         {
-          error: "This MCP template version is unavailable.",
-          code: "TEMPLATE_UNAVAILABLE",
+          error: 'This MCP template version is unavailable.',
+          code: 'TEMPLATE_UNAVAILABLE',
         },
         400,
       );
@@ -134,7 +138,7 @@ export function createGuideRuntimeApp({
     );
     if (!parsed.success)
       return context.json(
-        { error: "Invalid MCP command.", code: "INVALID_COMMAND" },
+        { error: 'Invalid MCP command.', code: 'INVALID_COMMAND' },
         400,
       );
     const { failure, ...response } = await executeWorkspaceCommand(
@@ -151,12 +155,12 @@ export function createGuideRuntimeApp({
       : context.json(response);
   }
 
-  app.post("/anonymous/workspaces", async (context) => {
+  app.post('/anonymous/workspaces', async (context) => {
     const parsed = createMcpWorkspaceRequestSchema.safeParse(
       await context.req.json().catch(() => null),
     );
     if (!parsed.success)
-      return context.json({ error: "Invalid workspace." }, 400);
+      return context.json({ error: 'Invalid workspace.' }, 400);
     const template = getMcpTemplate(parsed.data.templateId);
     const configuration = validateConfiguration(
       parsed.data.templateId,
@@ -168,7 +172,7 @@ export function createGuideRuntimeApp({
       template.guideSlug !== parsed.data.guideSlug ||
       !configuration
     ) {
-      return context.json({ error: "Invalid template configuration." }, 400);
+      return context.json({ error: 'Invalid template configuration.' }, 400);
     }
     return context.json(
       await workspaceRepository.createAnonymous({
@@ -183,13 +187,13 @@ export function createGuideRuntimeApp({
 
   async function anonymousWorkspace(context: Context) {
     const credential =
-      context.req.header("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-    const id = context.req.param("workspaceId" as never);
+      context.req.header('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
+    const id = context.req.param('workspaceId' as never);
     if (!z.uuid().safeParse(id).success || !credential) return null;
     return workspaceRepository.findAnonymous(id, credential);
   }
 
-  app.get("/anonymous/workspaces/:workspaceId", async (context) => {
+  app.get('/anonymous/workspaces/:workspaceId', async (context) => {
     const workspace = await anonymousWorkspace(context);
     return workspace
       ? context.json({
@@ -198,18 +202,18 @@ export function createGuideRuntimeApp({
         })
       : context.json(
           {
-            error: "Temporary workspace is unavailable.",
-            code: "TEMPORARY_WORKSPACE_UNAVAILABLE",
+            error: 'Temporary workspace is unavailable.',
+            code: 'TEMPORARY_WORKSPACE_UNAVAILABLE',
           },
           401,
         );
   });
 
-  app.put("/anonymous/workspaces/:workspaceId", async (context) => {
+  app.put('/anonymous/workspaces/:workspaceId', async (context) => {
     const workspace = await anonymousWorkspace(context);
     if (!workspace)
       return context.json(
-        { error: "Temporary workspace is unavailable." },
+        { error: 'Temporary workspace is unavailable.' },
         401,
       );
     const parsed = updateMcpWorkspaceRequestSchema.safeParse(
@@ -223,7 +227,7 @@ export function createGuideRuntimeApp({
         workspace.templateVersion,
       )
     ) {
-      return context.json({ error: "Invalid workspace update." }, 400);
+      return context.json({ error: 'Invalid workspace update.' }, 400);
     }
     try {
       return context.json({
@@ -240,43 +244,43 @@ export function createGuideRuntimeApp({
     }
   });
 
-  app.post("/anonymous/workspaces/:workspaceId/commands", async (context) => {
+  app.post('/anonymous/workspaces/:workspaceId/commands', async (context) => {
     const workspace = await anonymousWorkspace(context);
     if (!workspace)
       return context.json(
-        { error: "Temporary workspace is unavailable." },
+        { error: 'Temporary workspace is unavailable.' },
         401,
       );
     return executeCommand(context, workspace);
   });
 
-  app.get("/v1/mcp-workspaces/:guideSlug", async (context) => {
-    if (!enabledGuides.has(context.req.param("guideSlug")))
+  app.get('/v1/mcp-workspaces/:guideSlug', async (context) => {
+    if (!enabledGuides.has(context.req.param('guideSlug')))
       return context.json(
-        { error: "Real MCP runtime is not enabled for this guide." },
+        { error: 'Real MCP runtime is not enabled for this guide.' },
         404,
       );
     const workspace = await workspaceRepository.findOwned(
-      context.get("principal").sub,
-      context.req.param("guideSlug"),
+      context.get('principal').sub,
+      context.req.param('guideSlug'),
     );
     return workspace
       ? context.json({
           workspace,
           events: await workspaceRepository.listEvents(workspace.id),
         })
-      : context.json({ error: "Workspace not found." }, 404);
+      : context.json({ error: 'Workspace not found.' }, 404);
   });
 
-  app.post("/v1/mcp-workspaces/:guideSlug", async (context) => {
-    const guideSlug = context.req.param("guideSlug");
+  app.post('/v1/mcp-workspaces/:guideSlug', async (context) => {
+    const guideSlug = context.req.param('guideSlug');
     if (!enabledGuides.has(guideSlug))
       return context.json(
-        { error: "Real MCP runtime is not enabled for this guide." },
+        { error: 'Real MCP runtime is not enabled for this guide.' },
         404,
       );
     const existing = await workspaceRepository.findOwned(
-      context.get("principal").sub,
+      context.get('principal').sub,
       guideSlug,
     );
     if (existing) return context.json({ workspace: existing });
@@ -290,13 +294,13 @@ export function createGuideRuntimeApp({
       parsed.data.templateId !== template.id ||
       parsed.data.guideSlug !== guideSlug
     )
-      return context.json({ error: "Invalid workspace." }, 400);
+      return context.json({ error: 'Invalid workspace.' }, 400);
     const configuration = validateConfiguration(
       template.id,
       parsed.data.configuration,
     );
     if (!configuration)
-      return context.json({ error: "Invalid template configuration." }, 400);
+      return context.json({ error: 'Invalid template configuration.' }, 400);
     const temporary = await workspaceRepository.createAnonymous({
       guideSlug,
       templateId: template.id,
@@ -307,7 +311,7 @@ export function createGuideRuntimeApp({
       const claimed = await workspaceRepository.claim(
         temporary.workspace.id,
         temporary.temporaryCredential,
-        context.get("principal").sub,
+        context.get('principal').sub,
         false,
       );
       return context.json({ workspace: claimed }, 201);
@@ -318,12 +322,12 @@ export function createGuideRuntimeApp({
     }
   });
 
-  app.put("/v1/mcp-workspaces/:guideSlug", async (context) => {
+  app.put('/v1/mcp-workspaces/:guideSlug', async (context) => {
     const workspace = await workspaceRepository.findOwned(
-      context.get("principal").sub,
-      context.req.param("guideSlug"),
+      context.get('principal').sub,
+      context.req.param('guideSlug'),
     );
-    if (!workspace) return context.json({ error: "Workspace not found." }, 404);
+    if (!workspace) return context.json({ error: 'Workspace not found.' }, 404);
     const parsed = updateMcpWorkspaceRequestSchema.safeParse(
       await context.req.json().catch(() => null),
     );
@@ -335,7 +339,7 @@ export function createGuideRuntimeApp({
         workspace.templateVersion,
       )
     )
-      return context.json({ error: "Invalid workspace update." }, 400);
+      return context.json({ error: 'Invalid workspace update.' }, 400);
     try {
       return context.json({
         workspace: await workspaceRepository.update(
@@ -351,7 +355,7 @@ export function createGuideRuntimeApp({
     }
   });
 
-  app.post("/v1/mcp-workspaces/:guideSlug/claim", async (context) => {
+  app.post('/v1/mcp-workspaces/:guideSlug/claim', async (context) => {
     const parsed = z
       .object({
         workspaceId: z.uuid(),
@@ -363,8 +367,8 @@ export function createGuideRuntimeApp({
     if (!parsed.success)
       return context.json(
         {
-          error: "Temporary workspace credential is required.",
-          code: "INVALID_CLAIM",
+          error: 'Temporary workspace credential is required.',
+          code: 'INVALID_CLAIM',
         },
         400,
       );
@@ -373,11 +377,11 @@ export function createGuideRuntimeApp({
       body.workspaceId,
       body.temporaryCredential,
     );
-    if (!candidate || candidate.guideSlug !== context.req.param("guideSlug"))
+    if (!candidate || candidate.guideSlug !== context.req.param('guideSlug'))
       return context.json(
         {
-          error: "Temporary workspace is unavailable.",
-          code: "TEMPORARY_WORKSPACE_UNAVAILABLE",
+          error: 'Temporary workspace is unavailable.',
+          code: 'TEMPORARY_WORKSPACE_UNAVAILABLE',
         },
         401,
       );
@@ -385,7 +389,7 @@ export function createGuideRuntimeApp({
       const workspace = await workspaceRepository.claim(
         body.workspaceId,
         body.temporaryCredential,
-        context.get("principal").sub,
+        context.get('principal').sub,
         body.replace === true || body.replaceExisting === true,
       );
       return context.json({
@@ -402,25 +406,25 @@ export function createGuideRuntimeApp({
     }
   });
 
-  app.post("/v1/mcp-workspaces/:guideSlug/commands", async (context) => {
+  app.post('/v1/mcp-workspaces/:guideSlug/commands', async (context) => {
     const workspace = await workspaceRepository.findOwned(
-      context.get("principal").sub,
-      context.req.param("guideSlug"),
+      context.get('principal').sub,
+      context.req.param('guideSlug'),
     );
-    if (!workspace) return context.json({ error: "Workspace not found." }, 404);
+    if (!workspace) return context.json({ error: 'Workspace not found.' }, 404);
     return executeCommand(context, workspace);
   });
 
-  app.post("/v1/mcp-workspaces/:guideSlug/status", async (context) => {
+  app.post('/v1/mcp-workspaces/:guideSlug/status', async (context) => {
     const workspace = await workspaceRepository.findOwned(
-      context.get("principal").sub,
-      context.req.param("guideSlug"),
+      context.get('principal').sub,
+      context.req.param('guideSlug'),
     );
     const parsed = z
-      .object({ status: z.enum(["active", "paused"]) })
+      .object({ status: z.enum(['active', 'paused']) })
       .safeParse(await context.req.json().catch(() => null));
     if (!workspace || !parsed.success)
-      return context.json({ error: "Invalid status change." }, 400);
+      return context.json({ error: 'Invalid status change.' }, 400);
     return context.json({
       workspace: await workspaceRepository.setStatus(
         workspace.id,
@@ -429,45 +433,45 @@ export function createGuideRuntimeApp({
     });
   });
 
-  app.post("/v1/mcp-workspaces/:guideSlug/token", async (context) => {
+  app.post('/v1/mcp-workspaces/:guideSlug/token', async (context) => {
     const workspace = await workspaceRepository.findOwned(
-      context.get("principal").sub,
-      context.req.param("guideSlug"),
+      context.get('principal').sub,
+      context.req.param('guideSlug'),
     );
-    if (!workspace) return context.json({ error: "Workspace not found." }, 404);
+    if (!workspace) return context.json({ error: 'Workspace not found.' }, 404);
     const issued = await workspaceRepository.issueAccessToken(workspace.id);
     return context.json({
       ...issued,
-      endpoint: `${publicBaseUrl.replace(/\/$/, "")}/mcp/${workspace.publicId}`,
+      endpoint: `${publicBaseUrl.replace(/\/$/, '')}/mcp/${workspace.publicId}`,
     });
   });
 
-  app.delete("/v1/mcp-workspaces/:guideSlug/token", async (context) => {
+  app.delete('/v1/mcp-workspaces/:guideSlug/token', async (context) => {
     const workspace = await workspaceRepository.findOwned(
-      context.get("principal").sub,
-      context.req.param("guideSlug"),
+      context.get('principal').sub,
+      context.req.param('guideSlug'),
     );
-    if (!workspace) return context.json({ error: "Workspace not found." }, 404);
+    if (!workspace) return context.json({ error: 'Workspace not found.' }, 404);
     await workspaceRepository.revokeAccessTokens(workspace.id);
     return context.body(null, 204);
   });
 
-  app.all("/mcp/:publicId", async (context) => {
-    if (!z.uuid().safeParse(context.req.param("publicId")).success)
-      return context.json({ error: "MCP workspace is unavailable." }, 404);
+  app.all('/mcp/:publicId', async (context) => {
+    if (!z.uuid().safeParse(context.req.param('publicId')).success)
+      return context.json({ error: 'MCP workspace is unavailable.' }, 404);
     const workspace = await workspaceRepository.findByPublicId(
-      context.req.param("publicId"),
+      context.req.param('publicId'),
     );
     if (
       !workspace ||
       !enabledGuides.has(workspace.guideSlug) ||
-      workspace.status !== "active" ||
+      workspace.status !== 'active' ||
       (workspace.expiresAt && new Date(workspace.expiresAt) <= new Date())
     ) {
-      return context.json({ error: "MCP workspace is unavailable." }, 404);
+      return context.json({ error: 'MCP workspace is unavailable.' }, 404);
     }
     const token =
-      context.req.header("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+      context.req.header('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
     const temporary =
       workspace.anonymousCredentialHash &&
       token &&
@@ -494,9 +498,9 @@ export function createGuideRuntimeApp({
       }
     }
     if (!temporary && !external && !internal)
-      return context.json({ error: "Unauthorized" }, 401);
+      return context.json({ error: 'Unauthorized' }, 401);
     if (!withinLimits(context, workspace.id))
-      return context.json({ error: "Rate limit exceeded." }, 429);
+      return context.json({ error: 'Rate limit exceeded.' }, 429);
     const handler = createWorkspaceMcpHandler(workspace, weather);
     try {
       return await handler.fetch(context.req.raw);
@@ -505,30 +509,30 @@ export function createGuideRuntimeApp({
     }
   });
 
-  app.get("/v1/guide-runs/:guideSlug", async (context) => {
+  app.get('/v1/guide-runs/:guideSlug', async (context) => {
     const run = await repository.find(
-      context.get("principal").sub,
-      context.req.param("guideSlug"),
+      context.get('principal').sub,
+      context.req.param('guideSlug'),
     );
-    if (!run) return context.json({ error: "Guide run not found" }, 404);
+    if (!run) return context.json({ error: 'Guide run not found' }, 404);
     return context.json(guideRunSchema.parse(run));
   });
 
-  app.put("/v1/guide-runs/:guideSlug", async (context) => {
+  app.put('/v1/guide-runs/:guideSlug', async (context) => {
     const parsed = upsertGuideRunRequestSchema.safeParse(
       await context.req.json().catch(() => null),
     );
     if (!parsed.success) {
       return context.json(
-        { error: "Invalid guide run", issues: parsed.error.issues },
+        { error: 'Invalid guide run', issues: parsed.error.issues },
         400,
       );
     }
 
     try {
       const run = await repository.upsert(
-        context.get("principal").sub,
-        context.req.param("guideSlug"),
+        context.get('principal').sub,
+        context.req.param('guideSlug'),
         parsed.data,
       );
       return context.json(guideRunSchema.parse(run));

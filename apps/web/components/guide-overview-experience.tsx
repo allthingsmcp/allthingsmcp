@@ -15,7 +15,10 @@ import {
 } from 'lucide-react';
 import type { GuideResource, GuideStep } from '@/lib/content-schema';
 import { useGuideProgress } from '@/components/use-guide-progress';
-import { InteractiveGuideEnhancement } from '@/components/interactive-guide-overview';
+import {
+  InteractiveGuideEnhancement,
+  TasksGuideEnhancement,
+} from '@/components/interactive-guide-overview';
 import type { InteractiveGuideId } from '@/lib/interactive-guides';
 import { GuideProgressStatus } from '@/components/auth-dialog';
 
@@ -131,6 +134,7 @@ function StandardGuideOverview({
       </section>
 
       {guide.interactiveGuideId && <InteractiveGuideEnhancement />}
+      {guide.slug === 'build-mcp-tasks-with-sharp' && <TasksGuideEnhancement />}
 
       <section
         className="shell guide-overview-introduction prose"
@@ -209,18 +213,16 @@ function StandardGuideOverview({
             <h2>What you’ll accomplish</h2>
             <p>{guide.outcome}</p>
           </section>
-          <section>
-            <h2>Prerequisites</h2>
-            {guide.prerequisites.length ? (
+          {guide.prerequisites.length > 0 && (
+            <section>
+              <h2>Prerequisites</h2>
               <ul>
                 {guide.prerequisites.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
-            ) : (
-              <p>No prior MCP experience required.</p>
-            )}
-          </section>
+            </section>
+          )}
           <section>
             <h2>Resources</h2>
             <div className="guide-resource-links">

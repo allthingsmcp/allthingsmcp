@@ -13,6 +13,18 @@ const nextConfig = {
   experimental: {
     typedEnv: true,
   },
+  // Config-level redirects. Other redirect routes (/guide, /search) are
+  // intentionally kept as page files under app/.
+  async redirects() {
+    return [
+      { source: '/all', destination: '/', permanent: true },
+      {
+        source: '/library/tutorials/minimal-server',
+        destination: '/guides/build-a-minimal-mcp-server',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const withMDX = createMDX();

@@ -48,6 +48,12 @@ async function captureBlock(
   );
 }
 
+// Reviewed baselines exist for macOS only (see tests/e2e/README.md).
+test.skip(
+  process.platform !== 'darwin',
+  'Visual baselines are macOS-only; run on macOS or regenerate for your platform.',
+);
+
 test.beforeEach(async ({ page }) => {
   await seedRuntimeWorkspace(page);
 });

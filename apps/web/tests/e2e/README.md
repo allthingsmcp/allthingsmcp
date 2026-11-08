@@ -15,7 +15,7 @@ To check running local servers, including their actual database and live
 Open-Meteo integration, run from `apps/web`:
 
 ```sh
-PLAYWRIGHT_BASE_URL=http://localhost:3000 pnpm exec playwright test tests/e2e/platform.spec.ts --grep 'real Weather Guide'
+PLAYWRIGHT_BASE_URL=http://localhost:3000 pnpm exec playwright test tests/e2e/guides-runtime.spec.ts --grep 'real Weather Guide'
 ```
 
 Supplying `PLAYWRIGHT_BASE_URL` disables the isolated server harness. The
@@ -29,3 +29,12 @@ overlays and variable duration labels; actual protocol payloads and errors remai
 visible. Review UI changes before updating these baselines. The functional
 walkthrough also saves completion and reloaded protocol screenshots under its
 Playwright test output directory for review.
+
+## Visual baselines are macOS-only
+
+Committed snapshots are `*-darwin.png`. On other platforms (including CI on
+Linux) the screenshot assertions are skipped, and the functional and
+accessibility checks still run. To change a baseline, run the suite on macOS with
+`pnpm --filter @all-things-mcp/web exec playwright test --update-snapshots`,
+review the image diff, and commit the updated files. A future improvement is to
+generate Linux baselines in a pinned Playwright container so CI can compare them.

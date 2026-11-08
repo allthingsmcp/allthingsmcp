@@ -5,7 +5,7 @@ description: Create and review All Things MCP protocol diagrams, technical flows
 
 # All Things MCP diagrams
 
-Read `references/diagram-language.md` before creating or revising a diagram. Read the relevant official MCP specification source before asserting protocol behavior.
+Read [diagram language](../../../docs/diagrams.md) before creating or revising a diagram. Read the relevant official MCP specification source before asserting protocol behavior.
 
 ## Workflow
 

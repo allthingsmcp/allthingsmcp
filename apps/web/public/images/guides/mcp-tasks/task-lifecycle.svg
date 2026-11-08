@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="540" viewBox="0 0 560 540" role="img" aria-labelledby="t d">
+<title id="t">The five task statuses and how a task moves between them</title>
+<desc id="d">A task starts in working. It can move to input_required when the server needs input, and back to working after the client sends tasks/update; this guide's example never needs input. From working (or input_required) a task ends in one of three terminal statuses that never change again: completed when a result is ready, including tool results with isError true; failed when a JSON-RPC error stops execution; and cancelled when the server honours tasks/cancel.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F172A"/></marker>
+  <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#53657B"/></marker>
+  <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0B9F5A"/></marker>
+</defs>
+<rect width="560" height="540" fill="#FFFFFF"/>
+<circle cx="150" cy="34" r="9" fill="#0F172A"/>
+<text x="168" y="39" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#3E4C66" text-anchor="start">tools/call returns a task handle</text>
+<polygon points="150.0,82.0 145.0,72.0 155.0,72.0" fill="#0F172A"/>
+<line x1="150" y1="44" x2="150.0" y2="72.0" stroke="#0F172A" stroke-width="2"/>
+<rect x="50" y="86" width="200" height="62" rx="31" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="150.0" y="114" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15.5" font-weight="700" fill="#1D4ED8" text-anchor="middle">working</text>
+<text x="150.0" y="134" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">work in progress</text>
+<rect x="318" y="86" width="214" height="62" rx="31" fill="#FDF1EA" stroke="#DC6925" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="425.0" y="114" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15.5" font-weight="700" fill="#B4531B" text-anchor="middle">input_required</text>
+<text x="425.0" y="134" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">not used in this guide</text>
+<polygon points="314.0,104.0 304.0,109.0 304.0,99.0" fill="#0F172A"/>
+<path d="M250 104 L304.0 104.0" fill="none" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+<text x="284" y="96" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#3E4C66" text-anchor="middle">needs input</text>
+<polygon points="254.0,132.0 264.0,127.0 264.0,137.0" fill="#0F172A"/>
+<path d="M318 132 L264.0 132.0" fill="none" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+<text x="286" y="152" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="500" fill="#3E4C66" text-anchor="middle">tasks/update</text>
+<rect x="18" y="278" width="524" height="180" rx="12" fill="#F8FAFC" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="280.0" y="442" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#3E4C66" text-anchor="middle">TERMINAL STATUSES — once reached, the status never changes</text>
+<rect x="34" y="300" width="160" height="62" rx="31" fill="#EAF7F0" stroke="#0B9F5A" stroke-width="2"/>
+<text x="114.0" y="328" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15.5" font-weight="700" fill="#087A45" text-anchor="middle">completed</text>
+<text x="114.0" y="348" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">result is ready</text>
+<rect x="200" y="300" width="160" height="62" rx="31" fill="#FDECEC" stroke="#DC2626" stroke-width="2"/>
+<text x="280.0" y="328" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15.5" font-weight="700" fill="#B91C1C" text-anchor="middle">failed</text>
+<text x="280.0" y="348" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">JSON-RPC error</text>
+<rect x="366" y="300" width="160" height="62" rx="31" fill="#F1F5F9" stroke="#53657B" stroke-width="2"/>
+<text x="446.0" y="328" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15.5" font-weight="700" fill="#3E4C66" text-anchor="middle">cancelled</text>
+<text x="446.0" y="348" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">tasks/cancel honoured</text>
+<polygon points="114.0,298.0 108.7,288.1 118.7,287.9" fill="#0F172A"/>
+<path d="M110 148 L113.7 288.0" fill="none" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="280.0,298.0 269.7,293.7 277.2,287.2" fill="#0F172A"/>
+<path d="M150 148 L273.5 290.4" fill="none" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="446.0,298.0 441.0,288.0 451.0,288.0" fill="#0F172A"/>
+<path d="M200 148 C 330 200, 446.0 220, 446.0 288.0" fill="none" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="476.0,298.0 470.6,288.2 480.6,287.8" fill="#53657B"/>
+<path d="M470 148 L475.6 288.0" fill="none" stroke="#53657B" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/>
+<text x="114.0" y="392" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">Also when the tool</text>
+<text x="114.0" y="408" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">result has isError: true</text>
+<text x="280.0" y="392" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">Protocol failures only,</text>
+<text x="280.0" y="408" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">not tool errors</text>
+<text x="446.0" y="392" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">Cooperative: may still</text>
+<text x="446.0" y="408" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="middle">end as completed</text>
+<polygon points="64.0,504.0 54.0,509.0 54.0,499.0" fill="#0F172A"/>
+<line x1="28" y1="504" x2="54.0" y2="504.0" stroke="#0F172A" stroke-width="2"/>
+<text x="72" y="508" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">path in this guide's example</text>
+<polygon points="328.0,504.0 318.0,509.0 318.0,499.0" fill="#53657B"/>
+<line x1="292" y1="504" x2="318.0" y2="504.0" stroke="#53657B" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="336" y="508" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">possible, not implemented here</text>
+</svg>

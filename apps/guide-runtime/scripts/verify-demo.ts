@@ -1,24 +1,54 @@
-import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import { SignJWT } from "jose";
-import { Pool } from "pg";
-import { weatherTemplate } from "@all-things-mcp/mcp-templates";
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { SignJWT } from 'jose';
+import { Pool } from 'pg';
+import { weatherTemplate } from '@all-things-mcp/mcp-templates';
 import {
   CLIENT_CAPABILITIES_META_KEY,
   CLIENT_INFO_META_KEY,
   PROTOCOL_VERSION_META_KEY,
-} from "@modelcontextprotocol/server";
-import type { McpWorkspace, McpProtocolEvent } from "@all-things-mcp/contracts";
+} from '@modelcontextprotocol/server';
+import type { McpWorkspace, McpProtocolEvent } from '@all-things-mcp/contracts';
+
+function hasAllowedHostInUrls(value: unknown, allowedHost: string): boolean {
+  const stack: unknown[] = [value];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (typeof current === 'string') {
+      try {
+        const hostname = new URL(current).hostname.toLowerCase();
+        const normalizedAllowedHost = allowedHost.toLowerCase();
+        if (
+          hostname === normalizedAllowedHost ||
+          hostname.endsWith(`.${normalizedAllowedHost}`)
+        ) {
+          return true;
+        }
+      } catch {
+        // Ignore non-URL strings.
+      }
+      continue;
+    }
+    if (Array.isArray(current)) {
+      stack.push(...current);
+      continue;
+    }
+    if (current && typeof current === 'object') {
+      stack.push(...Object.values(current as Record<string, unknown>));
+    }
+  }
+  return false;
+}
 
 // Run against local servers with the real configured database and Open-Meteo.
 // Credentials stay in memory; only the isolated workspace created here is removed.
-const runtime = process.env.GUIDE_RUNTIME_PUBLIC_URL ?? "http://localhost:8787";
-const web = process.env.DEMO_WEB_URL ?? "http://localhost:3000";
+const runtime = process.env.GUIDE_RUNTIME_PUBLIC_URL ?? 'http://localhost:8787';
+const web = process.env.DEMO_WEB_URL ?? 'http://localhost:3000';
 const secret = process.env.GUIDE_RUNTIME_SHARED_SECRET;
-assert(secret, "GUIDE_RUNTIME_SHARED_SECRET is required.");
+assert(secret, 'GUIDE_RUNTIME_SHARED_SECRET is required.');
 assert(
   process.env.DATABASE_URL,
-  "Use the configured Supabase database for this check.",
+  'Use the configured Supabase database for this check.',
 );
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -29,25 +59,25 @@ let id: string | undefined;
 let token: string;
 const jwt = () =>
   new SignJWT({
-    name: "Demo verification",
-    email: "demo-check@example.invalid",
+    name: 'Demo verification',
+    email: 'demo-check@example.invalid',
   })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuer("all-things-mcp-web")
-    .setAudience("all-things-mcp-guide-runtime")
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuer('all-things-mcp-web')
+    .setAudience('all-things-mcp-guide-runtime')
     .setSubject(owner)
     .setIssuedAt()
-    .setExpirationTime("120s")
+    .setExpirationTime('120s')
     .sign(new TextEncoder().encode(secret));
 const guide = weatherTemplate.guideSlug;
 const ownerPath = `/v1/mcp-workspaces/${guide}`;
 
-async function request(path: string, method = "GET", body?: unknown) {
+async function request(path: string, method = 'GET', body?: unknown) {
   const response = await fetch(`${runtime}${path}`, {
     method,
     headers: {
       authorization: `Bearer ${token}`,
-      "content-type": "application/json",
+      'content-type': 'application/json',
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     signal: AbortSignal.timeout(30_000),
@@ -56,30 +86,30 @@ async function request(path: string, method = "GET", body?: unknown) {
   const value = (await response.json()) as Record<string, unknown>;
   assert(
     response.ok,
-    `${method} ${path}: ${response.status} ${value.error ?? ""}`,
+    `${method} ${path}: ${response.status} ${value.error ?? ''}`,
   );
   return value;
 }
 
 async function external(endpoint: string, bearer: string) {
   return fetch(endpoint, {
-    method: "POST",
+    method: 'POST',
     headers: {
       authorization: `Bearer ${bearer}`,
-      "content-type": "application/json",
-      "mcp-protocol-version": "2026-07-28",
-      "mcp-method": "tools/list",
+      'content-type': 'application/json',
+      'mcp-protocol-version': '2026-07-28',
+      'mcp-method': 'tools/list',
     },
     body: JSON.stringify({
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: 1,
-      method: "tools/list",
+      method: 'tools/list',
       params: {
         _meta: {
-          [PROTOCOL_VERSION_META_KEY]: "2026-07-28",
+          [PROTOCOL_VERSION_META_KEY]: '2026-07-28',
           [CLIENT_INFO_META_KEY]: {
-            name: "demo-external-client",
-            version: "1.0.0",
+            name: 'demo-external-client',
+            version: '1.0.0',
           },
           [CLIENT_CAPABILITIES_META_KEY]: {},
         },
@@ -92,20 +122,20 @@ async function external(endpoint: string, bearer: string) {
 try {
   token = await jwt();
   const created = await fetch(`${web}/api/mcp-workspaces/${guide}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       guideSlug: guide,
       templateId: weatherTemplate.id,
       configuration: {
-        serverName: "demo-verification",
+        serverName: 'demo-verification',
         enabledCapabilityIds: [],
       },
     }),
     signal: AbortSignal.timeout(20_000),
   });
   assert(
-    created.headers.get("content-type")?.includes("application/json"),
+    created.headers.get('content-type')?.includes('application/json'),
     `Web server returned ${created.status} instead of JSON. Restart pnpm dev:web to load its API routes.`,
   );
   const session = (await created.json()) as {
@@ -117,19 +147,19 @@ try {
   id = session.workspace.id;
   assert(
     session.temporaryCredential,
-    "BFF must issue a temporary workspace credential.",
+    'BFF must issue a temporary workspace credential.',
   );
-  console.log("PASS: browser API creates a real anonymous workspace.");
+  console.log('PASS: browser API creates a real anonymous workspace.');
 
-  const claimed = (await request(`${ownerPath}/claim`, "POST", {
+  const claimed = (await request(`${ownerPath}/claim`, 'POST', {
     workspaceId: id,
     temporaryCredential: session.temporaryCredential,
   })) as { workspace: McpWorkspace };
   assert.equal(claimed.workspace.anonymous, false);
-  const saved = (await request(ownerPath, "PUT", {
+  const saved = (await request(ownerPath, 'PUT', {
     expectedRevision: claimed.workspace.revision,
     configuration: {
-      serverName: "demo-verification",
+      serverName: 'demo-verification',
       enabledCapabilityIds: weatherTemplate.capabilities.map(
         (capability) => capability.id,
       ),
@@ -137,39 +167,39 @@ try {
   })) as { workspace: McpWorkspace };
   assert(saved.workspace.revision > claimed.workspace.revision);
   console.log(
-    "PASS: sign-in claim and revision-controlled configuration persist.",
+    'PASS: sign-in claim and revision-controlled configuration persist.',
   );
 
   const commands = [
-    { type: "discover" },
+    { type: 'discover' },
     {
-      type: "call-tool",
-      name: "get_weather",
-      arguments: { location: "Lagos", unit: "celsius" },
+      type: 'call-tool',
+      name: 'get_weather',
+      arguments: { location: 'Lagos', unit: 'celsius' },
     },
     {
-      type: "call-tool",
-      name: "get_forecast",
-      arguments: { location: "London" },
+      type: 'call-tool',
+      name: 'get_forecast',
+      arguments: { location: 'London' },
     },
     {
-      type: "call-tool",
-      name: "search_locations",
-      arguments: { query: "Lagos" },
+      type: 'call-tool',
+      name: 'search_locations',
+      arguments: { query: 'Lagos' },
     },
     ...weatherTemplate.capabilities
-      .filter((capability) => capability.kind === "resource")
-      .map((capability) => ({ type: "read-resource", uri: capability.uri })),
+      .filter((capability) => capability.kind === 'resource')
+      .map((capability) => ({ type: 'read-resource', uri: capability.uri })),
     {
-      type: "get-prompt",
-      name: "plan_for_weather",
-      arguments: { city: "Lagos", day: "Monday" },
+      type: 'get-prompt',
+      name: 'plan_for_weather',
+      arguments: { city: 'Lagos', day: 'Monday' },
     },
   ];
   for (const command of commands) {
     const response = (await request(
       `${ownerPath}/commands`,
-      "POST",
+      'POST',
       command,
     )) as {
       result: { error?: unknown; result?: { isError?: boolean } };
@@ -181,15 +211,15 @@ try {
     );
     assert(
       response.events.length > 0 &&
-        response.events.every((event) => event.status !== "error"),
+        response.events.every((event) => event.status !== 'error'),
     );
-    if (command.type === "call-tool")
+    if (command.type === 'call-tool')
       assert(
-        JSON.stringify(response.result).includes("open-meteo.com"),
-        "Provider attribution must be present.",
+        hasAllowedHostInUrls(response.result, 'open-meteo.com'),
+        'Provider attribution must be present.',
       );
     console.log(
-      `PASS: ${command.type}${"name" in command ? ` ${command.name}` : ""}.`,
+      `PASS: ${command.type}${'name' in command ? ` ${command.name}` : ''}.`,
     );
   }
   const reloaded = (await request(ownerPath)) as {
@@ -198,20 +228,20 @@ try {
   };
   assert.equal(reloaded.workspace.id, id);
   assert(
-    reloaded.events.some((event) => event.method === "tools/call"),
-    "Reload must return owner traces.",
+    reloaded.events.some((event) => event.method === 'tools/call'),
+    'Reload must return owner traces.',
   );
-  console.log("PASS: workspace and protocol history survive reload.");
+  console.log('PASS: workspace and protocol history survive reload.');
 
   const progressPath = `/v1/guide-runs/${guide}`;
-  await request(progressPath, "PUT", {
+  await request(progressPath, 'PUT', {
     progress: {
       version: 1,
       completedStepIds: [
-        "create-your-server",
-        "add-tools",
-        "connect-the-atm-client",
-        "test-your-server",
+        'create-your-server',
+        'add-tools',
+        'connect-the-atm-client',
+        'test-your-server',
       ],
       percent: 50,
       updatedAt: new Date().toISOString(),
@@ -220,10 +250,10 @@ try {
   const progress = (await request(progressPath)) as {
     progress: { completedStepIds: string[] };
   };
-  assert(progress.progress.completedStepIds.includes("test-your-server"));
-  console.log("PASS: signed-in Guide progress persists in Supabase.");
+  assert(progress.progress.completedStepIds.includes('test-your-server'));
+  console.log('PASS: signed-in Guide progress persists in Supabase.');
 
-  const access = (await request(`${ownerPath}/token`, "POST")) as {
+  const access = (await request(`${ownerPath}/token`, 'POST')) as {
     token: string;
     endpoint: string;
   };
@@ -239,24 +269,24 @@ try {
   assert.equal(
     afterExternal.events.length,
     reloaded.events.length,
-    "External payloads must not be retained.",
+    'External payloads must not be retained.',
   );
 
-  await request(`${ownerPath}/status`, "POST", { status: "paused" });
+  await request(`${ownerPath}/status`, 'POST', { status: 'paused' });
   assert.notEqual((await external(access.endpoint, access.token)).status, 200);
-  await request(`${ownerPath}/status`, "POST", { status: "active" });
+  await request(`${ownerPath}/status`, 'POST', { status: 'active' });
   assert.equal((await external(access.endpoint, access.token)).status, 200);
-  await request(`${ownerPath}/token`, "DELETE");
+  await request(`${ownerPath}/token`, 'DELETE');
   assert.equal((await external(access.endpoint, access.token)).status, 401);
   console.log(
-    "PASS: external access, trace privacy, pause/resume, and revocation.",
+    'PASS: external access, trace privacy, pause/resume, and revocation.',
   );
 } finally {
   if (id)
     await pool.query(
-      "delete from mcp_workspaces where id=$1 and (owner_user_id=$2 or owner_user_id is null)",
+      'delete from mcp_workspaces where id=$1 and (owner_user_id=$2 or owner_user_id is null)',
       [id, owner],
     );
-  await pool.query("delete from guide_runs where user_id=$1", [owner]);
+  await pool.query('delete from guide_runs where user_id=$1', [owner]);
   await pool.end();
 }

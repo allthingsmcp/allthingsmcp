@@ -17,16 +17,19 @@
     "start": "pnpm --filter @all-things-mcp/web start",
     "lint": "pnpm --filter @all-things-mcp/web lint",
     "typecheck": "pnpm -r --if-present typecheck",
-    "format": "pnpm --filter @all-things-mcp/web format",
-    "format:write": "pnpm --filter @all-things-mcp/web format:write",
+    "format": "pnpm format:web && pnpm format:rest",
+    "format:write": "pnpm --filter @all-things-mcp/web format:write && prettier --write .",
     "content:validate": "pnpm --filter @all-things-mcp/web content:validate",
     "brand:generate": "pnpm --filter @all-things-mcp/web brand:generate",
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm --filter @all-things-mcp/web test:e2e",
     "test:memory": "pnpm --filter @all-things-mcp/web test:memory",
-    "check": "pnpm --filter @all-things-mcp/web check"
+    "check": "pnpm --filter @all-things-mcp/web check",
+    "format:web": "pnpm --filter @all-things-mcp/web format",
+    "format:rest": "prettier --check ."
   },
   "devDependencies": {
+    "prettier": "^3.6.2",
     "supabase": "^2.116.0"
   }
 }

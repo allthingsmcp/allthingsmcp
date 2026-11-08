@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="560" viewBox="0 0 560 560" role="img" aria-labelledby="t d">
+<title id="t">How the MCP server decides whether a tools/call becomes a task</title>
+<desc id="d">The MCP client sends tools/call. If the request's _meta does not declare the io.modelcontextprotocol/tasks extension, the server must not return a task: it returns an ordinary CallToolResult, or error -32021 if the work cannot be done without a task. If the request declares the extension, the server chooses per request: an ordinary result for quick work or a task handle for long work. A Tasks-capable client must therefore handle both shapes.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F172A"/></marker>
+  <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#53657B"/></marker>
+  <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0B9F5A"/></marker>
+</defs>
+<rect width="560" height="560" fill="#FFFFFF"/>
+<rect x="170" y="16" width="220" height="52" rx="9" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.8"/>
+<text x="280.0" y="38.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#1D4ED8" text-anchor="middle">MCP client sends</text>
+<text x="280.0" y="56.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#3E4C66" text-anchor="middle">tools/call</text>
+<polygon points="280.0,96.0 275.0,86.0 285.0,86.0" fill="#0F172A"/>
+<line x1="280" y1="68" x2="280.0" y2="86.0" stroke="#0F172A" stroke-width="2"/>
+<polygon points="280,98.0 430.0,160 280,222.0 130.0,160" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.8"/>
+<text x="280" y="147.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0F172A" text-anchor="middle">Does this request's _meta</text>
+<text x="280" y="164.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0F172A" text-anchor="middle">declare the Tasks</text>
+<text x="280" y="181.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0F172A" text-anchor="middle">extension?</text>
+<polygon points="76.0,250.0 71.0,240.0 81.0,240.0" fill="#0F172A"/>
+<path d="M130 160 L76 160 L76.0 240.0" fill="none" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+<text x="104" y="152" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0F172A" text-anchor="middle">No</text>
+<rect x="14" y="254" width="130" height="80" rx="9" fill="#F1F5F9" stroke="#53657B" stroke-width="1.8"/>
+<text x="79.0" y="281.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#3E4C66" text-anchor="middle">Never a task</text>
+<text x="79.0" y="299.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#3E4C66" text-anchor="middle">ordinary result</text>
+<text x="79.0" y="317.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#3E4C66" text-anchor="middle">or error -32021</text>
+<polygon points="280.0,262.0 275.0,252.0 285.0,252.0" fill="#0F172A"/>
+<line x1="280" y1="222" x2="280.0" y2="252.0" stroke="#0F172A" stroke-width="2"/>
+<text x="294" y="246" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0F172A" text-anchor="start">Yes</text>
+<rect x="176" y="266" width="208" height="70" rx="9" fill="#EAF7F0" stroke="#0B9F5A" stroke-width="1.8"/>
+<text x="280.0" y="297.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#087A45" text-anchor="middle">MCP server decides</text>
+<text x="280.0" y="315.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#3E4C66" text-anchor="middle">per request</text>
+<polygon points="150.0,392.0 145.0,382.0 155.0,382.0" fill="#0F172A"/>
+<path d="M236 336 L236 366 L150 366 L150.0 382.0" fill="none" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="410.0,392.0 405.0,382.0 415.0,382.0" fill="#0F172A"/>
+<path d="M324 336 L324 366 L410 366 L410.0 382.0" fill="none" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+<text x="142" y="384" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="end">quick work</text>
+<text x="420" y="384" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">long work</text>
+<rect x="60" y="396" width="180" height="62" rx="9" fill="#FFFFFF" stroke="#DCE4EE" stroke-width="1.8"/>
+<text x="150.0" y="423.0" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" fill="#0F172A" text-anchor="middle">CallToolResult</text>
+<text x="150.0" y="441.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#3E4C66" text-anchor="middle">ordinary result</text>
+<rect x="320" y="396" width="180" height="62" rx="9" fill="#FFFFFF" stroke="#0B9F5A" stroke-width="1.8"/>
+<text x="410.0" y="423.0" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" fill="#087A45" text-anchor="middle">resultType: "task"</text>
+<text x="410.0" y="441.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#3E4C66" text-anchor="middle">task handle</text>
+<rect x="18" y="480" width="524" height="64" rx="9" fill="#F8FAFC" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="34" y="506" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#0F172A" text-anchor="start">Your client must handle both shapes on every call.</text>
+<text x="34" y="527" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#3E4C66" text-anchor="start">Check resultType on every response instead of assuming a task.</text>
+</svg>

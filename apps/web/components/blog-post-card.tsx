@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { coverScenes } from '@/components/cover-scenes';
+import type { CoverSceneId } from '@/lib/cover-scene-ids';
 import {
   ArrowRight,
   FileText,
@@ -25,6 +27,7 @@ export type BlogPostSummary = {
   estimatedMinutes?: number;
   status: 'draft' | 'published';
   href: string;
+  coverScene?: CoverSceneId;
 };
 
 export const topicLabels: Record<BlogTopic, string> = {
@@ -62,9 +65,11 @@ export function BlogPostMeta({ post }: { post: BlogPostSummary }) {
 export function BlogCover({
   topic,
   compact = false,
+  scene,
 }: {
   topic: BlogTopic;
   compact?: boolean;
+  scene?: CoverSceneId;
 }) {
   const icons = {
     concepts: FileText,
@@ -75,23 +80,30 @@ export function BlogCover({
     opinion: FileText,
   };
   const CoverIcon = icons[topic];
+  const Scene = scene ? coverScenes[scene] : undefined;
   return (
     <div
       className={[
         'blog-cover',
         `blog-cover--${topic}`,
         compact && 'blog-cover--compact',
+        Scene && 'blog-cover--scene',
       ]
         .filter(Boolean)
         .join(' ')}
       aria-hidden="true"
     >
-      <span />
-      <div>
-        <CoverIcon />
-        <b>MCP</b>
-      </div>
-      <span />
+      {Scene && <Scene />}
+      {!Scene && (
+        <>
+          <span />
+          <div>
+            <CoverIcon />
+            <b>MCP</b>
+          </div>
+          <span />
+        </>
+      )}
     </div>
   );
 }
@@ -105,7 +117,11 @@ export function BlogPostCard({
 }) {
   return (
     <Link className="blog-post-card" href={post.href}>
-      <BlogCover topic={post.topic} compact={compactCover} />
+      <BlogCover
+        topic={post.topic}
+        compact={compactCover}
+        scene={post.coverScene}
+      />
       <span>{topicLabels[post.topic]}</span>
       <h3>{post.title}</h3>
       <p>{post.description}</p>

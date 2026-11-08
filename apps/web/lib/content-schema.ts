@@ -1,5 +1,6 @@
 import { pageSchema } from 'fumadocs-core/source/schema';
 import { z } from 'zod';
+import { coverSceneIds } from '@/lib/cover-scene-ids';
 import { interactiveGuideIds } from '@/lib/interactive-guide-ids';
 
 const isoDate = z
@@ -94,6 +95,7 @@ export const contentSchema = pageSchema
         'opinion',
       ])
       .optional(),
+    coverScene: z.enum(coverSceneIds).optional(),
     substackUrl: z.string().url().optional(),
     outcome: z.string().min(24).optional(),
     interactiveGuideId: z.enum(interactiveGuideIds).optional(),

@@ -14,12 +14,14 @@ import {
 import {
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
+  Suspense,
   useRef,
   useState,
 } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { trackPrivacySafeEvent } from '@/components/privacy-analytics';
 import { cn } from '@/lib/utils';
 
@@ -355,8 +357,34 @@ function SearchDialog({
   );
 }
 
+/**
+ * Opens the dialog when the URL carries `?search=1` (the `/search` route
+ * redirects here), including after client-side navigation, then removes the
+ * parameter. It reads the router's search params rather than running once on
+ * mount, so it also works when the provider is already mounted.
+ */
+function SearchParamOpener({ onOpen }: { onOpen: () => void }) {
+  const searchParams = useSearchParams();
+  const requested = searchParams.get('search') === '1';
+
+  useEffect(() => {
+    if (!requested) return;
+    onOpen();
+    const url = new URL(window.location.href);
+    url.searchParams.delete('search');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  }, [requested, onOpen]);
+
+  return null;
+}
+
 export function SearchDialogProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const openSearch = useCallback(() => setOpen(true), []);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -367,32 +395,20 @@ export function SearchDialogProvider({ children }: { children: ReactNode }) {
     }
     window.addEventListener('keydown', onKeyDown);
 
-    const url = new URL(window.location.href);
-    let openTimeout: number | undefined;
-    if (url.searchParams.get('search') === '1') {
-      openTimeout = window.setTimeout(() => setOpen(true), 0);
-      url.searchParams.delete('search');
-      window.history.replaceState(
-        {},
-        '',
-        `${url.pathname}${url.search}${url.hash}`,
-      );
-    }
-
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      if (openTimeout !== undefined) window.clearTimeout(openTimeout);
-    };
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
   return (
     <SearchDialogContext.Provider
       value={{
-        openSearch: () => setOpen(true),
+        openSearch,
         closeSearch: () => setOpen(false),
       }}
     >
       {children}
+      <Suspense fallback={null}>
+        <SearchParamOpener onOpen={openSearch} />
+      </Suspense>
       <SearchDialog open={open} onClose={() => setOpen(false)} />
     </SearchDialogContext.Provider>
   );

@@ -1,23 +1,23 @@
-import { SignJWT } from "jose";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { SignJWT } from 'jose';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   CLIENT_CAPABILITIES_META_KEY,
   CLIENT_INFO_META_KEY,
   PROTOCOL_VERSION_META_KEY,
-} from "@modelcontextprotocol/server";
-import { weatherTemplate } from "@all-things-mcp/mcp-templates";
-import type { McpProtocolEvent, McpWorkspace } from "@all-things-mcp/contracts";
-import { createGuideRuntimeApp } from "../src/app.js";
-import { runtimeTokenAudience, runtimeTokenIssuer } from "../src/auth.js";
-import { MemoryGuideRunRepository } from "../src/repository.js";
-import { MemoryWorkspaceRepository } from "../src/workspace-repository.js";
-import { OpenMeteoProvider } from "../src/weather.js";
+} from '@modelcontextprotocol/server';
+import { weatherTemplate } from '@all-things-mcp/mcp-templates';
+import type { McpProtocolEvent, McpWorkspace } from '@all-things-mcp/contracts';
+import { createGuideRuntimeApp } from '../src/app.js';
+import { runtimeTokenAudience, runtimeTokenIssuer } from '../src/auth.js';
+import { MemoryGuideRunRepository } from '../src/repository.js';
+import { MemoryWorkspaceRepository } from '../src/workspace-repository.js';
+import { OpenMeteoProvider } from '../src/weather.js';
 
-const secret = "test-guide-runtime-shared-secret-32-chars";
+const secret = 'test-guide-runtime-shared-secret-32-chars';
 const guide = weatherTemplate.guideSlug;
 const ownedPath = `/v1/mcp-workspaces/${guide}`;
 const configuration = {
-  serverName: "demo-weather",
+  serverName: 'demo-weather',
   enabledCapabilityIds: weatherTemplate.capabilities.map(
     (capability) => capability.id,
   ),
@@ -31,15 +31,15 @@ const createBody = {
 function providerFixture() {
   return vi.fn(async (input: string | URL | Request) => {
     const url = new URL(String(input));
-    return url.hostname.startsWith("geocoding")
+    return url.hostname.startsWith('geocoding')
       ? Response.json({
           results: [
             {
-              name: "Lagos",
-              country: "Nigeria",
+              name: 'Lagos',
+              country: 'Nigeria',
               latitude: 6.45,
               longitude: 3.39,
-              timezone: "Africa/Lagos",
+              timezone: 'Africa/Lagos',
             },
           ],
         })
@@ -50,13 +50,13 @@ function providerFixture() {
             weather_code: 1,
             wind_speed_10m: 10,
           },
-          current_units: { temperature_2m: "°C", wind_speed_10m: "km/h" },
+          current_units: { temperature_2m: '°C', wind_speed_10m: 'km/h' },
           daily: {
-            time: ["2026-09-21"],
+            time: ['2026-09-21'],
             temperature_2m_max: [31],
             temperature_2m_min: [24],
           },
-          daily_units: { temperature_2m_max: "°C" },
+          daily_units: { temperature_2m_max: '°C' },
         });
   });
 }
@@ -72,18 +72,18 @@ function setup(fetcher: typeof fetch = providerFixture() as typeof fetch) {
   return { app, workspaceRepository };
 }
 
-async function auth(user = "owner-a") {
+async function auth(user = 'owner-a') {
   const token = await new SignJWT({
-    name: "Demo reader",
-    email: "demo@example.com",
+    name: 'Demo reader',
+    email: 'demo@example.com',
     image: null,
   })
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: 'HS256' })
     .setSubject(user)
     .setIssuer(runtimeTokenIssuer)
     .setAudience(runtimeTokenAudience)
     .setIssuedAt()
-    .setExpirationTime("5m")
+    .setExpirationTime('5m')
     .sign(new TextEncoder().encode(secret));
   return `Bearer ${token}`;
 }
@@ -91,11 +91,11 @@ async function auth(user = "owner-a") {
 const json = (
   body: unknown,
   authorization?: string,
-  method = "POST",
+  method = 'POST',
 ): RequestInit => ({
   method,
   headers: {
-    "content-type": "application/json",
+    'content-type': 'application/json',
     ...(authorization ? { authorization } : {}),
   },
   body: JSON.stringify(body),
@@ -107,25 +107,25 @@ function protocol(
   token: string,
 ): RequestInit {
   return {
-    method: "POST",
+    method: 'POST',
     headers: {
-      authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
-      "content-type": "application/json",
-      "mcp-protocol-version": "2026-07-28",
-      "mcp-method": method,
-      ...(typeof params.name === "string" ? { "mcp-name": params.name } : {}),
+      authorization: token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+      'content-type': 'application/json',
+      'mcp-protocol-version': '2026-07-28',
+      'mcp-method': method,
+      ...(typeof params.name === 'string' ? { 'mcp-name': params.name } : {}),
     },
     body: JSON.stringify({
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: 1,
       method,
       params: {
         ...params,
         _meta: {
-          [PROTOCOL_VERSION_META_KEY]: "2026-07-28",
+          [PROTOCOL_VERSION_META_KEY]: '2026-07-28',
           [CLIENT_INFO_META_KEY]: {
-            name: "external-demo-client",
-            version: "1.0.0",
+            name: 'external-demo-client',
+            version: '1.0.0',
           },
           [CLIENT_CAPABILITIES_META_KEY]: {},
         },
@@ -139,12 +139,12 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-describe("real MCP guide HTTP flow", () => {
-  it("creates an empty anonymous server, saves capabilities, and completes every real MCP operation", async () => {
+describe('real MCP guide HTTP flow', () => {
+  it('creates an empty anonymous server, saves capabilities, and completes every real MCP operation', async () => {
     const fetcher = providerFixture();
     const { app } = setup(fetcher as typeof fetch);
     const created = await app.request(
-      "/anonymous/workspaces",
+      '/anonymous/workspaces',
       json({
         ...createBody,
         configuration: { ...configuration, enabledCapabilityIds: [] },
@@ -155,71 +155,71 @@ describe("real MCP guide HTTP flow", () => {
       workspace: McpWorkspace;
       temporaryCredential: string;
     };
-    expect(session.workspace).not.toHaveProperty("anonymousCredentialHash");
-    expect(session.workspace).not.toHaveProperty("ownerUserId");
+    expect(session.workspace).not.toHaveProperty('anonymousCredentialHash');
+    expect(session.workspace).not.toHaveProperty('ownerUserId');
     const path = `/anonymous/workspaces/${session.workspace.id}`;
     const bearer = `Bearer ${session.temporaryCredential}`;
 
     const empty = await app.request(
       `${path}/commands`,
-      json({ type: "discover" }, bearer),
+      json({ type: 'discover' }, bearer),
     );
     expect(empty.status).toBe(200);
     const emptyBody = (await empty.json()) as { events: McpProtocolEvent[] };
     expect(
       emptyBody.events.map((event) => [event.method, event.status]),
-    ).toEqual([["server/discover", "response"]]);
+    ).toEqual([['server/discover', 'response']]);
 
     const saved = await app.request(
       path,
-      json({ configuration, expectedRevision: 1 }, bearer, "PUT"),
+      json({ configuration, expectedRevision: 1 }, bearer, 'PUT'),
     );
     expect(saved.status).toBe(200);
     const conflict = await app.request(
       path,
-      json({ configuration, expectedRevision: 1 }, bearer, "PUT"),
+      json({ configuration, expectedRevision: 1 }, bearer, 'PUT'),
     );
     expect(conflict.status).toBe(409);
     const discovery = await app.request(
       `${path}/commands`,
-      json({ type: "discover" }, bearer),
+      json({ type: 'discover' }, bearer),
     );
     expect(discovery.status).toBe(200);
     const discoveryBody = (await discovery.json()) as {
       events: McpProtocolEvent[];
     };
     expect(discoveryBody.events.map((event) => event.method)).toEqual([
-      "server/discover",
-      "tools/list",
-      "resources/list",
-      "prompts/list",
+      'server/discover',
+      'tools/list',
+      'resources/list',
+      'prompts/list',
     ]);
     expect(
-      discoveryBody.events.every((event) => event.status === "response"),
+      discoveryBody.events.every((event) => event.status === 'response'),
     ).toBe(true);
 
     for (const command of [
       {
-        type: "call-tool",
-        name: "get_weather",
-        arguments: { location: "Lagos", unit: "celsius" },
+        type: 'call-tool',
+        name: 'get_weather',
+        arguments: { location: 'Lagos', unit: 'celsius' },
       },
       {
-        type: "call-tool",
-        name: "get_forecast",
-        arguments: { location: "Lagos" },
+        type: 'call-tool',
+        name: 'get_forecast',
+        arguments: { location: 'Lagos' },
       },
       {
-        type: "call-tool",
-        name: "search_locations",
-        arguments: { query: "Lagos" },
+        type: 'call-tool',
+        name: 'search_locations',
+        arguments: { query: 'Lagos' },
       },
-      { type: "read-resource", uri: "weather://cities" },
-      { type: "read-resource", uri: "weather://docs/usage" },
+      { type: 'read-resource', uri: 'weather://cities' },
+      { type: 'read-resource', uri: 'weather://docs/usage' },
       {
-        type: "get-prompt",
-        name: "plan_for_weather",
-        arguments: { city: "Lagos", day: "Monday" },
+        type: 'get-prompt',
+        name: 'plan_for_weather',
+        arguments: { city: 'Lagos', day: 'Monday' },
       },
     ]) {
       const response = await app.request(
@@ -228,9 +228,9 @@ describe("real MCP guide HTTP flow", () => {
       );
       expect(response.status, JSON.stringify(command)).toBe(200);
       const body = await response.json();
-      expect(body.events[0].status).toBe("response");
+      expect(body.events[0].status).toBe('response');
       expect(JSON.stringify(body.result)).toContain(
-        command.type === "get-prompt" ? "Lagos on Monday" : "Open-Meteo",
+        command.type === 'get-prompt' ? 'Lagos on Monday' : 'Open-Meteo',
       );
     }
     // Current + forecast share one cached geocoding request.
@@ -247,7 +247,7 @@ describe("real MCP guide HTTP flow", () => {
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     ]);
     expect(
-      (await app.request(path, { headers: { authorization: "Bearer wrong" } }))
+      (await app.request(path, { headers: { authorization: 'Bearer wrong' } }))
         .status,
     ).toBe(401);
 
@@ -259,7 +259,7 @@ describe("real MCP guide HTTP flow", () => {
           expectedRevision: 2,
         },
         bearer,
-        "PUT",
+        'PUT',
       ),
     );
     expect(
@@ -271,7 +271,7 @@ describe("real MCP guide HTTP flow", () => {
     ).toEqual([]);
   });
 
-  it("persists owned workspaces and isolates external endpoint credentials, payloads, pause, rotation, and revocation", async () => {
+  it('persists owned workspaces and isolates external endpoint credentials, payloads, pause, rotation, and revocation', async () => {
     const { app } = setup();
     const owner = await auth();
     const created = await app.request(ownedPath, json(createBody, owner));
@@ -284,7 +284,7 @@ describe("real MCP guide HTTP flow", () => {
     expect(
       (
         await app.request(ownedPath, {
-          headers: { authorization: await auth("owner-b") },
+          headers: { authorization: await auth('owner-b') },
         })
       ).status,
     ).toBe(404);
@@ -297,10 +297,10 @@ describe("real MCP guide HTTP flow", () => {
     const external = await app.request(
       endpoint,
       protocol(
-        "tools/call",
+        'tools/call',
         {
-          name: "get_weather",
-          arguments: { location: "external-only-location" },
+          name: 'get_weather',
+          arguments: { location: 'external-only-location' },
         },
         token.token,
       ),
@@ -318,7 +318,7 @@ describe("real MCP guide HTTP flow", () => {
       (
         await app.request(
           `${ownedPath}/commands`,
-          json({ type: "discover" }, owner),
+          json({ type: 'discover' }, owner),
         )
       ).status,
     ).toBe(200);
@@ -327,17 +327,17 @@ describe("real MCP guide HTTP flow", () => {
     ).json();
     expect(loaded.events).toHaveLength(4);
     expect(JSON.stringify(loaded.events)).not.toContain(
-      "external-only-location",
+      'external-only-location',
     );
     expect(
-      (await app.request(endpoint, protocol("server/discover", {}, owner)))
+      (await app.request(endpoint, protocol('server/discover', {}, owner)))
         .status,
     ).toBe(200);
     expect(
       (
         await app.request(
           endpoint,
-          protocol("server/discover", {}, await auth("owner-b")),
+          protocol('server/discover', {}, await auth('owner-b')),
         )
       ).status,
     ).toBe(401);
@@ -346,7 +346,7 @@ describe("real MCP guide HTTP flow", () => {
       (
         await app.request(
           `${ownedPath}/status`,
-          json({ status: "paused" }, owner),
+          json({ status: 'paused' }, owner),
         )
       ).status,
     ).toBe(200);
@@ -354,7 +354,7 @@ describe("real MCP guide HTTP flow", () => {
       (
         await app.request(
           endpoint,
-          protocol("server/discover", {}, token.token),
+          protocol('server/discover', {}, token.token),
         )
       ).status,
     ).toBe(404);
@@ -362,11 +362,11 @@ describe("real MCP guide HTTP flow", () => {
       (
         await app.request(
           `${ownedPath}/commands`,
-          json({ type: "discover" }, owner),
+          json({ type: 'discover' }, owner),
         )
       ).status,
     ).toBe(423);
-    await app.request(`${ownedPath}/status`, json({ status: "active" }, owner));
+    await app.request(`${ownedPath}/status`, json({ status: 'active' }, owner));
     const rotated = await (
       await app.request(`${ownedPath}/token`, json({}, owner))
     ).json();
@@ -374,7 +374,7 @@ describe("real MCP guide HTTP flow", () => {
       (
         await app.request(
           endpoint,
-          protocol("server/discover", {}, token.token),
+          protocol('server/discover', {}, token.token),
         )
       ).status,
     ).toBe(401);
@@ -382,14 +382,14 @@ describe("real MCP guide HTTP flow", () => {
       (
         await app.request(
           endpoint,
-          protocol("server/discover", {}, rotated.token),
+          protocol('server/discover', {}, rotated.token),
         )
       ).status,
     ).toBe(200);
     expect(
       (
         await app.request(`${ownedPath}/token`, {
-          method: "DELETE",
+          method: 'DELETE',
           headers: { authorization: owner },
         })
       ).status,
@@ -398,20 +398,20 @@ describe("real MCP guide HTTP flow", () => {
       (
         await app.request(
           endpoint,
-          protocol("server/discover", {}, rotated.token),
+          protocol('server/discover', {}, rotated.token),
         )
       ).status,
     ).toBe(401);
   });
 
-  it("claims anonymous workspaces without silently replacing an existing saved workspace", async () => {
+  it('claims anonymous workspaces without silently replacing an existing saved workspace', async () => {
     const { app } = setup();
     const owner = await auth();
     const existing = await (
       await app.request(ownedPath, json(createBody, owner))
     ).json();
     const candidate = await (
-      await app.request("/anonymous/workspaces", json(createBody))
+      await app.request('/anonymous/workspaces', json(createBody))
     ).json();
     const claimBody = {
       workspaceId: candidate.workspace.id,
@@ -433,7 +433,7 @@ describe("real MCP guide HTTP flow", () => {
     expect(
       (
         await app.request(
-          "/v1/mcp-workspaces/wrong-guide/claim",
+          '/v1/mcp-workspaces/wrong-guide/claim',
           json(claimBody, owner),
         )
       ).status,
@@ -457,14 +457,14 @@ describe("real MCP guide HTTP flow", () => {
     ).toBe(401);
   });
 
-  it("rejects expired temporary credentials for reads, execution, and claiming", async () => {
-    vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime("2026-09-01T00:00:00Z");
+  it('rejects expired temporary credentials for reads, execution, and claiming', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime('2026-09-01T00:00:00Z');
     const { app } = setup();
     const temporary = await (
-      await app.request("/anonymous/workspaces", json(createBody))
+      await app.request('/anonymous/workspaces', json(createBody))
     ).json();
-    vi.setSystemTime("2026-09-09T00:00:00Z");
+    vi.setSystemTime('2026-09-09T00:00:00Z');
     const path = `/anonymous/workspaces/${temporary.workspace.id}`;
     const bearer = `Bearer ${temporary.temporaryCredential}`;
     expect(
@@ -474,7 +474,7 @@ describe("real MCP guide HTTP flow", () => {
       (
         await app.request(
           `${path}/commands`,
-          json({ type: "discover" }, bearer),
+          json({ type: 'discover' }, bearer),
         )
       ).status,
     ).toBe(401);
@@ -494,14 +494,14 @@ describe("real MCP guide HTTP flow", () => {
     ).toBe(401);
   });
 
-  it("returns actionable errors and failed traces for provider outages and invalid MCP arguments", async () => {
+  it('returns actionable errors and failed traces for provider outages and invalid MCP arguments', async () => {
     const { app } = setup(
       vi.fn(
-        async () => new Response("Unavailable", { status: 503 }),
+        async () => new Response('Unavailable', { status: 503 }),
       ) as typeof fetch,
     );
     const temporary = await (
-      await app.request("/anonymous/workspaces", json(createBody))
+      await app.request('/anonymous/workspaces', json(createBody))
     ).json();
     const path = `/anonymous/workspaces/${temporary.workspace.id}/commands`;
     const bearer = `Bearer ${temporary.temporaryCredential}`;
@@ -509,40 +509,40 @@ describe("real MCP guide HTTP flow", () => {
       path,
       json(
         {
-          type: "call-tool",
-          name: "get_weather",
-          arguments: { location: "Lagos" },
+          type: 'call-tool',
+          name: 'get_weather',
+          arguments: { location: 'Lagos' },
         },
         bearer,
       ),
     );
     expect(upstream.status).toBe(502);
     const upstreamBody = await upstream.json();
-    expect(upstreamBody.code).toBe("UPSTREAM_UNAVAILABLE");
-    expect(upstreamBody.events[0].status).toBe("error");
+    expect(upstreamBody.code).toBe('UPSTREAM_UNAVAILABLE');
+    expect(upstreamBody.events[0].status).toBe('error');
     expect(upstreamBody.result.result.isError).toBe(true);
 
     const invalid = await app.request(
       path,
       json(
         {
-          type: "call-tool",
-          name: "get_weather",
-          arguments: { location: "Lagos", unit: "kelvin" },
+          type: 'call-tool',
+          name: 'get_weather',
+          arguments: { location: 'Lagos', unit: 'kelvin' },
         },
         bearer,
       ),
     );
     expect(invalid.status).toBe(400);
-    expect((await invalid.json()).events[0].status).toBe("error");
+    expect((await invalid.json()).events[0].status).toBe('error');
     const unknown = await app.request(
       path,
-      json({ type: "call-tool", name: "run_anything", arguments: {} }, bearer),
+      json({ type: 'call-tool', name: 'run_anything', arguments: {} }, bearer),
     );
     expect(unknown.status).toBe(400);
   });
 
-  it("rejects invalid inputs and enforces the configured per-workspace limit", async () => {
+  it('rejects invalid inputs and enforces the configured per-workspace limit', async () => {
     const { app } = setup();
     const owner = await auth();
     expect(
@@ -551,23 +551,23 @@ describe("real MCP guide HTTP flow", () => {
     expect(
       (await app.request(`${ownedPath}/status`, json(null, owner))).status,
     ).toBe(400);
-    expect((await app.request("/mcp/not-a-uuid")).status).toBe(404);
+    expect((await app.request('/mcp/not-a-uuid')).status).toBe(404);
     expect(
       (
-        await app.request("/anonymous/workspaces/not-a-uuid", {
-          headers: { authorization: "Bearer invalid" },
+        await app.request('/anonymous/workspaces/not-a-uuid', {
+          headers: { authorization: 'Bearer invalid' },
         })
       ).status,
     ).toBe(401);
     expect(
       (
         await app.request(
-          "/anonymous/workspaces",
+          '/anonymous/workspaces',
           json({
             ...createBody,
             configuration: {
               ...configuration,
-              enabledCapabilityIds: ["unknown"],
+              enabledCapabilityIds: ['unknown'],
             },
           }),
         )
@@ -576,28 +576,28 @@ describe("real MCP guide HTTP flow", () => {
     expect(
       (
         await app.request(
-          "/anonymous/workspaces",
+          '/anonymous/workspaces',
           json({
             ...createBody,
             configuration: {
               ...configuration,
-              enabledCapabilityIds: ["get-weather", "get-weather"],
+              enabledCapabilityIds: ['get-weather', 'get-weather'],
             },
           }),
         )
       ).status,
     ).toBe(400);
-    vi.stubEnv("MCP_REQUESTS_PER_WORKSPACE_HOUR", "1");
+    vi.stubEnv('MCP_REQUESTS_PER_WORKSPACE_HOUR', '1');
     const temporary = await (
-      await app.request("/anonymous/workspaces", json(createBody))
+      await app.request('/anonymous/workspaces', json(createBody))
     ).json();
     const path = `/anonymous/workspaces/${temporary.workspace.id}/commands`;
     const bearer = `Bearer ${temporary.temporaryCredential}`;
     expect(
-      (await app.request(path, json({ type: "discover" }, bearer))).status,
+      (await app.request(path, json({ type: 'discover' }, bearer))).status,
     ).toBe(200);
-    const blocked = await app.request(path, json({ type: "discover" }, bearer));
+    const blocked = await app.request(path, json({ type: 'discover' }, bearer));
     expect(blocked.status).toBe(429);
-    expect((await blocked.json()).code).toBe("RATE_LIMIT_EXCEEDED");
+    expect((await blocked.json()).code).toBe('RATE_LIMIT_EXCEEDED');
   });
 });

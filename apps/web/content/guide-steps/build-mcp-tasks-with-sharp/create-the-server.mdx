@@ -1,0 +1,222 @@
+---
+title: Build an MCP server with Tasks support
+description: Register the image tool, return a task ID and serve task status.
+contentType: guide-step
+section: build
+guideSlug: build-mcp-tasks-with-sharp
+guideStepId: create-the-server
+guideStepOrder: 3
+authors: [Gbadebo Bello]
+status: draft
+tags: [guide-step, tasks, typescript, sharp]
+updatedAt: 2026-11-04
+difficulty: intermediate
+estimatedMinutes: 12
+specVersion: 2026-07-28
+lastVerified: 2026-10-31
+---
+
+Add task-backed execution to `create_thumbnails`, with handlers for status
+retrieval and cancellation. Keep an ordinary-result path for MCP clients that
+do not declare Tasks support. This step builds the MCP server's half of the
+exchange from step 1:
+
+<ProtocolDiagram
+  label="The MCP server side of a task: receive tools/call, save the task, return the task handle, let the worker run the batch, then answer tasks/get and tasks/cancel from the stored record."
+  nodes={[
+    'tools/call',
+    'Save task',
+    'Return task handle',
+    'Worker runs batch',
+    'Serve tasks/get',
+  ]}
+/>
+
+## 1. Register the image tool
+
+Replace `src/app.ts` with this complete file:
+
+```typescript title="src/app.ts"
+import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
+import { thumbnailInput } from './config.ts';
+import { createThumbnails, type BatchOptions } from './thumbnails.ts';
+import { registerTaskHandlers } from './task-handlers.ts';
+import { TaskWorker } from './task-worker.ts';
+
+export function createApp(options: BatchOptions, worker?: TaskWorker) {
+  return createMcpHandler(
+    () => {
+      const server = new McpServer({
+        name: 'thumbnail-server',
+        version: '1.0.0',
+      });
+      server.registerTool(
+        'create_thumbnails',
+        {
+          description: 'Create WebP thumbnails from local sample images.',
+          inputSchema: thumbnailInput,
+        },
+        (input) => createThumbnails(input, options),
+      );
+      if (worker) registerTaskHandlers(server, worker);
+      return server;
+    },
+    { legacy: 'reject' },
+  );
+}
+```
+
+The tool's existing execution path calls `createThumbnails()`. When a worker is
+provided, `registerTaskHandlers()` adds the Tasks capability and request handlers.
+The supplied `TaskWorker` runs batches and retains their task state outside the
+HTTP request lifecycle.
+
+The supplied `src/server.ts` starts the HTTP endpoint. The `legacy: 'reject'`
+option keeps requests on the current protocol revision used by this guide.
+
+## 2. Add the Tasks handlers
+
+Replace `src/task-handlers.ts` with:
+
+```typescript title="src/task-handlers.ts"
+import type { McpServer } from '@modelcontextprotocol/server';
+import { tasksExtension } from './config.ts';
+import { createThumbnails } from './thumbnails.ts';
+import type { TaskWorker } from './task-worker.ts';
+import {
+  callSchema,
+  getSchema,
+  cancelSchema,
+  supportsTasks,
+  requireTasks,
+} from './task-protocol.ts';
+
+export function registerTaskHandlers(server: McpServer, worker: TaskWorker) {
+  const protocol = server.server;
+  protocol.registerCapabilities({ extensions: { [tasksExtension]: {} } });
+
+  protocol.setRequestHandler('tools/call', callSchema, (params, context) => {
+    return supportsTasks(context)
+      ? worker.start(params.arguments)
+      : createThumbnails(params.arguments, worker.options);
+  });
+
+  protocol.setRequestHandler(
+    'tasks/get',
+    getSchema,
+    async (params, context) => {
+      requireTasks(context);
+      return {
+        resultType: 'complete' as const,
+        ...(await worker.store.get(params.taskId)),
+      };
+    },
+  );
+
+  protocol.setRequestHandler(
+    'tasks/cancel',
+    cancelSchema,
+    async (params, context) => {
+      requireTasks(context);
+      await worker.store.cancel(params.taskId);
+      return { resultType: 'complete' as const };
+    },
+  );
+}
+```
+
+The extension adds four responsibilities. Each one matches part of the step 1
+diagrams:
+
+| Code                     | What it does                                                                                                                        | Step 1 reference          |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `registerCapabilities()` | Advertises `io.modelcontextprotocol/tasks` in discovery. `tasksExtension` is defined in `src/config.ts`.                            | Who decides               |
+| `tools/call` handler     | Checks this request's capabilities. Declaring clients get a task handle from `worker.start()`; others wait for the ordinary result. | Who decides; exchange 1–3 |
+| `tasks/get` handler      | Returns the stored record. Once the task is completed, the record also holds the tool result.                                       | Exchange 5 and 7          |
+| `tasks/cancel` handler   | Records a request to stop and returns an empty acknowledgement. The worker checks it between images.                                | Lifecycle: cancelled      |
+
+Both `tasks/*` handlers call `requireTasks()` first. A request that doesn't
+declare the extension gets error `-32021`, as the specification requires.
+
+The schemas and capability checks in `task-protocol.ts` are supplied project
+code built from the extension's official `core/v2` exports. They validate the
+messages without adding that boilerplate to your handlers. The base SDK also
+exposes older task types; this example uses the [versioned extension schemas](https://tasks.extensions.modelcontextprotocol.io/typescript/adapters-and-schemas).
+
+## 3. Persist the task before returning its ID
+
+Open the supplied `src/task-worker.ts`. Its `start()` method persists the task
+before scheduling the batch:
+
+```typescript title="src/task-worker.ts (supplied excerpt)"
+async start(input: ThumbnailInput) {
+  const task = await this.store.create();
+  const job = new Promise<void>((resolve) => setImmediate(resolve)).then(() =>
+    this.run(task.taskId, input),
+  );
+  this.running.add(job);
+  void job.finally(() => this.running.delete(job)).catch(console.error);
+  return { resultType: 'task' as const, ...task };
+}
+```
+
+This is exchange steps 2 and 3 from step 1: save, then return. `store.create()`
+saves the record in `.tasks/` first. `setImmediate` schedules
+`run()` after the current turn of the event loop. The response returns the saved
+record with `resultType: 'task'`, while the batch runs separately. The MCP client
+can look up the ID immediately because the initial save has already finished.
+The `running` set tracks active jobs for shutdown and tests.
+
+The worker keeps running outside the HTTP request handler. After each output,
+it updates `statusMessage`; at the end, it saves `status: 'completed'` and the
+result.
+This implementation retains records for one hour and suggests checking every
+500 milliseconds. Those are example settings, not MCP defaults.
+
+## 4. Start the MCP server and check a task
+
+In **terminal A**, run:
+
+```bash
+pnpm run server --demo-delay-ms 1000
+```
+
+Expect:
+
+```text
+MCP server: http://127.0.0.1:3001/mcp
+Mode: MCP Tasks
+Teaching delay: 1000 ms between outputs (not processing time).
+```
+
+The delay pauses after each output so you can observe the task. Sharp does not
+need that pause; omit the flag for normal processing. Keep terminal A running.
+
+In **terminal B**, in the same folder, run the supplied probe:
+
+```bash
+pnpm run probe
+```
+
+It calls your tool with Tasks support and immediately checks the returned ID:
+
+```text
+Task handle received: <task-id>
+Task is readable: working
+The server continues working after this probe exits.
+```
+
+Your ID will differ. A `completed` status is also valid if the images finish
+before the check. Look in `output/` while terminal A runs: the batch continues
+after the probe exits. Next, you will write your own MCP client to follow it.
+
+If the probe gets an ordinary result, save both edited files and restart terminal
+A without `--ordinary`. If port 3001 is occupied, use `--port 3002` on the MCP server
+and `pnpm run probe http://127.0.0.1:3002/mcp`. Use `pnpm run server`, including
+`run`; `pnpm server` is a different command.
+
+**Checkpoint:** your MCP server returns a task ID that can be looked up immediately,
+while the image work continues.
+
+[Recover to the end of step 3](/downloads/mcp-tasks-thumbnails/step-3.zip).
+Stop the old MCP server before starting the recovered copy.

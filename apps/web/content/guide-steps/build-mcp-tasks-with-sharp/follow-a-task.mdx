@@ -1,0 +1,107 @@
+---
+title: Reconnect to a task and cancel work
+description: Save a task ID, return to the same batch and request cancellation.
+contentType: guide-step
+section: build
+guideSlug: build-mcp-tasks-with-sharp
+guideStepId: follow-a-task
+guideStepOrder: 5
+authors: [Gbadebo Bello]
+status: draft
+tags: [guide-step, tasks, typescript, sharp]
+updatedAt: 2026-11-04
+difficulty: intermediate
+estimatedMinutes: 8
+specVersion: 2026-07-28
+lastVerified: 2026-10-31
+---
+
+Verify that a task outlives the initiating MCP client, then test cooperative
+cancellation while the batch is running. These are two different actions, and
+they end differently:
+
+![Two flows side by side. Detach: the MCP client saves the taskId and exits without sending a message; the server keeps working and finishes all 18 images; a later tasks/get from a new connection returns completed with the same batch and result. Cancel: the MCP client sends tasks/cancel and the server replies with an empty acknowledgement; the worker checks for cancellation between images, so the current image may finish; tasks/get then reads the actual outcome, cancelled, or completed if the batch had already finished.](/images/guides/mcp-tasks/detach-vs-cancel.svg)
+
+The starter includes a command-line wrapper, `src/client.ts`, with `run`, `watch`
+and `cancel` commands. It uses the same connection helper and the polling loop
+you just wrote, and saves IDs in `output/last-task.json`.
+
+## 1. Leave a task running
+
+Keep terminal A running with `pnpm run server --demo-delay-ms 1000`. In terminal B:
+
+```bash
+pnpm run client run --detach
+```
+
+Expect:
+
+```text
+Task ID: <task-id>
+Detached. Run: pnpm run client watch last
+```
+
+The command saves the task ID and exits without cancelling. You can close
+terminal B; the MCP server in terminal A continues processing the images.
+
+## 2. Reconnect using the saved ID
+
+Reopen a terminal in the same project folder and run:
+
+```bash
+pnpm run client watch last
+pnpm run verify --output
+```
+
+You should eventually see `completed: All thumbnails are ready.`, followed by
+`Created 18 thumbnails.` and successful verification. It may already be complete
+when you reconnect. You can also use `pnpm run client watch <task-id>`, replacing
+the placeholder with the printed ID.
+
+The watch command sends `tasks/get`. It does not call `create_thumbnails` again.
+Check that its output folder matches the same batch. The stored MCP server URL
+and task ID together identify which work to resume observing. The official
+[recovery guide](https://tasks.extensions.modelcontextprotocol.io/typescript/client/input-and-recovery)
+uses the same principle when handing tasks between connections.
+
+If the task is unknown or expired, check the ID, URL and project folder. This
+example retains tasks for one hour. Restarting the MCP server marks unfinished
+batches as failed; a durable task record alone does not restart an interrupted
+image job.
+
+## 3. Request cancellation
+
+Start a fresh paced batch and request cancellation promptly:
+
+```bash
+pnpm run client run --detach
+pnpm run client cancel last
+```
+
+The first message acknowledges the request:
+
+```text
+Cancellation requested. Checking the actual outcome…
+```
+
+When the worker stops, you see:
+
+```text
+cancelled: Cancelled; completed files remain in output.
+```
+
+The wrapper calls `connection.cancelTask(id)` and then your `watchTask()` loop.
+The worker checks cancellation between Sharp operations; the current operation
+may finish first. If the batch already finished, you may see `completed` instead.
+Try again with the delay enabled. Files created before cancellation remain.
+
+Closing an MCP client and cancelling a task are different actions. In the
+[official lifecycle API](https://tasks.extensions.modelcontextprotocol.io/typescript/client/execution),
+detachment and cancellation are separate operations too.
+
+**Checkpoint:** you retrieved the same batch after the MCP client exited and
+observed the terminal state after requesting cancellation. The acknowledgement
+alone is not evidence that processing stopped.
+
+[Recover to the end of step 5](/downloads/mcp-tasks-thumbnails/step-5.zip).
+A recovery download contains code, not your existing `.tasks/` records.

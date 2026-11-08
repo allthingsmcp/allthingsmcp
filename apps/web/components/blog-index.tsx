@@ -47,7 +47,7 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
       <div className="blog-main">
         {featured && (
           <Link className="blog-feature" href={featured.href}>
-            <BlogCover topic={featured.topic} />
+            <BlogCover topic={featured.topic} scene={featured.coverScene} />
             <div className="blog-feature__copy">
               <span>Featured · {topicLabels[featured.topic]}</span>
               <h2>{featured.title}</h2>
@@ -130,7 +130,7 @@ export function BlogIndex({ posts }: { posts: BlogPostSummary[] }) {
           <div>
             {posts.slice(0, 3).map((post) => (
               <Link href={post.href} key={post.href}>
-                <BlogCover topic={post.topic} compact />
+                <BlogCover topic={post.topic} compact scene={post.coverScene} />
                 <span>
                   <strong>{post.title}</strong>
                   <BlogPostMeta post={post} />

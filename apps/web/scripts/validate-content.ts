@@ -3,6 +3,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
 import { contentSchema } from '../lib/content-schema';
+import { validateMdxBody, withoutFencedCode } from '../lib/mdx-validation';
 import {
   interactiveGuideDefinitions,
   interactiveGuideScenes,
@@ -22,6 +23,18 @@ const allowedComponents = new Set([
   'ProtocolDiagram',
   'InteractiveGuideBlock',
 ]);
+const contentDirectories: Record<string, string[]> = {
+  guide: ['guides'],
+  'guide-step': ['guide-steps'],
+  article: ['blog'],
+  'learning-path': ['learning-paths'],
+  lesson: ['lessons'],
+  glossary: ['glossary'],
+  ecosystem: ['ecosystem'],
+  tool: ['tools'],
+  'spec-release': ['spec-watch'],
+  'spec-proposal': ['spec-watch'],
+};
 const slugs = new Map<string, string>();
 const knownLibraryUrls = new Set(
   files.map(
@@ -34,6 +47,25 @@ const knownLibraryUrls = new Set(
   ),
 );
 const errors: string[] = [];
+const warnings: string[] = [];
+const authorFiles = await fg('content/authors/*.{yaml,yml}', {
+  cwd: root,
+  absolute: true,
+});
+const authorNames = new Set<string>();
+for (const file of authorFiles) {
+  const profile = matter(`---\n${await readFile(file, 'utf8')}\n---`).data as {
+    slug?: string;
+    name?: string;
+  };
+  const expected = path.basename(file).replace(/\.ya?ml$/, '');
+  if (profile.slug !== expected) {
+    errors.push(
+      `${path.relative(root, file)}: slug must match the file name ("${expected}")`,
+    );
+  }
+  if (profile.name) authorNames.add(profile.name);
+}
 const guides = new Map<
   string,
   {
@@ -54,6 +86,7 @@ for (const file of files) {
   const relative = path.relative(root, file);
   const raw = await readFile(file, 'utf8');
   const parsed = matter(raw);
+  const mdx = withoutFencedCode(parsed.content);
   const result = contentSchema.safeParse(parsed.data);
   if (!result.success) {
     for (const issue of result.error.issues)
@@ -74,9 +107,7 @@ for (const file of files) {
     result.data.guideStepOrder
   ) {
     const scenes = Array.from(
-      parsed.content.matchAll(
-        /<InteractiveGuideBlock\s+scene="([^"]+)"\s*\/>/g,
-      ),
+      mdx.matchAll(/<InteractiveGuideBlock\s+scene="([^"]+)"\s*\/>/g),
     ).map((match) => match[1]);
     const invalidScene = scenes.find(
       (scene) =>
@@ -87,10 +118,7 @@ for (const file of files) {
         `${relative}: unknown interactive Guide scene ${invalidScene}`,
       );
     }
-    if (
-      parsed.content.includes('<InteractiveGuideBlock') &&
-      scenes.length === 0
-    ) {
+    if (mdx.includes('<InteractiveGuideBlock') && scenes.length === 0) {
       errors.push(
         `${relative}: InteractiveGuideBlock requires a literal scene attribute`,
       );
@@ -106,6 +134,26 @@ for (const file of files) {
     });
   }
 
+  if (result.success) {
+    for (const author of result.data.authors) {
+      if (!authorNames.has(author)) {
+        // Unmatched names are credited by name only, which is allowed.
+        warnings.push(
+          `${relative}: author "${author}" has no profile; add content/authors/<slug>.yaml to link a profile (see docs/authors.md)`,
+        );
+      }
+    }
+    const directory = path
+      .relative(path.join(root, 'content'), file)
+      .split(path.sep)[0];
+    const allowed = contentDirectories[result.data.contentType];
+    if (allowed && !allowed.includes(directory)) {
+      errors.push(
+        `${relative}: contentType "${result.data.contentType}" belongs in content/${allowed[0]}/, not content/${directory}/`,
+      );
+    }
+  }
+
   const slug = path
     .relative(path.join(root, 'content'), file)
     .replace(/\.(md|mdx)$/, '')
@@ -116,28 +164,10 @@ for (const file of files) {
   if (duplicate) errors.push(`${relative}: duplicate slug with ${duplicate}`);
   slugs.set(slug, relative);
 
-  if (/^(?:import|export)\s/m.test(parsed.content))
-    errors.push(`${relative}: MDX imports and exports are not allowed`);
-  for (const match of parsed.content.matchAll(/<\/?([A-Z][A-Za-z0-9]*)\b/g)) {
-    if (!allowedComponents.has(match[1]))
-      errors.push(`${relative}: unapproved MDX component <${match[1]}>`);
-  }
+  for (const error of validateMdxBody(parsed.content, allowedComponents))
+    errors.push(`${relative}: ${error}`);
 
-  const withoutApprovedArrays = parsed.content.replace(
-    /items=\{\[[\s\S]*?\]\}/g,
-    '',
-  );
-  if (
-    /\{\s*(?:\([^)]*\)\s*=>|function\b|async\b|await\b|new\s+|[A-Za-z_$][\w$]*\s*\()/m.test(
-      withoutApprovedArrays,
-    )
-  ) {
-    errors.push(
-      `${relative}: executable JavaScript is not allowed in contributed MDX`,
-    );
-  }
-
-  for (const match of parsed.content.matchAll(/\]\((\/[\w\-/.#]+)\)/g)) {
+  for (const match of mdx.matchAll(/\]\((\/[\w\-/.#]+)\)/g)) {
     const target = match[1].split('#')[0].replace(/\/$/, '');
     if (target.startsWith('/library/') && !knownLibraryUrls.has(target))
       errors.push(`${relative}: broken internal reference ${target}`);
@@ -189,6 +219,8 @@ for (const [guideSlug, guide] of guides) {
     }
   }
 }
+
+for (const warning of warnings) console.warn(`warning: ${warning}`);
 
 if (errors.length) {
   console.error(`Content validation failed with ${errors.length} issue(s):\n`);

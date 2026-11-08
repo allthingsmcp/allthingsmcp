@@ -76,18 +76,18 @@ export function contentStructuredData({
         dateModified: data.updatedAt,
         author: data.authors.map((name) => {
           const profile = authors.find((item) => item.name === name);
+          const isPerson = !profile || profile.kind === 'person';
+          const profileUrl =
+            profile?.kind === 'person'
+              ? absoluteUrl(`/authors/${profile.slug}`)
+              : (profile?.url ?? profile?.website);
           return {
-            '@type':
-              profile?.name === 'All Things MCP Editors'
-                ? 'Organization'
-                : 'Person',
+            '@type': isPerson ? 'Person' : 'Organization',
             name,
-            ...(profile?.url?.endsWith('/authors/gbadebo-bello')
-              ? { '@id': `${profile.url}#person` }
+            ...(profile?.kind === 'person'
+              ? { '@id': `${profileUrl}#person` }
               : {}),
-            ...(profile?.url || profile?.website
-              ? { url: profile.url ?? profile.website }
-              : {}),
+            ...(profileUrl ? { url: profileUrl } : {}),
           };
         }),
         publisher: { '@id': absoluteUrl('/#organization') },

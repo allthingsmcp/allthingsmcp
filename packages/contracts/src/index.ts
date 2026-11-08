@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const runtimePrincipalSchema = z.object({
   sub: z.string().min(1),
@@ -119,9 +119,17 @@ export const mcpProtocolEventSchema = z.object({
 
 export const mcpWorkspaceCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('discover') }),
-  z.object({ type: z.literal('call-tool'), name: z.string().min(1), arguments: z.record(z.string(), z.unknown()) }),
+  z.object({
+    type: z.literal('call-tool'),
+    name: z.string().min(1),
+    arguments: z.record(z.string(), z.unknown()),
+  }),
   z.object({ type: z.literal('read-resource'), uri: z.string().min(1) }),
-  z.object({ type: z.literal('get-prompt'), name: z.string().min(1), arguments: z.record(z.string(), z.unknown()).default({}) }),
+  z.object({
+    type: z.literal('get-prompt'),
+    name: z.string().min(1),
+    arguments: z.record(z.string(), z.unknown()).default({}),
+  }),
 ]);
 
 export const mcpCommandResponseSchema = z.object({
@@ -149,6 +157,8 @@ export const mcpAccessTokenResponseSchema = z.object({
 });
 
 export type McpWorkspace = z.infer<typeof mcpWorkspaceSchema>;
-export type McpWorkspaceConfiguration = z.infer<typeof mcpWorkspaceConfigurationSchema>;
+export type McpWorkspaceConfiguration = z.infer<
+  typeof mcpWorkspaceConfigurationSchema
+>;
 export type McpWorkspaceCommand = z.infer<typeof mcpWorkspaceCommandSchema>;
 export type McpProtocolEvent = z.infer<typeof mcpProtocolEventSchema>;

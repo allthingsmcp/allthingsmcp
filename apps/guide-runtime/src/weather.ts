@@ -1,7 +1,7 @@
 const attribution = {
-  label: "Weather data by Open-Meteo",
-  url: "https://open-meteo.com/",
-  license: "CC BY 4.0",
+  label: 'Weather data by Open-Meteo',
+  url: 'https://open-meteo.com/',
+  license: 'CC BY 4.0',
 };
 
 const maxCacheEntries = 256;
@@ -11,9 +11,9 @@ export class WeatherProviderError extends Error {
   constructor(
     message: string,
     readonly code:
-      | "UPSTREAM_UNAVAILABLE"
-      | "UPSTREAM_QUOTA_EXCEEDED"
-      | "LOCATION_NOT_FOUND" = "UPSTREAM_UNAVAILABLE",
+      | 'UPSTREAM_UNAVAILABLE'
+      | 'UPSTREAM_QUOTA_EXCEEDED'
+      | 'LOCATION_NOT_FOUND' = 'UPSTREAM_UNAVAILABLE',
   ) {
     super(message);
   }
@@ -21,13 +21,13 @@ export class WeatherProviderError extends Error {
 
 export class OpenMeteoProvider {
   private cache = new Map<string, { value: unknown; expiresAt: number }>();
-  private upstreamWindow = { day: "", count: 0 };
+  private upstreamWindow = { day: '', count: 0 };
   constructor(
     private fetcher: typeof fetch = fetch,
     private geocodingUrl = process.env.OPEN_METEO_GEOCODING_URL ??
-      "https://geocoding-api.open-meteo.com/v1/search",
+      'https://geocoding-api.open-meteo.com/v1/search',
     private forecastUrl = process.env.OPEN_METEO_FORECAST_URL ??
-      "https://api.open-meteo.com/v1/forecast",
+      'https://api.open-meteo.com/v1/forecast',
   ) {}
 
   private pruneCache(now: number) {
@@ -54,8 +54,8 @@ export class OpenMeteoProvider {
     const dailyLimit = Number(process.env.MCP_UPSTREAM_DAILY_LIMIT ?? 8_000);
     if (this.upstreamWindow.count >= dailyLimit) {
       throw new WeatherProviderError(
-        "The Open-Meteo daily quota is exhausted.",
-        "UPSTREAM_QUOTA_EXCEEDED",
+        'The Open-Meteo daily quota is exhausted.',
+        'UPSTREAM_QUOTA_EXCEEDED',
       );
     }
     this.upstreamWindow.count += 1;
@@ -64,7 +64,7 @@ export class OpenMeteoProvider {
     try {
       const response = await this.fetcher(url, {
         signal: controller.signal,
-        headers: { "user-agent": "All-Things-MCP/0.1" },
+        headers: { 'user-agent': 'All-Things-MCP/0.1' },
       });
       if (!response.ok)
         throw new WeatherProviderError(
@@ -73,12 +73,12 @@ export class OpenMeteoProvider {
       const value: unknown = await response.json();
       if (
         !value ||
-        typeof value !== "object" ||
+        typeof value !== 'object' ||
         Array.isArray(value) ||
-        ("error" in value && value.error)
+        ('error' in value && value.error)
       ) {
         throw new WeatherProviderError(
-          "Open-Meteo returned an invalid response.",
+          'Open-Meteo returned an invalid response.',
         );
       }
       if (key.length <= maxCacheKeyLength) {
@@ -93,7 +93,7 @@ export class OpenMeteoProvider {
       return structuredClone(value);
     } catch (error) {
       if (error instanceof WeatherProviderError) throw error;
-      throw new WeatherProviderError("Open-Meteo is temporarily unavailable.");
+      throw new WeatherProviderError('Open-Meteo is temporarily unavailable.');
     } finally {
       clearTimeout(timeout);
     }
@@ -101,20 +101,20 @@ export class OpenMeteoProvider {
 
   async search(query: string) {
     const url = new URL(this.geocodingUrl);
-    url.searchParams.set("name", query);
-    url.searchParams.set("count", "5");
-    url.searchParams.set("language", "en");
-    url.searchParams.set("format", "json");
+    url.searchParams.set('name', query);
+    url.searchParams.set('count', '5');
+    url.searchParams.set('language', 'en');
+    url.searchParams.set('format', 'json');
     const data = (await this.json(url, 24 * 60 * 60 * 1000)) as {
       results?: Array<Record<string, unknown>>;
     };
     if (
       data.results &&
       (!Array.isArray(data.results) ||
-        data.results.some((item) => !item || typeof item !== "object"))
+        data.results.some((item) => !item || typeof item !== 'object'))
     ) {
       throw new WeatherProviderError(
-        "Open-Meteo returned invalid location data.",
+        'Open-Meteo returned invalid location data.',
       );
     }
     return {
@@ -135,43 +135,43 @@ export class OpenMeteoProvider {
     const first = found.matches[0];
     if (
       !first ||
-      typeof first.latitude !== "number" ||
-      typeof first.longitude !== "number"
+      typeof first.latitude !== 'number' ||
+      typeof first.longitude !== 'number'
     ) {
       throw new WeatherProviderError(
         `No location matched “${location}”.`,
-        "LOCATION_NOT_FOUND",
+        'LOCATION_NOT_FOUND',
       );
     }
     return first;
   }
 
-  async current(location: string, unit = "celsius") {
+  async current(location: string, unit = 'celsius') {
     const place = await this.resolve(location);
     const url = new URL(this.forecastUrl);
-    url.searchParams.set("latitude", String(place.latitude));
-    url.searchParams.set("longitude", String(place.longitude));
+    url.searchParams.set('latitude', String(place.latitude));
+    url.searchParams.set('longitude', String(place.longitude));
     url.searchParams.set(
-      "current",
-      "temperature_2m,apparent_temperature,weather_code,wind_speed_10m",
+      'current',
+      'temperature_2m,apparent_temperature,weather_code,wind_speed_10m',
     );
     url.searchParams.set(
-      "temperature_unit",
-      unit === "fahrenheit" ? "fahrenheit" : "celsius",
+      'temperature_unit',
+      unit === 'fahrenheit' ? 'fahrenheit' : 'celsius',
     );
-    url.searchParams.set("timezone", "auto");
+    url.searchParams.set('timezone', 'auto');
     const data = (await this.json(url, 10 * 60 * 1000)) as Record<
       string,
       unknown
     >;
     if (
       !data.current ||
-      typeof data.current !== "object" ||
+      typeof data.current !== 'object' ||
       !data.current_units ||
-      typeof data.current_units !== "object"
+      typeof data.current_units !== 'object'
     ) {
       throw new WeatherProviderError(
-        "Open-Meteo returned incomplete current weather data.",
+        'Open-Meteo returned incomplete current weather data.',
       );
     }
     return {
@@ -185,26 +185,26 @@ export class OpenMeteoProvider {
   async forecast(location: string) {
     const place = await this.resolve(location);
     const url = new URL(this.forecastUrl);
-    url.searchParams.set("latitude", String(place.latitude));
-    url.searchParams.set("longitude", String(place.longitude));
+    url.searchParams.set('latitude', String(place.latitude));
+    url.searchParams.set('longitude', String(place.longitude));
     url.searchParams.set(
-      "daily",
-      "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+      'daily',
+      'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
     );
-    url.searchParams.set("forecast_days", "7");
-    url.searchParams.set("timezone", "auto");
+    url.searchParams.set('forecast_days', '7');
+    url.searchParams.set('timezone', 'auto');
     const data = (await this.json(url, 30 * 60 * 1000)) as Record<
       string,
       unknown
     >;
     if (
       !data.daily ||
-      typeof data.daily !== "object" ||
+      typeof data.daily !== 'object' ||
       !data.daily_units ||
-      typeof data.daily_units !== "object"
+      typeof data.daily_units !== 'object'
     ) {
       throw new WeatherProviderError(
-        "Open-Meteo returned incomplete forecast data.",
+        'Open-Meteo returned incomplete forecast data.',
       );
     }
     return {

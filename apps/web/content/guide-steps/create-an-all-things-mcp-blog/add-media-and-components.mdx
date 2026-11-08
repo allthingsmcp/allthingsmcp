@@ -71,6 +71,8 @@ Add the actual image before using this example. Write alternative text that comm
 
 ## Understand the card cover
 
-The current blog cards generate their cover graphics from `blogTopic`. There is no custom `coverImage` frontmatter field wired into the card. An image inside the article will appear in the body; it will not replace that generated cover.
+By default, blog cards generate their cover graphics from `blogTopic`. There is no `coverImage` field: an image inside the article appears in the body and does not replace the cover.
+
+To give a post its own cover, set `coverScene` to a registered scene id, such as `coverScene: tasks`. A scene is a small reviewed component that lays itself out to every card shape instead of cropping. If no existing scene fits your article, the `cover-scenes` skill in `skills/all-things-mcp/cover-scenes/` walks you through building one in the same pull request.
 
 **Checkpoint:** code has language labels and context, callouts have a clear purpose, and every article image exists at its referenced path with useful alternative text.

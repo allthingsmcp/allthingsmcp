@@ -12,21 +12,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const webRoot = fileURLToPath(new URL('../', import.meta.url));
 const repositoryRoot = path.resolve(webRoot, '../..');
-const sourceDir = path.join(
-  repositoryRoot,
-  'skills/all-things-mcp/brand-system/assets/logo/open-junction',
-);
+const sourceDir = path.join(repositoryRoot, 'brand/logo/open-junction');
 const publicDir = path.join(webRoot, 'public/brand');
 const outputDir = path.join(publicDir, 'open-junction');
 const substackDir = path.join(outputDir, 'substack');
 const identity = JSON.parse(
-  await readFile(
-    path.join(
-      repositoryRoot,
-      'skills/all-things-mcp/brand-system/assets/identity.json',
-    ),
-    'utf8',
-  ),
+  await readFile(path.join(repositoryRoot, 'brand/identity.json'), 'utf8'),
 );
 
 // These existing public URLs remain usable, but all contain the new artwork.

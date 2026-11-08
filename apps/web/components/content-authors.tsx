@@ -31,7 +31,10 @@ export function ContentAuthors({
           linkedin: profile.linkedin,
           x: profile.x,
           website: profile.website,
-          url: localProfileUrl(profile.url),
+          url:
+            profile.kind === 'person'
+              ? `/authors/${profile.slug}`
+              : localProfileUrl(profile.url),
         }
       : { name };
   });

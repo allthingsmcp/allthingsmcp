@@ -61,10 +61,6 @@ export default async function LibraryPage({
       </main>
     );
   }
-  const legacyPath = slug.join('/');
-  if (legacyPath === 'tutorials/minimal-server') {
-    redirect('/guides/build-a-minimal-mcp-server');
-  }
   const page = source.getPage(slug);
   if (!page) notFound();
   const data = page.data as typeof page.data & ContentFrontmatter;

@@ -1,0 +1,6 @@
+node_modules/
+fixtures/
+output/
+.tasks/
+dist/
+*.tsbuildinfo

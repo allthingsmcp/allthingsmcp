@@ -1,0 +1,7 @@
+interface:
+  display_name: 'All Things MCP Cover Scenes'
+  short_description: 'Design responsive blog cover scenes'
+  default_prompt: 'Use $cover-scenes to design a cover scene for this article.'
+  icon_small: '../../../brand/logo/open-junction/icons/favicon.svg'
+  icon_large: '../../../brand/logo/open-junction/icons/avatar.svg'
+  brand_color: '#2563EB'

@@ -4,10 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { brandAssets, brandIdentity } from '@/lib/brand';
 
 const repositoryRoot = path.resolve(process.cwd(), '../..');
-const sourceDir = path.join(
-  repositoryRoot,
-  'skills/all-things-mcp/brand-system/assets/logo/open-junction',
-);
+const sourceDir = path.join(repositoryRoot, 'brand/logo/open-junction');
 const publicDir = path.join(process.cwd(), 'public/brand');
 const manifest = JSON.parse(
   readFileSync(path.join(sourceDir, 'manifest.json'), 'utf8'),
