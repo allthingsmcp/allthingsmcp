@@ -11,7 +11,11 @@ COPY apps/guide-runtime/package.json apps/guide-runtime/package.json
 COPY apps/web/package.json apps/web/package.json
 COPY packages/contracts/package.json packages/contracts/package.json
 COPY packages/mcp-templates/package.json packages/mcp-templates/package.json
-RUN pnpm install --frozen-lockfile --prod \
+# The base image already provides Node 24. Drop pnpm's useNodeVersion pin here:
+# pnpm has no musl (Alpine) Node build to download, and the pin is only for local
+# development.
+RUN sed -i '/^useNodeVersion:/d' pnpm-workspace.yaml \
+  && pnpm install --frozen-lockfile --prod \
     --filter @all-things-mcp/guide-runtime...
 
 FROM base
