@@ -148,6 +148,7 @@ export default function HomePage() {
                     updatedAt: data.updatedAt,
                     estimatedMinutes: data.estimatedMinutes,
                     status: data.status,
+                    coverScene: data.coverScene,
                   }}
                 />
               </li>

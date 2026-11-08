@@ -46,6 +46,7 @@ export default function BlogPage() {
         estimatedMinutes: data.estimatedMinutes,
         status: data.status,
         href: `/blog/${slug}`,
+        coverScene: data.coverScene,
         slug,
       };
     })
@@ -62,6 +63,7 @@ export default function BlogPage() {
       estimatedMinutes: post.estimatedMinutes,
       status: post.status,
       href: post.href,
+      coverScene: post.coverScene,
     }));
 
   return (
