@@ -1,6 +1,6 @@
 ---
-title: 'How MCP Tasks Work: From tools/call to Result'
-description: Understand why a long tool call needs a task, what a task is, and how an MCP client follows one from tools/call to its final result.
+title: 'What Are MCP Tasks? A Practical Introduction'
+description: Follow one long-running thumbnail batch from tools/call to its result to see what MCP Tasks are, how they work, and when to use them.
 contentType: article
 section: blog
 blogTopic: concepts
@@ -16,98 +16,50 @@ lastVerified: 2026-11-04
 prerequisites: [What Is MCP? A Practical Introduction]
 ---
 
-Some `tools/call` requests take longer than a request should stay open: a large image batch, a CI run, a step that waits for a person to approve something. **Tasks is the MCP extension that lets an MCP server answer such a call immediately with a task handle, then report progress and the final result through short follow-up requests.**
+MCP exposes multiple primitives, each with methods for discovery, retrieval, and execution. Discovery and retrieval are often times, more fairly straightforward
+and non-blocking requests.
 
-This article builds a mental model of Tasks: the problem they solve, what a task is, and the messages that carry one from `tools/call` to its result. It uses a batch image resize as the running example, where an MCP server turns six images into eighteen thumbnails. If you want to implement the extension afterwards, [Build Your First MCP Task](/guides/build-mcp-tasks-with-sharp) walks through it on both an MCP server and an MCP client.
+However, a `tools/call` is one request and one response. The MCP client waits on that request until the MCP server returns the tool result.
+For a database lookup that takes milliseconds, that works quite well. For a batch of eighteen image resizes, a CI run or a step that waits for a person to approve something, it breaks quickly.
 
-## Why a long tool call needs a task
+**Tasks is the MCP extension that lets an MCP server answer such a call immediately with a task handle, then report progress and the final result through short follow-up requests.**
 
-An ordinary `tools/call` is one request and one response. The MCP client waits on that request until the MCP server returns the tool result. For a database lookup that takes milliseconds, that works. For a batch of eighteen image resizes, a CI run or a step that waits for a person, it breaks in three ways:
+This article guides you through what an MCP tasks is, how it works, and why it is important using a practical example.
 
-| Problem       | What happens with one long request                                   |
-| ------------- | -------------------------------------------------------------------- |
-| Timeouts      | Clients and intermediaries close requests that stay open too long.   |
-| Lost results  | If the MCP client exits or the connection drops, the result is lost. |
-| No visibility | The MCP client can't see progress or ask the work to stop.           |
+Let's assume you are building an MCP tool that turns a folder of images into thumbnails. This folder consist of six images, and when a batch of six images is sent to an MCP tool,
+it generates three widths thumbnail variations per image. This means the tool results will consist of eighteen images in total.
+This runs long enough that holding one request open for it is a gamble.
 
-**A task separates starting the work from collecting its result.** The MCP server answers the call right away with a task handle. The MCP client then checks on the task with short requests whenever it wants.
+This article follows that single call from the moment the MCP client sends it to the moment the result arrives, and shows what Tasks changes along the way.
+
+<Callout type="note" title="Before you start">
+  This article assumes you already know the basics of MCP: what MCP clients and
+  servers are, and how a client calls a server's tools. If you're new to the
+  protocol, start with [What Is MCP? A Practical
+  Introduction](/blog/what-is-mcp).
+</Callout>
+
+## What goes wrong with one long request
+
+Picture the thumbnail call without Tasks. Your MCP client sends `tools/call` with the six images, and then it waits on that open request while your server resizes eighteen thumbnails. Three things can go wrong while it waits:
+
+| Problem       | What happens to the thumbnail call                                                                         |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| Timeouts      | The client, or a proxy between the client and your server, gives up on a request that stays open too long. |
+| Lost results  | If the client exits or the connection drops at thumbnail twelve, the finished work has nowhere to go.      |
+| No visibility | Nobody can see how far the batch has got, and the client has no way to ask it to stop.                     |
+
+**A task separates starting the work from collecting its result.** Your server answers the call right away with a task handle. The client then checks on the batch with short requests whenever it wants.
 
 ![Two sequence diagrams. Without Tasks, the MCP client sends tools/call and waits on one open request while the MCP server resizes 18 images; a timeout or disconnect leaves the result with nowhere to go. With Tasks, the MCP server returns a task handle immediately, the MCP client sends short tasks/get requests and sees "working, Created 6 of 18", and the last tasks/get returns completed with the final result.](/images/guides/mcp-tasks/why-tasks.svg)
 
-## What a task is
-
-A **task** is a record that the MCP server keeps for one `tools/call`. It has an unguessable ID, a status and a status message. When the task finishes, the record also holds the result. The MCP client never sees the work itself, only this record.
-
-When the MCP server decides to run a call as a task, it returns a **task handle** in place of the tool result. Here is one, with annotations:
-
-```jsonc
-{
-  "resultType": "task", // "this is a task handle, not the tool result"
-  "taskId": "a1288bf1-305f-46ac-a49c-5c02a2828bc7", // keep this to check back
-  "status": "working",
-  "statusMessage": "Starting the image batch.", // human-readable progress
-  "createdAt": "2026-10-27T10:41:57.590Z",
-  "lastUpdatedAt": "2026-10-27T10:41:57.590Z",
-  "ttlMs": 3600000, // the server may discard the task after one hour
-  "pollIntervalMs": 500, // "please check no more than every 500 ms"
-}
-```
-
-`ttlMs` and `pollIntervalMs` are values this example server chooses, not protocol defaults. A server may change either one during a task.
-
-## Follow one task from call to result
-
-The diagram traces the full exchange, including the worker and task store that this example MCP server uses internally. Those two are implementation choices, not protocol participants.
+Here is the whole journey of that one call. Each section below covers one or two of its numbered steps, in order. The worker and task store are how a thumbnail server like yours might do the work internally. They are implementation choices, not protocol participants.
 
 ![Sequence diagram with three participants: MCP client, MCP server and task store. 1: the MCP client sends tools/call and its _meta declares Tasks support. 2: the MCP server saves a task with status working. 3: the server returns a task handle with resultType task and a taskId. 4: a worker resizes images in the background and updates the store. 5: in a loop every pollIntervalMs, the client sends tasks/get with the taskId and receives status working with a message such as "Created 6 of 18 thumbnails." 6: the client can exit or lose its connection; the task keeps running and a new connection polls the saved taskId without a second tools/call. 7: tasks/get returns status completed with a result in the same shape tools/call returns.](/images/guides/mcp-tasks/task-exchange.svg)
 
-Four details in this flow matter when you write the code:
+## The client says it can handle a task
 
-- **The server saves the task before it returns the handle** (messages 2–3). The specification requires this, so the MCP client's first `tasks/get` always finds the task.
-- **The work runs outside the request** (message 4). The `tools/call` response is already sent, so a worker or job queue has to own the batch.
-- **The task ID is how you resume** (message 6). Calling the tool again would start a second batch. Calling `tasks/get` with the saved ID follows the original one.
-- **The final `tasks/get` carries the result** (message 7). Its `result` field holds exactly what an ordinary `tools/call` would have returned. There is no separate "fetch result" request.
-
-The extension adds three methods to the `tools/call` you already know:
-
-| Method         | The MCP client sends it to                                           |
-| -------------- | -------------------------------------------------------------------- |
-| `tools/call`   | Start the work. The response is a task handle or an ordinary result. |
-| `tasks/get`    | Read the current status and, once finished, the result.              |
-| `tasks/cancel` | Ask the MCP server to stop. The reply is an empty acknowledgement.   |
-| `tasks/update` | Answer a request the task is waiting on, such as an approval.        |
-
-Over Streamable HTTP, the MCP client also sets the `Mcp-Name` header to the `taskId` on every `tasks/*` request. A load balancer can use it to route polls to the server instance that holds the task.
-
-## Read a task's status
-
-Every task is a small state machine. Your MCP client decides what to do next by reading `status`:
-
-![State diagram. A task starts in working after tools/call returns a task handle. It can move to input_required when it needs input and back to working after tasks/update; the image example never needs input. From working, a task ends in one of three terminal statuses that never change: completed when the result is ready, including when the tool result has isError true; failed for JSON-RPC errors only, not tool errors; and cancelled when tasks/cancel is honoured, although cancellation is cooperative and the task may still end as completed.](/images/guides/mcp-tasks/task-lifecycle.svg)
-
-| Status           | What your MCP client does                                              |
-| ---------------- | ---------------------------------------------------------------------- |
-| `working`        | Wait `pollIntervalMs`, then call `tasks/get` again.                    |
-| `input_required` | Show the requests in `inputRequests`, then reply with `tasks/update`.  |
-| `completed`      | Read `result`. Check its `isError` too, because tool errors land here. |
-| `failed`         | Read `error`, a JSON-RPC error that prevented a normal result.         |
-| `cancelled`      | Stop waiting. Work already done may still exist on the server.         |
-
-<Callout type="warning" title="A tool error is not a failed task">
-  If the tool runs and reports a problem, such as an unreadable image, the task
-  is `completed` and its result has `isError: true`. Only a protocol-level
-  JSON-RPC error produces `failed`.
-</Callout>
-
-`input_required` is how a task pauses for approval or other input. The server places standard requests, such as an elicitation, in the `tasks/get` response. The MCP client answers them with `tasks/update` and goes back to polling. The image batch never needs input, so the example doesn't exercise that path.
-
-## Who decides to create a task
-
-Both sides opt in to the extension, but **the MCP server decides on each request whether to create a task**. The MCP client never asks for a task. It only states that it can handle one.
-
-![Flowchart. The MCP client sends tools/call. If the request's _meta does not declare the Tasks extension, the server never returns a task: it returns an ordinary result, or error -32021 if it cannot do the work without one. If the request declares the extension, the MCP server decides per request: an ordinary CallToolResult for quick work, or a task handle with resultType task for long work. Your client must handle both shapes on every call. In the image example, a declaring client always receives a task handle.](/images/guides/mcp-tasks/who-decides.svg)
-
-Each side declares support with the same extension identifier, `io.modelcontextprotocol/tasks`:
+The journey starts at step 1(from the journey image), before your server does any work. Both sides opt in to the extension with the same identifier, `io.modelcontextprotocol/tasks`. Your server advertises it support for Tasks once, and the client declares it on every request it sends:
 
 ```jsonc
 // MCP client: in every request's params._meta
@@ -122,11 +74,101 @@ Each side declares support with the same extension identifier, `io.modelcontextp
 }
 ```
 
-Because the client declaration travels with each request, the server checks it every time. A server must never return a task to a request that didn't declare the extension. A server that can still do the work synchronously falls back to an ordinary result in that case. One that can't returns error `-32021`.
+The client never asks for a task, it simply can't. It only says it can handle one. **Your server decides, on each request, whether to create a task.**
 
-The practical consequence for client authors is that a call may come back in either shape. Check `resultType` on every response instead of assuming a task.
+![Flowchart. The MCP client sends tools/call. If the request's _meta does not declare the Tasks extension, the server never returns a task: it returns an ordinary result, or error -32021 if it cannot do the work without one. If the request declares the extension, the MCP server decides per request: an ordinary CallToolResult for quick work, or a task handle with resultType task for long work. Your client must handle both shapes on every call, so it checks resultType on every response.](/images/blog/how-mcp-tasks-work/who-decides.svg)
+
+For a batch of eighteen thumbnails, the answer is a task. If someone sent your tool a single small image, your server could reasonably return an ordinary result instead. A server must never return a task to a request that didn't declare the extension. In that case it falls back to an ordinary result if it can still do the work, or returns error `-32021` if it can't.
+
+The consequence for anyone writing a client is that a call may come back in either shape. Check `resultType` on every response instead of assuming a task.
+
+## Your server answers with a task handle
+
+Your server accepts the batch. Before it returns anything, it saves a **task** (step 2): a record it keeps for this one `tools/call`. The record has an unguessable ID, a status and a status message, and once the batch finishes it also holds the result. The client never sees the resizing itself, only this record.
+
+The specification requires the server to save the task before it responds, so the client's first check always finds it. Then your server returns a **task handle** in place of the tool result (step 3):
+
+```jsonc
+{
+  "resultType": "task", // "this is a task handle, not the tool result"
+  "taskId": "a1288bf1-305f-46ac-a49c-5c02a2828bc7", // keep this to check back
+  "status": "working",
+  "statusMessage": "Starting the image batch.", // human-readable progress
+  "createdAt": "2026-10-27T10:41:57.590Z",
+  "lastUpdatedAt": "2026-10-27T10:41:57.590Z",
+  "ttlMs": 3600000, // the server may discard the task after one hour
+  "pollIntervalMs": 500, // "please check no more than every 500 ms"
+}
+```
+
+`ttlMs` and `pollIntervalMs` are values your server chooses, not protocol defaults. It may change either one while the batch runs.
+
+## The batch runs while the client checks in
+
+The `tools/call` response has already been sent, so the resizing can't happen inside that request. Something outside it, such as a worker or a job queue, has to own the batch and update the task record as each thumbnail is written (step 4).
+
+Meanwhile, the client loops through step 5: it waits `pollIntervalMs` and calls `tasks/get` with the `taskId`. Each answer reports where the batch is:
+
+```jsonc
+{
+  "taskId": "a1288bf1-305f-46ac-a49c-5c02a2828bc7",
+  "status": "working",
+  "statusMessage": "Created 6 of 18 thumbnails.",
+}
+```
+
+Over Streamable HTTP, the client also sets the `Mcp-Name` header to the `taskId` on every `tasks/*` request. If your server runs on several instances, a load balancer can use the header to route each check to the instance that holds the task.
+
+Every answer carries a `status`, and the client decides what to do next by reading it. A task really is a small state machine:
+
+![State diagram. A task starts in working after tools/call returns a task handle. It can move to input_required when it needs input and back to working after tasks/update. From working, a task ends in one of three terminal statuses that never change: completed when the result is ready, including when the tool result has isError true; failed for JSON-RPC errors only, not tool errors; and cancelled when tasks/cancel is honoured, although cancellation is cooperative and the task may still end as completed.](/images/blog/how-mcp-tasks-work/task-lifecycle.svg)
+
+| Status           | What the client does                                                   |
+| ---------------- | ---------------------------------------------------------------------- |
+| `working`        | Wait `pollIntervalMs`, then call `tasks/get` again.                    |
+| `input_required` | Show the requests in `inputRequests`, then reply with `tasks/update`.  |
+| `completed`      | Read `result`. Check its `isError` too, because tool errors land here. |
+| `failed`         | Read `error`, a JSON-RPC error that prevented a normal result.         |
+| `cancelled`      | Stop waiting. Thumbnails already written may still exist.              |
+
+## The client drops off and comes back
+
+Step 6 is the moment Tasks exists for. Say the client process exits at thumbnail twelve. Without Tasks, that was the lost-results problem introduced at the start. With Tasks, nothing on the server notices: the batch keeps running and the record keeps updating.
+
+When a client comes back, even over a brand-new connection, it calls `tasks/get` with the `taskId` it saved. **The task ID is how you resume.** Calling the tool again would start a second batch of eighteen thumbnails. Calling `tasks/get` follows the original one.
+
+## The result arrives
+
+When the last thumbnail is written, the next `tasks/get` returns `status: completed` (step 7). Its `result` field holds exactly what an ordinary `tools/call` would have returned, the same list of eighteen thumbnails. There is no separate "fetch result" request.
+
+<Callout type="warning" title="A tool error is not a failed task">
+  If one of the six images is unreadable, your tool still ran and reported a
+  problem. The task is `completed`, and its result has `isError: true`. Only a
+  protocol-level JSON-RPC error produces `failed`.
+</Callout>
+
+## When the batch doesn't finish on its own
+
+The diagram shows the happy path. Two more paths can end or pause the journey.
+
+**The client cancels.** If the user no longer wants the thumbnails, the client sends `tasks/cancel` and gets an empty acknowledgement. Cancellation is cooperative. Your server stops at the next point where it checks, for example between images, so the image in progress may still finish. The client then reads the real outcome with `tasks/get`: `cancelled`, or `completed` if the batch got there first. That is different from the client simply leaving, which never stops the work.
+
+![Two flows side by side. Detach: the MCP client saves the taskId and exits without sending a message; the server keeps working and finishes all 18 images; a later tasks/get from a new connection returns completed with the same batch and result. Cancel: the MCP client sends tasks/cancel and the server replies with an empty acknowledgement; the worker checks for cancellation between images, so the current image may finish; tasks/get then reads the actual outcome, cancelled, or completed if the batch had already finished.](/images/guides/mcp-tasks/detach-vs-cancel.svg)
+
+**The task needs input.** Suppose your tool found existing thumbnails and wanted permission to overwrite them. It would move the task to `input_required` and place standard requests, such as an elicitation, in the `tasks/get` response. The client shows them to the user, answers with `tasks/update`, and goes back to checking in. The batch in this article may never need an input, but approval steps are one of the main reasons Tasks exists.
+
+Across the whole journey, the client used four methods:
+
+| Method         | What the client used it for                                           |
+| -------------- | --------------------------------------------------------------------- |
+| `tools/call`   | Start the batch. The response is a task handle or an ordinary result. |
+| `tasks/get`    | Check progress and, once finished, read the result.                   |
+| `tasks/cancel` | Ask your server to stop. The reply is an empty acknowledgement.       |
+| `tasks/update` | Answer a request the task is waiting on, such as an approval.         |
 
 ## When to reach for Tasks
+
+The thumbnail batch is one shape of a common problem. Tasks fit work like this:
 
 | Good fit                                                   | Usually unnecessary                          |
 | ---------------------------------------------------------- | -------------------------------------------- |
@@ -137,11 +179,14 @@ The practical consequence for client authors is that a call may come back in eit
 
 The [official Tasks overview](https://modelcontextprotocol.io/extensions/tasks/overview) lists more use cases. The statuses, methods and rules in this article come from the [Tasks specification](https://tasks.extensions.modelcontextprotocol.io/specification/2026-07-28/tasks).
 
-## What to remember
+## Wrapping up
 
-- The MCP server returns a **task handle with a `taskId`** in place of the tool result.
-- An MCP client gets the result after reconnecting by calling **`tasks/get` with the saved ID**, never `tools/call` again.
-- A tool error produces a **`completed`** task with `isError: true`. Only a JSON-RPC error produces `failed`.
-- The server decides per request whether to create a task, so clients must handle both result shapes.
+This article started with one `tools/call` asking for eighteen thumbnails, and a client that would otherwise sit on an open request, hoping nothing drops. Tasks don't make the batch any faster. They change what the client is waiting on.
 
-To see these messages in running code, follow [Build Your First MCP Task](/guides/build-mcp-tasks-with-sharp). You will build the MCP server, the MCP client, and then reconnect to and cancel a live task.
+Instead of the result, your server hands back a **task handle**, and the `taskId` inside it becomes the client's claim ticket. The client checks in with `tasks/get` no more often than `pollIntervalMs` asks, watches the count climb, and can walk away at thumbnail twelve without losing anything. When it comes back, even over a new connection, **the same ID picks up the same batch**. Calling the tool again would only start another one.
+
+Two details are worth carrying into your own code. A problem inside the tool, like an unreadable image, still ends as a **`completed`** task with `isError: true`, because `failed` is reserved for JSON-RPC errors. And since **your server decides per request** whether to create a task at all, a client that declares support must still be ready for an ordinary result.
+
+That is the whole extension: a record on the server, a handful of methods, and a status that tells the client what to do next. The next time a tool you're building takes longer than a request should stay open, you'll know what to return instead.
+
+If you'd like to build the thumbnail server end to end, [Build Your First MCP Task](/guides/build-mcp-tasks-with-sharp) walks through the MCP server and MCP client step by step, including reconnecting to a running task and cancelling one.

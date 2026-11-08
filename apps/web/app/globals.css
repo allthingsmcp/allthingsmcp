@@ -3225,6 +3225,7 @@ a:is(:hover, :focus-visible) .tasks-scene__node--done {
   grid-template-areas: 'content toc';
 }
 .blog-article-layout .blog-article {
+  min-width: 0;
   grid-area: content;
 }
 .blog-article-layout .article-toc {
