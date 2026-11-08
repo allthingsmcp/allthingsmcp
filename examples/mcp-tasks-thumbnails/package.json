@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/client": "2.4.0",
-    "@modelcontextprotocol/ext-tasks": "0.2.2",
+    "@modelcontextprotocol/ext-tasks": "0.2.3",
     "@modelcontextprotocol/node": "2.1.2",
     "@modelcontextprotocol/server": "2.4.0",
     "sharp": "0.35.5",
