@@ -10,6 +10,36 @@ import {
 } from '@modelcontextprotocol/server';
 import type { McpWorkspace, McpProtocolEvent } from '@all-things-mcp/contracts';
 
+function hasAllowedHostInUrls(value: unknown, allowedHost: string): boolean {
+  const stack: unknown[] = [value];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (typeof current === 'string') {
+      try {
+        const hostname = new URL(current).hostname.toLowerCase();
+        const normalizedAllowedHost = allowedHost.toLowerCase();
+        if (
+          hostname === normalizedAllowedHost ||
+          hostname.endsWith(`.${normalizedAllowedHost}`)
+        ) {
+          return true;
+        }
+      } catch {
+        // Ignore non-URL strings.
+      }
+      continue;
+    }
+    if (Array.isArray(current)) {
+      stack.push(...current);
+      continue;
+    }
+    if (current && typeof current === 'object') {
+      stack.push(...Object.values(current as Record<string, unknown>));
+    }
+  }
+  return false;
+}
+
 // Run against local servers with the real configured database and Open-Meteo.
 // Credentials stay in memory; only the isolated workspace created here is removed.
 const runtime = process.env.GUIDE_RUNTIME_PUBLIC_URL ?? 'http://localhost:8787';
@@ -185,7 +215,7 @@ try {
     );
     if (command.type === 'call-tool')
       assert(
-        JSON.stringify(response.result).includes('open-meteo.com'),
+        hasAllowedHostInUrls(response.result, 'open-meteo.com'),
         'Provider attribution must be present.',
       );
     console.log(
