@@ -59,13 +59,25 @@ export function ContentMeta({
         </div>
       )}
       <div className="page-actions">
-        <AnalyticsLink href={editUrl} eventName="page_edit">
+        <AnalyticsLink
+          href={editUrl}
+          eventName="page_edit"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <PencilLine />
           Edit this page on GitHub
+          <span className="sr-only"> (opens in a new tab)</span>
         </AnalyticsLink>
-        <AnalyticsLink href={reportUrl.toString()} eventName="contribution_cta">
+        <AnalyticsLink
+          href={reportUrl.toString()}
+          eventName="contribution_cta"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <ExternalLink />
           Report outdated content
+          <span className="sr-only"> (opens in a new tab)</span>
         </AnalyticsLink>
         {share}
       </div>

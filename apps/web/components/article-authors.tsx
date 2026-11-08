@@ -98,7 +98,9 @@ export function ArticleAuthors({
                       <a
                         href={href}
                         key={label}
-                        aria-label={`${label} — ${author.name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${label} — ${author.name} (opens in a new tab)`}
                         title={label}
                         data-platform={label.toLowerCase()}
                       >
