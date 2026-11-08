@@ -145,13 +145,14 @@ test('new logo stays clear of navigation from 320px through desktop', async ({
   }
 });
 
-test('editorial author avatar uses the new mark', async ({ page }) => {
+test('blog author avatar loads from the author profile', async ({ page }) => {
   await page.goto('/blog/what-is-mcp');
-  const avatar = page.locator('.article-authors img');
+  // The author's photo is the direct child image; social icons sit deeper.
+  const avatar = page.locator('.article-author > img').first();
   await expect(avatar).toBeVisible();
   expect(
     decodeURIComponent((await avatar.getAttribute('src')) ?? ''),
-  ).toContain(`${brandRoot}/icons/avatar-512.png`);
+  ).toContain('/authors/gbadebo-bello.png');
   await expect
     .poll(() =>
       avatar.evaluate(

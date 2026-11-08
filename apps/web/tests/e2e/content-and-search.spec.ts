@@ -98,20 +98,24 @@ test('blog posts show authors and track the active section', async ({
   await page.goto('/blog/what-is-mcp');
 
   const authors = page.locator('.article-authors');
-  await expect(authors).toContainText('All Things MCP Editors');
-  await expect(authors.locator('img')).toBeVisible();
+  await expect(authors).toContainText('Gbadebo Bello');
+  await expect(authors.locator('.article-author > img').first()).toBeVisible();
 
   const toc = page.locator('.article-toc');
   if (isMobile) {
     await toc.getByRole('button', { name: 'Toggle article sections' }).click();
   }
 
-  const finalSection = page.getByRole('heading', { name: 'Where to go next' });
+  // Use the article's last section, whatever it is called, so content edits
+  // don't break this test.
+  const finalSection = page.locator('.prose h2').last();
+  const finalTitle = ((await finalSection.textContent()) ?? '').trim();
+  expect(finalTitle).not.toBe('');
   await finalSection.evaluate((element) =>
     element.scrollIntoView({ block: 'start' }),
   );
   await expect(
-    toc.getByRole('link', { name: 'Where to go next' }),
+    toc.getByRole('link', { name: finalTitle, exact: true }),
   ).toHaveAttribute('aria-current', 'location');
   await expect
     .poll(async () => toc.locator('small').textContent())
