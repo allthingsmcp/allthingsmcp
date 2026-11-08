@@ -1,7 +1,7 @@
 # Build from the repository root:
 #   docker build -f apps/guide-runtime/Dockerfile -t guide-runtime .
 # Keep the Node major in sync with .nvmrc and package.json "engines".
-FROM node:24-alpine AS base
+FROM node:25-alpine AS base
 WORKDIR /app
 RUN corepack enable
 
