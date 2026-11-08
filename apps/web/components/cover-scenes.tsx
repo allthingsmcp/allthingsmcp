@@ -54,6 +54,42 @@ function TasksScene() {
   );
 }
 
+/**
+ * One MCP tool call: an AI app asks a server's tool a question and the
+ * result comes back. The request and result read at rest; hover lands it.
+ */
+function ToolCallScene() {
+  return (
+    <figure className="call-scene">
+      <span className="call-scene__rail" />
+      <span className="call-scene__node call-scene__node--app">AI app</span>
+      <span className="call-scene__edge" />
+      <div className="call-scene__card">
+        <span className="call-scene__row call-scene__row--request">
+          <b>→ tools/call</b> get_forecast
+        </span>
+        <span className="call-scene__args">
+          city: &quot;Lagos&quot; · day: &quot;tomorrow&quot;
+        </span>
+        <span className="call-scene__row call-scene__row--result">
+          <b>
+            ← <span className="call-scene__method">result</span>
+          </b>{' '}
+          &quot;80% chance of rain&quot;
+        </span>
+      </div>
+      <span className="call-scene__edge" />
+      <span className="call-scene__node call-scene__node--server">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 1.5l5.6 3.25v6.5L8 14.5l-5.6-3.25v-6.5z" />
+        </svg>
+        MCP server
+      </span>
+    </figure>
+  );
+}
+
 export const coverScenes: Record<CoverSceneId, () => React.JSX.Element> = {
   tasks: TasksScene,
+  'tool-call': ToolCallScene,
 };

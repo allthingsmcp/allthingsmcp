@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="690" viewBox="0 0 560 690" role="img" aria-labelledby="t d">
+<title id="t">Without MCP every app needs a custom integration for every service; with MCP each side is built once</title>
+<desc id="d">Top: without MCP, three AI apps (chat app, code editor, agent) and three services (weather API, GitHub, your files) need nine custom integrations, one for every pair. Bottom: with MCP, each app contains an MCP client and each service is wrapped by one MCP server. All of them speak the same protocol, so three clients and three servers are enough and any app can use any server.</desc>
+<rect width="560" height="690" fill="#FFFFFF"/>
+<text x="20" y="34" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#0F172A" text-anchor="start">Without MCP</text>
+<text x="20" y="56" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#3E4C66" text-anchor="start">Every app builds its own integration for every service.</text>
+<rect x="170" y="76" width="104" height="34" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5"/>
+<text x="222" y="98" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#3E4C66" text-anchor="middle">Weather API</text>
+<rect x="284" y="76" width="104" height="34" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5"/>
+<text x="336" y="98" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#3E4C66" text-anchor="middle">GitHub</text>
+<rect x="398" y="76" width="104" height="34" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5"/>
+<text x="450" y="98" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#3E4C66" text-anchor="middle">Your files</text>
+<rect x="20" y="122" width="140" height="36" rx="8" fill="#F1F5F9" stroke="#53657B" stroke-width="1.5"/>
+<g fill="none" stroke="#53657B" stroke-width="1.8" stroke-linejoin="round"><rect x="30" y="132" width="20" height="16" rx="2.5"/><path d="M30 137 h20"/></g>
+<text x="58" y="145" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#3E4C66" text-anchor="start">Chat app</text>
+<rect x="174" y="126" width="96" height="28" rx="6" fill="#FFFFFF" stroke="#C9D2E1" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="222" y="144.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#53657B" text-anchor="middle">custom code</text>
+<rect x="288" y="126" width="96" height="28" rx="6" fill="#FFFFFF" stroke="#C9D2E1" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="336" y="144.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#53657B" text-anchor="middle">custom code</text>
+<rect x="402" y="126" width="96" height="28" rx="6" fill="#FFFFFF" stroke="#C9D2E1" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="450" y="144.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#53657B" text-anchor="middle">custom code</text>
+<rect x="20" y="172" width="140" height="36" rx="8" fill="#F1F5F9" stroke="#53657B" stroke-width="1.5"/>
+<g fill="none" stroke="#53657B" stroke-width="1.8" stroke-linejoin="round"><rect x="30" y="182" width="20" height="16" rx="2.5"/><path d="M30 187 h20"/></g>
+<text x="58" y="195" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#3E4C66" text-anchor="start">Code editor</text>
+<rect x="174" y="176" width="96" height="28" rx="6" fill="#FFFFFF" stroke="#C9D2E1" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="222" y="194.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#53657B" text-anchor="middle">custom code</text>
+<rect x="288" y="176" width="96" height="28" rx="6" fill="#FFFFFF" stroke="#C9D2E1" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="336" y="194.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#53657B" text-anchor="middle">custom code</text>
+<rect x="402" y="176" width="96" height="28" rx="6" fill="#FFFFFF" stroke="#C9D2E1" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="450" y="194.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#53657B" text-anchor="middle">custom code</text>
+<rect x="20" y="222" width="140" height="36" rx="8" fill="#F1F5F9" stroke="#53657B" stroke-width="1.5"/>
+<g fill="none" stroke="#53657B" stroke-width="1.8" stroke-linejoin="round"><rect x="30" y="232" width="20" height="16" rx="2.5"/><path d="M30 237 h20"/></g>
+<text x="58" y="245" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#3E4C66" text-anchor="start">Agent</text>
+<rect x="174" y="226" width="96" height="28" rx="6" fill="#FFFFFF" stroke="#C9D2E1" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="222" y="244.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#53657B" text-anchor="middle">custom code</text>
+<rect x="288" y="226" width="96" height="28" rx="6" fill="#FFFFFF" stroke="#C9D2E1" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="336" y="244.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#53657B" text-anchor="middle">custom code</text>
+<rect x="402" y="226" width="96" height="28" rx="6" fill="#FFFFFF" stroke="#C9D2E1" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="450" y="244.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#53657B" text-anchor="middle">custom code</text>
+<text x="20" y="296" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#3E4C66" text-anchor="start">3 apps × 3 services = 9 integrations to build and maintain</text>
+<line x1="20" y1="324" x2="540" y2="324" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="20" y="360" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#0F172A" text-anchor="start">With MCP</text>
+<text x="20" y="382" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#3E4C66" text-anchor="start">Each app speaks MCP once. Each service gets one MCP server.</text>
+<rect x="20" y="404" width="160" height="58" rx="9" fill="#F1F5F9" stroke="#53657B" stroke-width="1.5"/>
+<g fill="none" stroke="#53657B" stroke-width="1.8" stroke-linejoin="round"><rect x="32" y="414" width="20" height="16" rx="2.5"/><path d="M32 419 h20"/></g>
+<text x="60" y="427" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#3E4C66" text-anchor="start">Chat app</text>
+<rect x="32" y="436" width="136" height="20" rx="5" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.2"/>
+<text x="100" y="450" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1D4ED8" text-anchor="middle">MCP client</text>
+<rect x="200" y="404" width="160" height="58" rx="9" fill="#F1F5F9" stroke="#53657B" stroke-width="1.5"/>
+<g fill="none" stroke="#53657B" stroke-width="1.8" stroke-linejoin="round"><rect x="212" y="414" width="20" height="16" rx="2.5"/><path d="M212 419 h20"/></g>
+<text x="240" y="427" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#3E4C66" text-anchor="start">Code editor</text>
+<rect x="212" y="436" width="136" height="20" rx="5" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.2"/>
+<text x="280" y="450" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1D4ED8" text-anchor="middle">MCP client</text>
+<rect x="380" y="404" width="160" height="58" rx="9" fill="#F1F5F9" stroke="#53657B" stroke-width="1.5"/>
+<g fill="none" stroke="#53657B" stroke-width="1.8" stroke-linejoin="round"><rect x="392" y="414" width="20" height="16" rx="2.5"/><path d="M392 419 h20"/></g>
+<text x="420" y="427" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#3E4C66" text-anchor="start">Agent</text>
+<rect x="392" y="436" width="136" height="20" rx="5" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.2"/>
+<text x="460" y="450" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1D4ED8" text-anchor="middle">MCP client</text>
+<rect x="20" y="500" width="520" height="34" rx="8" fill="#0F172A"/>
+<text x="280" y="522" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF" text-anchor="middle">Model Context Protocol</text>
+<line x1="100" y1="462" x2="100" y2="500" stroke="#0F172A" stroke-width="2"/>
+<line x1="280" y1="462" x2="280" y2="500" stroke="#0F172A" stroke-width="2"/>
+<line x1="460" y1="462" x2="460" y2="500" stroke="#0F172A" stroke-width="2"/>
+<line x1="100" y1="534" x2="100" y2="572" stroke="#0F172A" stroke-width="2"/>
+<rect x="20" y="572" width="160" height="48" rx="9" fill="#EAF7F0" stroke="#0B9F5A" stroke-width="1.5"/>
+<polygon points="42,587.0 49.83,591.5 49.83,600.5 42,605.0 34.17,600.5 34.17,591.5" fill="none" stroke="#0B9F5A" stroke-width="1.8" stroke-linejoin="round"/><circle cx="42" cy="596.0" r="2.2" fill="#0B9F5A"/>
+<text x="60" y="601.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#087A45" text-anchor="start">Weather server</text>
+<line x1="280" y1="534" x2="280" y2="572" stroke="#0F172A" stroke-width="2"/>
+<rect x="200" y="572" width="160" height="48" rx="9" fill="#EAF7F0" stroke="#0B9F5A" stroke-width="1.5"/>
+<polygon points="222,587.0 229.83,591.5 229.83,600.5 222,605.0 214.17,600.5 214.17,591.5" fill="none" stroke="#0B9F5A" stroke-width="1.8" stroke-linejoin="round"/><circle cx="222" cy="596.0" r="2.2" fill="#0B9F5A"/>
+<text x="240" y="601.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#087A45" text-anchor="start">GitHub server</text>
+<line x1="460" y1="534" x2="460" y2="572" stroke="#0F172A" stroke-width="2"/>
+<rect x="380" y="572" width="160" height="48" rx="9" fill="#EAF7F0" stroke="#0B9F5A" stroke-width="1.5"/>
+<polygon points="402,587.0 409.83,591.5 409.83,600.5 402,605.0 394.17,600.5 394.17,591.5" fill="none" stroke="#0B9F5A" stroke-width="1.8" stroke-linejoin="round"/><circle cx="402" cy="596.0" r="2.2" fill="#0B9F5A"/>
+<text x="420" y="601.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#087A45" text-anchor="start">Files server</text>
+<text x="20" y="656" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#3E4C66" text-anchor="start">3 clients + 3 servers, and any app can use any server</text>
+</svg>

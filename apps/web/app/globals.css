@@ -1885,9 +1885,212 @@ a:is(:hover, :focus-visible) .tasks-scene__node--done {
     border-radius: 2px;
   }
 }
+/* tool-call scene: the What Is MCP? cover */
+.call-scene {
+  position: relative;
+  display: flex;
+  width: 100%;
+  margin: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #cbd5e1;
+  font:
+    500 0.72rem var(--font-mono),
+    monospace;
+}
+.call-scene__rail {
+  position: absolute;
+  top: -16px;
+  bottom: -16px;
+  left: 50%;
+  border-left: 1px dashed rgba(135, 166, 221, 0.55);
+}
+.call-scene__node,
+.call-scene__edge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  white-space: nowrap;
+}
+.call-scene__node {
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 10px;
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.call-scene__node--app {
+  background: #334155;
+}
+.call-scene__node--server {
+  border-color: #475569;
+  background: #1e293b;
+  color: #94a3b8;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+.call-scene__node svg {
+  width: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.call-scene__edge {
+  padding: 0 6px;
+  background: var(--footer);
+  color: #87a6dd;
+  font-size: 0.8rem;
+}
+.call-scene__edge::after {
+  content: '\21C5';
+}
+.call-scene__card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 320px);
+  gap: 7px;
+  padding: 14px 18px;
+  border: 1px solid #475569;
+  border-radius: 10px;
+  background: #1e293b;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
+}
+.call-scene__row {
+  overflow: hidden;
+  color: white;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.call-scene__row b {
+  margin-right: 6px;
+  font-weight: 600;
+}
+.call-scene__row--request b {
+  color: var(--blue-on-dark);
+}
+.call-scene__args {
+  padding-left: 14px;
+  color: #94a3b8;
+}
+.call-scene__row--result {
+  margin-top: 4px;
+  padding-top: 9px;
+  border-top: 1px solid #334155;
+  color: #cbd5e1;
+  transition: color 160ms ease;
+}
+.call-scene__row--result b {
+  color: #94a3b8;
+  transition: color 160ms ease;
+}
+a:is(:hover, :focus-visible) .call-scene__row--result,
+a:is(:hover, :focus-visible) .call-scene__row--result b {
+  color: #6ee7b7;
+  transition-delay: 150ms;
+}
+a:is(:hover, :focus-visible) .call-scene__node--server {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: var(--green);
+  color: white;
+}
+@container (min-width: 640px) {
+  .call-scene {
+    flex-direction: row;
+    gap: 10px;
+  }
+  .call-scene__node {
+    padding: 9px 12px;
+  }
+  .call-scene__edge::after {
+    content: '\21C4';
+  }
+  .call-scene__rail {
+    top: 50%;
+    right: -16px;
+    bottom: auto;
+    left: -16px;
+    border-top: 1px dashed rgba(135, 166, 221, 0.55);
+    border-left: 0;
+  }
+}
+.blog-cover--compact .call-scene {
+  flex-direction: row;
+}
+.blog-cover--compact .call-scene__node,
+.blog-cover--compact .call-scene__edge,
+.blog-cover--compact .call-scene__args {
+  display: none;
+}
+.blog-cover--compact .call-scene__rail {
+  top: 50%;
+  right: -8px;
+  bottom: auto;
+  left: -8px;
+  border-top: 1px dashed rgba(135, 166, 221, 0.55);
+  border-left: 0;
+}
+.blog-cover--compact .call-scene__card {
+  width: min(100%, 280px);
+  gap: 4px;
+  padding: 7px 12px;
+  box-shadow: none;
+}
+.blog-cover--compact .call-scene__row {
+  font-size: 0.68rem;
+}
+.blog-cover--compact .call-scene__row--result {
+  margin-top: 0;
+  padding-top: 4px;
+}
+.blog-cover--compact .call-scene__method {
+  display: none;
+}
+@container (max-width: 160px) {
+  .call-scene__card {
+    gap: 5px;
+    padding: 9px;
+  }
+  .call-scene__row {
+    height: 7px;
+    border-radius: 3px;
+    color: transparent;
+  }
+  .call-scene__row b {
+    display: none;
+  }
+  .call-scene__row--request {
+    width: 80%;
+    background: var(--blue-on-dark);
+  }
+  .call-scene__row--result,
+  .blog-cover--compact .call-scene__row--result {
+    width: 60%;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    background: var(--green);
+  }
+  a:is(:hover, :focus-visible) .call-scene__row--result {
+    color: transparent;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .tasks-scene__cells i,
-  .tasks-scene__node--done {
+  .tasks-scene__node--done,
+  .call-scene__node--server,
+  .call-scene__row--result,
+  .call-scene__row--result b {
     transition: none;
   }
 }

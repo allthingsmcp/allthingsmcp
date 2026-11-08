@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="520" viewBox="0 0 560 520" role="img" aria-labelledby="t d">
+<title id="t">When a server needs more input, it returns input_required and the client retries with your answer</title>
+<desc id="d">1. The MCP client sends tools/call for get_forecast with city Lagos. 2. The weather server cannot tell which Lagos is meant, so instead of a forecast it returns resultType input_required with an elicitation asking which Lagos. 3. The host shows you the question: Lagos, Nigeria or Lagos, Portugal. 4. You choose Lagos, Nigeria. 5. The client sends tools/call again as a new request, adding your answer in inputResponses. 6. The server returns resultType complete with the forecast for Lagos, Nigeria.</desc>
+<rect width="560" height="520" fill="#FFFFFF"/>
+<rect x="18" y="16" width="160" height="48" rx="9" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5"/>
+<g fill="none" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round"><circle cx="40" cy="29.0" r="4"/><path d="M33 42.0 a7 6 0 0 1 14 0"/></g>
+<text x="58" y="38.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#0F172A" text-anchor="start">You</text>
+<text x="58" y="55.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#53657B" text-anchor="start">via the host</text>
+<rect x="216" y="16" width="148" height="48" rx="9" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.5"/>
+<g fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="229" y="33.0" width="18" height="12" rx="2"/><path d="M234 49.0 h8 M238 45.0 v4"/></g>
+<text x="256" y="45.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#1D4ED8" text-anchor="start">MCP client</text>
+<rect x="392" y="16" width="156" height="48" rx="9" fill="#EAF7F0" stroke="#0B9F5A" stroke-width="1.5"/>
+<polygon points="414,31.0 421.83,35.5 421.83,44.5 414,49.0 406.17,44.5 406.17,35.5" fill="none" stroke="#0B9F5A" stroke-width="1.8" stroke-linejoin="round"/><circle cx="414" cy="40.0" r="2.2" fill="#0B9F5A"/>
+<text x="432" y="45.0" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#087A45" text-anchor="start">Weather server</text>
+<line x1="92" y1="64" x2="92" y2="506" stroke="#DCE4EE" stroke-width="2" stroke-dasharray="4 5"/>
+<line x1="290" y1="64" x2="290" y2="506" stroke="#DCE4EE" stroke-width="2" stroke-dasharray="4 5"/>
+<line x1="470" y1="64" x2="470" y2="506" stroke="#DCE4EE" stroke-width="2" stroke-dasharray="4 5"/>
+<line x1="290" y1="108" x2="460" y2="108" stroke="#0F172A" stroke-width="2"/>
+<polygon points="470,108 460,103 460,113" fill="#0F172A"/>
+<text x="380.0" y="99" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">tools/call</text>
+<text x="380.0" y="127" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">get_forecast {city: “Lagos”}</text>
+<circle cx="268" cy="103" r="9.5" fill="#0F172A"/>
+<text x="268" y="107.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+<line x1="470" y1="172" x2="300" y2="172" stroke="#0F172A" stroke-width="2"/>
+<polygon points="290,172 300,167 300,177" fill="#0F172A"/>
+<text x="380.0" y="163" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">input_required</text>
+<text x="380.0" y="191" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">elicitation: “Which Lagos?”</text>
+<circle cx="492" cy="167" r="9.5" fill="#0F172A"/>
+<text x="492" y="171.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">2</text>
+<line x1="290" y1="236" x2="102" y2="236" stroke="#0F172A" stroke-width="2"/>
+<polygon points="92,236 102,231 102,241" fill="#0F172A"/>
+<text x="191.0" y="227" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">Which Lagos?</text>
+<text x="191.0" y="255" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">Nigeria or Portugal</text>
+<circle cx="312" cy="231" r="9.5" fill="#0F172A"/>
+<text x="312" y="235.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+<line x1="92" y1="300" x2="280" y2="300" stroke="#0F172A" stroke-width="2"/>
+<polygon points="290,300 280,295 280,305" fill="#0F172A"/>
+<text x="191.0" y="291" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">Lagos, Nigeria</text>
+<circle cx="70" cy="295" r="9.5" fill="#0F172A"/>
+<text x="70" y="299.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">4</text>
+<line x1="290" y1="364" x2="460" y2="364" stroke="#0F172A" stroke-width="2"/>
+<polygon points="470,364 460,359 460,369" fill="#0F172A"/>
+<text x="380.0" y="355" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">tools/call (retry)</text>
+<text x="380.0" y="383" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">same call + inputResponses</text>
+<circle cx="268" cy="359" r="9.5" fill="#0F172A"/>
+<text x="268" y="363.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">5</text>
+<line x1="470" y1="428" x2="300" y2="428" stroke="#0F172A" stroke-width="2"/>
+<polygon points="290,428 300,423 300,433" fill="#0F172A"/>
+<text x="380.0" y="419" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">complete</text>
+<text x="380.0" y="447" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">forecast for Lagos, Nigeria</text>
+<circle cx="492" cy="423" r="9.5" fill="#0F172A"/>
+<text x="492" y="427.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">6</text>
+<text x="280" y="496" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">The retry is a new request with a new id.</text>
+</svg>
