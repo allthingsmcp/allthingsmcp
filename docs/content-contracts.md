@@ -12,6 +12,8 @@ Supported `contentType` values:
 - `glossary`, `spec-release`, `spec-proposal`
 - `ecosystem`, `tool`
 
+An `article` may set `coverScene` to a registered id from `apps/web/lib/cover-scene-ids.ts` to replace its generated topic tile with a reviewed, responsive cover scene. Scenes are code in `apps/web/components/cover-scenes.tsx`, never MDX; see the cover-scenes skill.
+
 Use ISO `YYYY-MM-DD` dates. Use stable, lowercase, hyphenated slugs. Add `prerequisites` only when genuinely required. Tutorial fields may include language, SDK, SDK version, transport, authentication model, repository, and last-tested date.
 
 Contributed MDX may use: `Callout`, `Steps`, `Tabs`, `Checklist`, `CardGrid`, `MetadataPanel`, and `ProtocolDiagram`. Reviewed interactive Guide steps may also use `InteractiveGuideBlock` with a literal registered `scene` value. Scenario definitions and behavior live in the TypeScript registry, never in MDX. Do not import components or execute JavaScript inside content.

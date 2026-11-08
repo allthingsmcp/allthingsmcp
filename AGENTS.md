@@ -5,6 +5,7 @@ Before modifying this project, load the relevant local skill completely:
 - Visual identity, components, typography, spacing, or UI: `skills/all-things-mcp/brand-system/SKILL.md`
 - Website architecture, routes, content, metadata, validation, or community workflows: `skills/all-things-mcp/website/SKILL.md`
 - Protocol illustrations, system diagrams, or technical flows: `skills/all-things-mcp/diagrams/SKILL.md`
+- Blog card cover graphics (`coverScene`): `skills/all-things-mcp/cover-scenes/SKILL.md`
 
 The website skill owns content contracts and routes. Keep the Guide format; do not turn a walkthrough into a narrative blog post.
 
