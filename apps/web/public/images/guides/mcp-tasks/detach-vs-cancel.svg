@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="470" viewBox="0 0 560 470" role="img" aria-labelledby="t d">
+<title id="t">Closing the MCP client compared with sending tasks/cancel</title>
+<desc id="d">Left: detaching. The MCP client exits after saving the taskId. The server keeps processing and the task reaches completed; a later tasks/get with the saved ID returns the result. Right: cancelling. The client sends tasks/cancel and receives an empty acknowledgement. The worker checks for cancellation between images, so the current image may finish first. The client reads the real outcome with tasks/get: usually cancelled, or completed if the batch had already finished. Files created before cancellation remain.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F172A"/></marker>
+  <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#53657B"/></marker>
+  <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0B9F5A"/></marker>
+</defs>
+<rect width="560" height="470" fill="#FFFFFF"/>
+<rect x="16" y="14" width="256.0" height="442" rx="12" fill="#FFFFFF" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="32" y="40" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#2563EB" text-anchor="start">DETACH</text>
+<text x="32" y="64" font-family="Geist, Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#0F172A" text-anchor="start">Close the client</text>
+<rect x="32" y="96" width="224.0" height="62" rx="8" fill="#F8FAFC" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="44" y="122" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#0F172A" text-anchor="start">Save taskId, exit</text>
+<text x="44" y="142" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">No message sent to the server</text>
+<polygon points="144.0,178.0 139.0,168.0 149.0,168.0" fill="#0F172A"/>
+<line x1="144.0" y1="160" x2="144.0" y2="168.0" stroke="#0F172A" stroke-width="2"/>
+<rect x="32" y="182" width="224.0" height="62" rx="8" fill="#F8FAFC" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="44" y="208" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#0F172A" text-anchor="start">Server keeps working</text>
+<text x="44" y="228" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">Worker finishes all 18 images</text>
+<polygon points="144.0,264.0 139.0,254.0 149.0,254.0" fill="#0F172A"/>
+<line x1="144.0" y1="246" x2="144.0" y2="254.0" stroke="#0F172A" stroke-width="2"/>
+<rect x="32" y="268" width="224.0" height="62" rx="8" fill="#F8FAFC" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="44" y="294" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" fill="#0F172A" text-anchor="start">tasks/get {taskId}</text>
+<text x="44" y="314" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">From a new connection, later</text>
+<polygon points="144.0,350.0 139.0,340.0 149.0,340.0" fill="#0F172A"/>
+<line x1="144.0" y1="332" x2="144.0" y2="340.0" stroke="#0F172A" stroke-width="2"/>
+<rect x="32" y="354" width="224.0" height="70" rx="8" fill="#EAF7F0" stroke="#087A45" stroke-width="1.8"/>
+<text x="44" y="382" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" fill="#087A45" text-anchor="start">completed</text>
+<text x="44" y="403" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">Same batch, same result</text>
+<rect x="288.0" y="14" width="256.0" height="442" rx="12" fill="#FFFFFF" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="304.0" y="40" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#DC2626" text-anchor="start">CANCEL</text>
+<text x="304.0" y="64" font-family="Geist, Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#0F172A" text-anchor="start">Ask the server to stop</text>
+<rect x="304.0" y="96" width="224.0" height="62" rx="8" fill="#F8FAFC" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="316.0" y="122" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" fill="#0F172A" text-anchor="start">tasks/cancel</text>
+<text x="316.0" y="142" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">Server replies with an empty ack</text>
+<polygon points="416.0,178.0 411.0,168.0 421.0,168.0" fill="#0F172A"/>
+<line x1="416.0" y1="160" x2="416.0" y2="168.0" stroke="#0F172A" stroke-width="2"/>
+<rect x="304.0" y="182" width="224.0" height="62" rx="8" fill="#F8FAFC" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="316.0" y="208" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#0F172A" text-anchor="start">Checked between images</text>
+<text x="316.0" y="228" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">The current image may finish</text>
+<polygon points="416.0,264.0 411.0,254.0 421.0,254.0" fill="#0F172A"/>
+<line x1="416.0" y1="246" x2="416.0" y2="254.0" stroke="#0F172A" stroke-width="2"/>
+<rect x="304.0" y="268" width="224.0" height="62" rx="8" fill="#F8FAFC" stroke="#DCE4EE" stroke-width="1.5"/>
+<text x="316.0" y="294" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" fill="#0F172A" text-anchor="start">tasks/get {taskId}</text>
+<text x="316.0" y="314" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">Read the actual outcome</text>
+<polygon points="416.0,350.0 411.0,340.0 421.0,340.0" fill="#0F172A"/>
+<line x1="416.0" y1="332" x2="416.0" y2="340.0" stroke="#0F172A" stroke-width="2"/>
+<rect x="304.0" y="354" width="224.0" height="70" rx="8" fill="#F1F5F9" stroke="#3E4C66" stroke-width="1.8"/>
+<text x="316.0" y="382" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" fill="#3E4C66" text-anchor="start">cancelled</text>
+<text x="316.0" y="403" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#3E4C66" text-anchor="start">or completed, if it already finished</text>
+</svg>

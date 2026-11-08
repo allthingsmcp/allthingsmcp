@@ -9,7 +9,7 @@ guideStepOrder: 4
 authors: [Gbadebo Bello]
 status: draft
 tags: [guide-step, tasks, typescript, sharp]
-updatedAt: 2026-10-31
+updatedAt: 2026-11-04
 difficulty: intermediate
 estimatedMinutes: 12
 specVersion: 2026-07-28
@@ -19,6 +19,17 @@ lastVerified: 2026-10-31
 The MCP server can now return a task. Your MCP client must declare that it knows
 how to handle one, then distinguish a task handle from an ordinary result.
 Keep the MCP server running in terminal A.
+
+<ProtocolDiagram
+  label="The MCP client side of a task: declare Tasks support, call the tool, branch on resultType, poll tasks/get at the suggested interval, and read the final result when the status is completed."
+  nodes={[
+    'Declare support',
+    'tools/call',
+    'Branch on resultType',
+    'Poll tasks/get',
+    'Read result',
+  ]}
+/>
 
 ## 1. Write the tool caller
 
@@ -116,9 +127,16 @@ export async function watchTask(
 }
 ```
 
-Each loop calls `tasks/get` through `connection.getTask()`, using the same ID.
-`working` leads to another check after the suggested interval. `completed`
-returns `task.result`; `failed` throws its error; `cancelled` ends the wait.
+Each loop calls `tasks/get` through `connection.getTask()`, using the same ID,
+and handles the statuses from the step 1 table:
+
+| Status           | What `watchTask()` does                                                         |
+| ---------------- | ------------------------------------------------------------------------------- |
+| `working`        | Logs a changed message, waits `pollIntervalMs` (at least 100 ms), checks again. |
+| `completed`      | Returns `task.result`, validated as a tool result.                              |
+| `failed`         | Throws the JSON-RPC error message.                                              |
+| `cancelled`      | Returns `undefined`, so the caller prints nothing.                              |
+| `input_required` | Throws, because this image tool never asks for input.                           |
 
 The two-minute deadline stops this MCP client from waiting forever. It does not
 cancel image processing. This image tool never asks for input, so the example

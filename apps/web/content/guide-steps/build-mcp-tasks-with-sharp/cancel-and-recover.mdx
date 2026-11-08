@@ -9,7 +9,7 @@ guideStepOrder: 6
 authors: [Gbadebo Bello]
 status: draft
 tags: [guide-step, tasks, typescript, sharp]
-updatedAt: 2026-10-31
+updatedAt: 2026-11-04
 difficulty: intermediate
 estimatedMinutes: 5
 specVersion: 2026-07-28
@@ -35,7 +35,9 @@ Cannot process broken.png: Input buffer contains unsupported image format
 ```
 
 The command exits with a nonzero status. The task says `completed` because the
-tool returned a result describing its failure, with `isError: true`. That is
+tool returned a result describing its failure, with `isError: true`. This is the
+"also when the tool result has `isError: true`" path in the step 1 lifecycle
+diagram. That is
 different from the `failed` state used for a JSON-RPC execution error. Your MCP
 client must inspect the tool result as well as the task status.
 

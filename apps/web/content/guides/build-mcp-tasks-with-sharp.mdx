@@ -6,9 +6,9 @@ section: build
 authors: [Gbadebo Bello]
 status: draft
 tags: [guide, tasks, typescript, sharp, client, server]
-updatedAt: 2026-10-31
+updatedAt: 2026-11-04
 difficulty: intermediate
-estimatedMinutes: 50
+estimatedMinutes: 53
 specVersion: 2026-07-28
 lastVerified: 2026-10-31
 outcome: Implement the Tasks extension on an MCP server and MCP client, retrieve a task after reconnecting, and handle cancellation and errors.
@@ -21,9 +21,9 @@ guideResources:
     url: https://tasks.extensions.modelcontextprotocol.io/typescript/
 guideSteps:
   - id: understand-mcp-tasks
-    title: Understand when Tasks help
-    description: See when a tool call needs a task and how a client follows it to the result.
-    estimatedMinutes: 5
+    title: Understand how MCP Tasks work
+    description: See why a long tool call needs a task, what a task is, and how an MCP client follows one to its result.
+    estimatedMinutes: 8
   - id: prepare-your-project
     title: Check prerequisites and get the project
     description: Set up your tools, download the starter and inspect the sample images.
@@ -46,25 +46,25 @@ guideSteps:
     estimatedMinutes: 5
 ---
 
-Some `tools/call` requests take time to finish. A large batch may keep running,
-or a workflow may pause for approval. **Tasks lets an MCP server return a task ID
-so the MCP client can follow the work and retrieve its result later.**
+Some `tools/call` requests take longer than a request should stay open. A large
+image batch, a deployment, a step that waits for approval. **Tasks is the MCP
+extension that lets an MCP server answer such a call immediately with a task
+handle, then report progress and the final result through short follow-up
+requests.** The MCP client can disconnect, come back with the task ID and pick
+up the same work.
 
-This guide assumes you have built an MCP server and are new to Tasks. You will
-implement the extension on both an MCP server and an MCP client, using an image
-batch to exercise the lifecycle.
+This guide is for developers who have built an MCP server and are new to Tasks.
+The first step explains how Tasks work with diagrams of the full exchange. The remaining
+steps guides you through an implementation of the extension on both an MCP server and an MCP 
+client using a simple bacth image optomization example. 
 
 ## What you will build
 
 Your MCP server will use Sharp to turn six images into **eighteen thumbnails**:
-three widths per image. Your MCP client will start the batch, report its status
-and retrieve the output location. Then you will reconnect using a saved task ID
-and try cancellation.
+three widths per image. Your MCP client will start the batch as a task, report
+its progress and retrieve the result. Then you will reconnect to a running task
+using its saved ID, cancel one, and handle a tool error.
 
 ![Three generated sample images resized to 320 pixels wide: landscape, portrait and square.](/images/guides/mcp-tasks-thumbnails.png)
 
-We will use polling and a local task store. Approval prompts and pushed status
-notifications are outside this first walkthrough. Small images finish quickly,
-so a labelled demo delay will make the running state easier to observe.
-
-Start with **Understand when Tasks help** below.
+Get started with **Understand how MCP Tasks work** and building your first task workflow below.

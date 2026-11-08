@@ -9,7 +9,7 @@ guideStepOrder: 5
 authors: [Gbadebo Bello]
 status: draft
 tags: [guide-step, tasks, typescript, sharp]
-updatedAt: 2026-10-31
+updatedAt: 2026-11-04
 difficulty: intermediate
 estimatedMinutes: 8
 specVersion: 2026-07-28
@@ -17,7 +17,10 @@ lastVerified: 2026-10-31
 ---
 
 Verify that a task outlives the initiating MCP client, then test cooperative
-cancellation while the batch is running.
+cancellation while the batch is running. These are two different actions, and
+they end differently:
+
+![Two flows side by side. Detach: the MCP client saves the taskId and exits without sending a message; the server keeps working and finishes all 18 images; a later tasks/get from a new connection returns completed with the same batch and result. Cancel: the MCP client sends tasks/cancel and the server replies with an empty acknowledgement; the worker checks for cancellation between images, so the current image may finish; tasks/get then reads the actual outcome, cancelled, or completed if the batch had already finished.](/images/guides/mcp-tasks/detach-vs-cancel.svg)
 
 The starter includes a command-line wrapper, `src/client.ts`, with `run`, `watch`
 and `cancel` commands. It uses the same connection helper and the polling loop
