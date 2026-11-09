@@ -1,6 +1,6 @@
 ---
 title: Add Resources
-description: Expose read-only weather data through a stable resource URI, metadata, and a declared MIME type.
+description: Expose read-only weather data at a stable URI, and see what a client gets when it lists and reads a resource.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,21 +10,54 @@ authors: [Gbadebo Bello]
 status: published
 tags: [guide-step, interactive, resources, uri]
 publishedAt: 2026-08-31
-updatedAt: 2026-09-21
+updatedAt: 2026-11-09
 difficulty: beginner
 estimatedMinutes: 10
 specVersion: 2026-07-28
-lastVerified: 2026-09-21
+lastVerified: 2026-11-09
 ---
 
-Resources expose read-only data that the host application can retrieve and attach as context. A resource needs a stable URI, useful metadata, and a content type the client can interpret.
+A **resource** is data your server makes available at an address, called a URI. Where the model decides when to use a tool, the app decides when to read a resource: it might show the data to the user, or attach it to the conversation as context. Reading a resource never runs an action. It only returns data.
 
-Select **Supported cities** and inspect its `weather://cities` URI and response shape before adding it. You can compare it with the other curated resources first.
+## 1. Add Supported cities
+
+Select **Supported cities**. Note its URI, `weather://cities`, and its content type, `application/json`, then add it. You can compare it with **Weather API usage guide**, which lives at `weather://docs/usage` and returns Markdown.
 
 <InteractiveGuideBlock scene="add-resources" />
 
-<Callout title="Resources are not tools">
-  Use a resource for data a client reads. Use a tool for an operation that the
-  model may choose to invoke. The distinction helps hosts apply appropriate
-  presentation and approval policies.
+## What a client sees
+
+When a client lists your server's resources, Supported cities appears with its URI, its names and its content type:
+
+```jsonc
+{
+  "uri": "weather://cities",
+  "name": "supported_cities",
+  "title": "Supported cities",
+  "description": "A curated set of example cities.",
+  "mimeType": "application/json",
+}
+```
+
+To get the data, the client asks for that URI with `resources/read`. Your server answers with the contents:
+
+```jsonc
+"contents": [
+  {
+    "uri": "weather://cities",
+    "mimeType": "application/json",
+    "text": "{\"cities\":[\"Lagos\",\"London\",\"San Francisco\"], ...}",
+  },
+],
+```
+
+The URI is what makes a resource useful. It stays the same between requests, so an app can read it again later or link to it from elsewhere, without knowing anything about how your server produces the data.
+
+<Callout title="Resource or tool?">
+  Use a resource for data someone reads. Use a tool for an operation that takes
+  arguments or does something. Keeping them apart helps a host decide what to
+  show and what needs approval: reading a list of cities is harmless, while a
+  tool might send a message or change data.
 </Callout>
+
+**Checkpoint:** your server offers `weather://cities`, and the **Code** tab shows a `server.registerResource` call with that URI.

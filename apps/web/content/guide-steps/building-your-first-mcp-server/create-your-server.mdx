@@ -1,6 +1,6 @@
 ---
 title: Create Your Server
-description: Start a temporary Guide Runtime workspace and establish the named MCP server boundary you will configure.
+description: Name your server, start a Guide Runtime workspace that runs real MCP, and read the server code that the guide generates.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,22 +10,56 @@ authors: [Gbadebo Bello]
 status: published
 tags: [guide-step, interactive, server, typescript]
 publishedAt: 2026-08-31
-updatedAt: 2026-09-21
+updatedAt: 2026-11-09
 difficulty: beginner
 estimatedMinutes: 10
 specVersion: 2026-07-28
-lastVerified: 2026-09-21
+lastVerified: 2026-11-09
 ---
 
-Begin with a named server boundary. The name becomes part of the server identity shown to clients and the downloaded project package.
+Your server starts with a name and nothing else. Over the next three steps you'll add what it offers. Creating it also starts a **workspace**: a hosted copy of your server that answers real MCP requests, so you can test it before you download anything.
 
-Use a lowercase, hyphenated name. The default `weather-server` is deliberately descriptive and portable.
+## 1. Name your server
+
+Use a short, lowercase, hyphenated name. The default, `weather-server`, says what the server does and works as a package name when you export the project.
 
 <InteractiveGuideBlock scene="create-server" />
 
+The name isn't just a label for this guide. Every response your server sends identifies it in `_meta`, so any client that connects can show you which server it's talking to:
+
+```jsonc
+"_meta": {
+  "io.modelcontextprotocol/serverInfo": {
+    "name": "weather-server", // the name you chose
+    "version": "0.1.0",
+  },
+},
+```
+
+You'll see this block in step 6, at the end of every response in the **Protocol** tab.
+
 <Callout title="A temporary real workspace">
-  Creating the server provisions a seven-day workspace that executes real MCP
+  Creating the server starts a seven-day workspace that executes real MCP
   requests. Sign in to claim it and issue credentials for its external endpoint.
 </Callout>
 
-Switch to **Code** after creating the server. The generated source should already contain a current SDK v2 server factory even though it exposes no capabilities yet.
+## 2. Read the generated code
+
+Switch to the **Code** tab. The guide writes a complete TypeScript server as you work, using the official MCP TypeScript SDK. Right now its core looks like this:
+
+```typescript title="src/server.ts"
+function buildServer() {
+  const server = new McpServer({
+    name: 'weather-server',
+    version: '0.1.0',
+  });
+
+  // Add tools, resources, and prompts here.
+
+  return server;
+}
+```
+
+`McpServer` holds your server's identity and everything it offers. Further down, the file wraps `buildServer` in an HTTP handler, so the server answers MCP requests at a single `/mcp` URL. You'll run that file yourself in step 8.
+
+**Checkpoint:** the **Code** tab shows `new McpServer` with your server's name and the comment `// Add tools, resources, and prompts here.` The server exists but offers nothing yet.

@@ -1,6 +1,6 @@
 ---
 title: Review and Export
-description: Review the complete MCP server, download its runnable TypeScript project, and finish the Guide.
+description: Review the finished server, download and run it as a TypeScript project, connect a real MCP host, and see what to learn next.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,33 +10,61 @@ authors: [Gbadebo Bello]
 status: published
 tags: [guide-step, interactive, export, typescript]
 publishedAt: 2026-08-31
-updatedAt: 2026-09-21
+updatedAt: 2026-11-09
 difficulty: beginner
 estimatedMinutes: 10
 specVersion: 2026-07-28
-lastVerified: 2026-09-21
+lastVerified: 2026-11-09
 ---
 
-Your visual configuration, generated source, protocol history, and test result should now describe the same server. Review that consistency before exporting the project.
+Your configuration, the generated code, the protocol history and your test results should now all describe the same server. Check that they agree before you export it.
+
+## 1. Review the server
 
 <InteractiveGuideBlock scene="completion" />
 
-## Run the exported project
+## 2. Run the exported project
 
-Extract the ZIP, then run:
+Download the project, extract the ZIP and run it. You need Node.js 20 or newer.
 
 ```bash title="Terminal"
 npm install
 npm start
 ```
 
-The local project exposes a Streamable HTTP MCP endpoint at `http://127.0.0.1:3001/mcp` with loopback host and origin validation. Set the `PORT` environment variable to use another port.
+The terminal prints the address your server is listening on:
 
-<Callout title="Connect an external client">
-  Sign in to claim and keep your workspace, then create an access token above.
-  Configure your MCP client with the displayed endpoint and bearer token. Save
-  the token when it is shown; rotating or revoking it disables the old token.
-  Pausing the endpoint immediately prevents new MCP requests.
+```text title="Output"
+MCP server available at http://127.0.0.1:3001/mcp
+```
+
+This is the same server you tested, now running on your own machine. It speaks Streamable HTTP at a single `/mcp` URL, like the workspace did. It only accepts requests addressed to your own computer, which stops web pages you visit from reaching it. Set the `PORT` environment variable to use a different port.
+
+The exported project calls Open-Meteo directly, so it needs an internet connection.
+
+## 3. Connect a real host
+
+To use the server from an AI app, add it to that app's MCP settings. Hosts connect to servers in one of two ways:
+
+- **By URL, over Streamable HTTP.** Give the host `http://127.0.0.1:3001/mcp`. This is the transport your exported project uses.
+- **By launching a program, over stdio.** Many desktop apps start local servers themselves and talk to them through standard input and output. Your exported project doesn't use stdio, so for these apps you'd need to add a stdio entry point first.
+
+Once connected, ask the host's model something like "Do I need an umbrella in Lagos tomorrow?" and watch it choose `get_forecast` on its own. That's the part you played by hand in step 7.
+
+<Callout title="Connect an external client to your workspace">
+  You can also connect an external client to the hosted workspace instead of
+  your local copy. Sign in to claim and keep your workspace, then create an
+  access token above. Configure your MCP client with the displayed endpoint and
+  bearer token. Save the token when it is shown, because rotating or revoking it
+  disables the old token. Pausing the endpoint immediately stops new MCP
+  requests.
 </Callout>
 
-Weather results use live Open-Meteo data and include attribution. The exported project also calls Open-Meteo and requires an internet connection.
+## What to learn next
+
+Your server covers the core of MCP. Two parts of the protocol go further than this guide:
+
+- **Servers that ask questions.** A server can answer a call with `input_required` and ask the user for more information, such as which Lagos they meant. [What Is MCP? A Practical Introduction](/blog/what-is-mcp) shows how that exchange works.
+- **Calls that take minutes.** When a tool runs too long for one request, a server can return a task and report progress until the work is done. [Build Your First MCP Task](/guides/build-mcp-tasks-with-sharp) builds one step by step.
+
+Weather results use live Open-Meteo data and include attribution.
