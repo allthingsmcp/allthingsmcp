@@ -29,7 +29,7 @@
     "format:rest": "prettier --check ."
   },
   "devDependencies": {
-    "prettier": "^3.6.2",
+    "prettier": "^3.9.10",
     "supabase": "^2.116.0"
   }
 }
