@@ -1,6 +1,6 @@
 ---
 title: Connect the ATM Client
-description: Connect the ATM learning client to your real MCP workspace, discover the server, and inspect the protocol exchange.
+description: Connect the ATM learning client, discover your server with server/discover and the list requests, and read every field of the real messages.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,20 +10,98 @@ authors: [Gbadebo Bello]
 status: published
 tags: [guide-step, interactive, client, discovery, protocol]
 publishedAt: 2026-08-31
-updatedAt: 2026-09-21
+updatedAt: 2026-11-09
 difficulty: beginner
 estimatedMinutes: 10
 specVersion: 2026-07-28
-lastVerified: 2026-09-21
+lastVerified: 2026-11-09
 ---
 
-The ATM learning client uses the same Streamable HTTP MCP handler as external clients. Connecting it performs `server/discover`, followed by tools, resources, and prompts discovery against your workspace.
+Your server is ready. Now a client needs to find out what it offers. The ATM learning client plays the host and its MCP client. It uses the same **Streamable HTTP** handler as any remote MCP client: each message is a separate HTTP POST to your server's `/mcp` URL.
+
+In the journey of a single request, this step covers messages 1 and 2. You'll play messages 3 to 5 yourself in step 7, where you stand in for the model and the person approving the call.
+
+![1. The MCP client sends server/discover and the weather server replies with its supported versions and capabilities, including tools. 2. The client sends tools/list and the server replies with get_forecast and its input schema, which takes a location. 3. The host gives the model your question and the tool list. 4. The model asks to call get_forecast with the location Lagos. 5. You approve the call. 6. The host hands the approved call to the MCP client, which sends tools/call for get_forecast with the location. 7. The server fetches a seven-day forecast from a weather API and returns it, including an 80% chance of rain tomorrow, and the client passes it back to the host. 8. The host gives the result to the model, which reads tomorrow from the seven days and answers: yes, take an umbrella.](/images/blog/what-is-mcp/one-question.svg)
+
+## 1. Connect the client
+
+Open the **Client** tab and select **Connect ATM client**. The client sends `server/discover`, then one list request for each kind of capability your server says it has.
 
 <InteractiveGuideBlock scene="connect-client" />
 
-After connecting, open **Protocol** and inspect `server/discover`. The request carries the current protocol metadata, while the response advertises the server identity and capability families.
+## 2. Read the discovery request
 
-<Callout title="This is the modern protocol flow">
-  This Guide targets MCP `2026-07-28`. Each request includes the protocol
-  version, client identity, and client capabilities in its metadata.
+Open the **Protocol** tab and select `server/discover`. The request is short:
+
+```jsonc
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "server/discover",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientInfo": {
+        "name": "atm-learning-client",
+        "version": "0.1.0",
+      },
+      "io.modelcontextprotocol/clientCapabilities": {},
+    },
+  },
+}
+```
+
+Everything that matters is in `_meta`, and the client sends the same three entries on **every** request, not just this one:
+
+- `protocolVersion` says which version of MCP the client is speaking.
+- `clientInfo` identifies the client, the same way `serverInfo` identifies your server.
+- `clientCapabilities` lists what the client can do for the server. It's empty here because the learning client doesn't support extras such as asking you questions on the server's behalf.
+
+Because each request carries this information, there's no handshake to open a connection and no session to keep alive. Your server can answer any request on its own. That's also why `server/discover` is optional for clients in general: a client that already knows your server could skip straight to calling a tool.
+
+## 3. Read the discovery response
+
+Your server answers with what it supports:
+
+```jsonc
+"result": {
+  "supportedVersions": ["2026-07-28"],
+  "capabilities": {
+    "tools": { "listChanged": true },
+    "resources": { "listChanged": true },
+    "prompts": { "listChanged": true },
+  },
+  "resultType": "complete",
+  "ttlMs": 0,
+  "cacheScope": "private",
+  "_meta": {
+    "io.modelcontextprotocol/serverInfo": {
+      "name": "weather-server",
+      "version": "0.1.0",
+    },
+  },
+},
+```
+
+| Field               | What it tells the client                                                                            |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| `supportedVersions` | Which MCP versions your server understands. The client uses one of these on later requests.         |
+| `capabilities`      | Which kinds of capability your server offers. `listChanged` means the list can change over time.    |
+| `resultType`        | `complete` means this is the final answer. Every result carries this field.                         |
+| `ttlMs`             | How long, in milliseconds, the client may reuse this answer. `0` means ask again next time.         |
+| `cacheScope`        | `private` means only this client may cache the answer, not shared caches between it and the server. |
+| `serverInfo`        | The name you chose in step 2.                                                                       |
+
+## 4. Follow the list requests
+
+Your server advertised tools, resources and prompts, so the client follows up with `tools/list`, `resources/list` and `prompts/list`, in that order. Select each one in the **Protocol** tab. Their responses contain the definitions you added in steps 3 to 5, with the same `resultType`, `ttlMs` and `cacheScope` fields at the end.
+
+If you'd skipped a kind of capability, its list request wouldn't appear. The client only asks for what `capabilities` says exists.
+
+<Callout title="The same request, twice">
+  The body of each request is the source of truth. Streamable HTTP also copies
+  key values into HTTP headers, such as `Mcp-Method: tools/list`, so that load
+  balancers and proxies can route a request without reading its body.
 </Callout>
+
+**Checkpoint:** the **Client** tab says **Discovery complete** with the number of tools, resources and prompts you added, and the **Protocol** tab lists `server/discover`, `tools/list`, `resources/list` and `prompts/list`. You haven't called anything yet.

@@ -4,14 +4,15 @@ description: Learn MCP by configuring a weather server, inspecting the generated
 contentType: guide
 section: build
 authors: [Gbadebo Bello]
+coverScene: server-build
 status: published
 tags: [guide, interactive, server, typescript, weather]
 publishedAt: 2026-08-31
-updatedAt: 2026-10-05
+updatedAt: 2026-11-09
 difficulty: beginner
 estimatedMinutes: 90
 specVersion: 2026-07-28
-lastVerified: 2026-09-21
+lastVerified: 2026-11-09
 interactiveGuideId: building-your-first-mcp-server
 outcome: Configure a weather MCP server with tools, resources, and prompts; inspect its TypeScript and current protocol exchanges; test it through an ATM learning client; and export a runnable local project.
 prerequisites:
@@ -28,47 +29,65 @@ guideResources:
 guideSteps:
   - id: what-is-mcp
     title: What is MCP?
-    description: Build the host-client-server mental model and identify the capabilities an MCP server can expose.
+    description: See how the host, MCP client and MCP server fit together, and who plays each role in this guide.
     estimatedMinutes: 10
   - id: create-your-server
     title: Create your server
-    description: Create a Guide Runtime workspace and establish the named server boundary you will configure.
+    description: Name your server, start a workspace that runs real MCP, and read the generated code.
     estimatedMinutes: 10
   - id: add-tools
     title: Add tools
-    description: Select predefined weather operations and inspect their validated input schemas before adding them.
+    description: Add weather tools and see how their descriptions and inputs become tool definitions.
     estimatedMinutes: 15
   - id: add-resources
     title: Add resources
-    description: Expose read-only weather data through discoverable resource URIs and useful metadata.
+    description: Expose read-only weather data at a stable URI and see what a client reads.
     estimatedMinutes: 10
   - id: add-prompts
     title: Add prompts
-    description: Create reusable weather-planning prompt templates with explicit arguments.
+    description: Add a weather-planning prompt template and see how a client fills it in.
     estimatedMinutes: 10
   - id: connect-the-atm-client
     title: Connect the ATM client
-    description: Discover the configured server and inspect the real protocol messages exchanged with Guide Runtime.
+    description: Discover your server with server/discover and read every field of the real messages.
     estimatedMinutes: 10
   - id: test-your-server
     title: Test your server
-    description: Invoke a configured tool through the ATM learning client and inspect its structured result.
+    description: Play the model, call get_forecast, and read the result and a deliberate failure.
     estimatedMinutes: 15
   - id: review-and-export
     title: Review and export
-    description: Review the completed server, download the runnable TypeScript project, and finish the Guide.
+    description: Download and run your server, connect a real host, and see what to learn next.
     estimatedMinutes: 10
 ---
 
 ## Who this guide is for
 
-Start here if you want to understand MCP by building a server, rather than only reading about its parts. No previous MCP work is required. Familiarity with TypeScript helps when you inspect the generated source, but the browser activities guide you through each choice.
+Start here if you want to understand MCP by building a server, rather than only reading about its parts. No previous MCP experience is required. Familiarity with TypeScript helps when you read the generated code, but every choice happens in the browser.
+
+If you'd like the concepts first, [What Is MCP? A Practical Introduction](/blog/what-is-mcp) explains them without any building. This guide works either way.
 
 ## What you will build
 
-You will configure a weather server with tools, resources, and prompts, then connect the ATM learning client to inspect the messages exchanged with the server. The Guide Runtime workspace runs the configured capabilities, so you can test a tool before exporting a runnable TypeScript project. Your configuration remains the source of truth across the steps.
+You'll build a weather server that offers two tools, a resource and a prompt, then connect a client to it and test it. By the end you'll have:
 
-The explanations and protocol examples target the [2026-07-28 MCP specification](https://modelcontextprotocol.io/specification/2026-07-28). Use this guide when you want a broader view of a server's capabilities. If you only need a small local Python example, [Build a Minimal MCP Server](/guides/build-a-minimal-mcp-server) is the shorter path.
+- a server that returns live forecasts from Open-Meteo through MCP
+- read every message a client and server exchange, field by field
+- called a tool yourself, including one call that fails on purpose
+- a TypeScript project you can run on your own machine and connect to a real AI app
+
+The explanations and protocol examples target the [2026-07-28 MCP specification](https://modelcontextprotocol.io/specification/2026-07-28).
+
+## How the workspace works
+
+Each step has an interactive panel with four tabs:
+
+| Tab          | What it shows                                                             |
+| ------------ | ------------------------------------------------------------------------- |
+| **Visual**   | The choices you make: the server name and what it offers                  |
+| **Code**     | The TypeScript server the guide generates from those choices              |
+| **Protocol** | Every MCP message sent so far, with the request and response side by side |
+| **Client**   | The ATM learning client, which connects to your server and calls it       |
 
 <Callout title="A real MCP server with exportable source">
   The workspace executes real MCP exchanges using curated server capabilities.

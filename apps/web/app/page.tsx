@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { BlogPostCard, type BlogTopic } from '@/components/blog-post-card';
-import { ContentCard } from '@/components/content-card';
-import { GuidesOverviewVisual } from '@/components/guides-overview-visual';
+import { GuideCard, type GuideCardItem } from '@/components/guide-card';
+import { McpExchangeVisual } from '@/components/mcp-exchange-visual';
 import { NewsletterPanel } from '@/components/newsletter-panel';
 import type { ContentFrontmatter } from '@/lib/content-schema';
-import type { CardItem } from '@/lib/site-data';
+import { contributorGuideSlugs } from '@/lib/site-data';
 import { source } from '@/lib/source';
 import styles from './home.module.css';
 
@@ -17,21 +19,14 @@ export const metadata: Metadata = {
 
 const startingGuide = 'building-your-first-mcp-server';
 
-function sentenceCase(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
 export default function HomePage() {
-  const production =
-    process.env.VERCEL_ENV === 'production' ||
-    (!process.env.VERCEL_ENV && process.env.NODE_ENV === 'production');
   const content = source
     .getPages()
     .map((page) => ({
       data: page.data as ContentFrontmatter,
       slug: page.slugs.at(-1) ?? '',
     }))
-    .filter(({ data }) => !production || data.status === 'published')
+    .filter(({ data }) => data.status === 'published')
     .sort(
       (a, b) =>
         (b.data.publishedAt ?? b.data.updatedAt).localeCompare(
@@ -41,8 +36,9 @@ export default function HomePage() {
 
   const guides = content
     .filter(
-      ({ data }) =>
+      ({ data, slug }) =>
         data.contentType === 'guide' &&
+        !contributorGuideSlugs.includes(slug) &&
         ['learn', 'build', 'operate', 'security'].includes(data.section),
     )
     .sort(
@@ -55,7 +51,7 @@ export default function HomePage() {
     <main id="main-content" className={`shell ${styles.page}`}>
       <section className={styles.intro} aria-labelledby="home-title">
         <div className={styles.introCopy}>
-          <p className="eyebrow">An independent field guide</p>
+          {/* <p className="eyebrow">An independent field guide</p> */}
           <h1 id="home-title">
             Learn. Build. Ship with <span>MCP.</span>
           </h1>
@@ -66,58 +62,7 @@ export default function HomePage() {
             emerging standards shaping how agents interact with software.
           </p>
         </div>
-        <GuidesOverviewVisual />
-      </section>
-
-      <section
-        id="guides"
-        className={styles.collection}
-        aria-labelledby="guides-title"
-      >
-        <div className={styles.heading}>
-          <h2 id="guides-title">Guides</h2>
-          <p>Build something, one step at a time.</p>
-        </div>
-        {guides.length ? (
-          <ul className={styles.guides}>
-            {guides.map(({ data, slug }) => {
-              const recommended =
-                slug === startingGuide && data.status === 'published';
-              const item: CardItem = {
-                title: data.title,
-                description: data.description,
-                icon: 'code',
-                href: `/guides/${slug}`,
-                badge:
-                  data.status === 'draft'
-                    ? 'Draft preview'
-                    : recommended
-                      ? 'Start here'
-                      : undefined,
-                meta: [
-                  data.guideSteps?.length && `${data.guideSteps.length} steps`,
-                  data.estimatedMinutes && `${data.estimatedMinutes} min`,
-                  data.difficulty && sentenceCase(data.difficulty),
-                ]
-                  .filter(Boolean)
-                  .join(' · '),
-              };
-              return (
-                <li
-                  className={recommended ? styles.recommended : undefined}
-                  key={slug}
-                >
-                  <ContentCard item={item} />
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className={styles.empty}>
-            The first guides are being prepared. Get new guides in your inbox
-            through the newsletter below.
-          </p>
-        )}
+        <McpExchangeVisual />
       </section>
 
       <section
@@ -160,6 +105,60 @@ export default function HomePage() {
             they are published.
           </p>
         )}
+        <Link className={styles.viewAll} href="/blog">
+          View all posts <ArrowRight aria-hidden="true" />
+        </Link>
+      </section>
+
+      <section
+        id="guides"
+        className={styles.collection}
+        aria-labelledby="guides-title"
+      >
+        <div className={styles.heading}>
+          <h2 id="guides-title">Guides</h2>
+          <p>Build something, one step at a time.</p>
+        </div>
+        {guides.length ? (
+          <ul className={styles.guides}>
+            {guides.map(({ data, slug }) => {
+              const recommended =
+                slug === startingGuide && data.status === 'published';
+              const guide: GuideCardItem = {
+                title: data.title,
+                description: data.description,
+                href: `/guides/${slug}`,
+                category: data.section as GuideCardItem['category'],
+                difficulty: data.difficulty,
+                estimatedMinutes: data.estimatedMinutes,
+                coverScene: data.coverScene,
+                badge:
+                  data.status === 'draft'
+                    ? 'Draft preview'
+                    : recommended
+                      ? 'Start here'
+                      : undefined,
+                steps: data.guideSteps?.map((step) => ({
+                  title: step.title,
+                  minutes: step.estimatedMinutes,
+                })),
+              };
+              return (
+                <li key={slug}>
+                  <GuideCard guide={guide} recommended={recommended} />
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className={styles.empty}>
+            The first guides are being prepared. Get new guides in your inbox
+            through the newsletter below.
+          </p>
+        )}
+        <Link className={styles.viewAll} href="/guides">
+          View all guides <ArrowRight aria-hidden="true" />
+        </Link>
       </section>
 
       <NewsletterPanel />

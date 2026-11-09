@@ -104,12 +104,12 @@ export default function ClassicHomePage() {
             <div className="stack-list">
               {[
                 {
-                  title: 'Build a minimal MCP server',
+                  title: 'Building your first MCP server',
                   description:
-                    'Create and inspect a focused server in small steps.',
+                    'Configure a weather server, test it with the ATM learning client, and export it.',
                   icon: 'code',
-                  meta: '4 steps · 55 min · Beginner',
-                  href: '/guides/build-a-minimal-mcp-server',
+                  meta: '8 steps · 90 min · Beginner',
+                  href: '/guides/building-your-first-mcp-server',
                 },
               ].map((item) => (
                 <ContentCard key={item.title} item={item} />

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="560" height="810" viewBox="0 0 560 810" role="img" aria-labelledby="t d">
 <title id="t">How one question travels through MCP, from your prompt to the model's answer</title>
-<desc id="d">1. The MCP client sends server/discover and the weather server replies with its supported versions and capabilities, including tools. 2. The client sends tools/list and the server replies with get_forecast and its input schema, which takes a city and a day. 3. The host gives the model your question and the tool list. 4. The model asks to call get_forecast for Lagos, tomorrow. 5. You approve the call. 6. The host hands the approved call to the MCP client, which sends tools/call for get_forecast with the city and day. 7. The server fetches the forecast from a weather API and returns a result, 80% chance of rain, which the client passes back to the host. 8. The host gives the result to the model, which answers: yes, take an umbrella.</desc>
+<desc id="d">1. The MCP client sends server/discover and the weather server replies with its supported versions and capabilities, including tools. 2. The client sends tools/list and the server replies with get_forecast and its input schema, which takes a location. 3. The host gives the model your question and the tool list. 4. The model asks to call get_forecast with the location Lagos. 5. You approve the call. 6. The host hands the approved call to the MCP client, which sends tools/call for get_forecast with the location. 7. The server fetches a seven-day forecast from a weather API and returns it, including an 80% chance of rain tomorrow, and the client passes it back to the host. 8. The host gives the result to the model, which reads tomorrow from the seven days and answers: yes, take an umbrella.</desc>
 <rect width="560" height="810" fill="#FFFFFF"/>
 <rect x="18" y="16" width="148" height="48" rx="9" fill="#F1F5F9" stroke="#53657B" stroke-width="1.5"/>
 <g fill="none" stroke="#53657B" stroke-width="1.8" stroke-linejoin="round"><rect x="30" y="32.0" width="20" height="16" rx="2.5"/><path d="M30 37.0 h20"/></g>
@@ -31,7 +31,7 @@
 <line x1="470" y1="240" x2="300" y2="240" stroke="#0F172A" stroke-width="2"/>
 <polygon points="290,240 300,235 300,245" fill="#0F172A"/>
 <text x="380.0" y="231" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">get_forecast</text>
-<text x="380.0" y="259" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">inputSchema: city, day</text>
+<text x="380.0" y="259" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">inputSchema: location</text>
 <rect x="18" y="290" width="250" height="52" rx="8" fill="#F1F5F9" stroke="#53657B" stroke-width="1.2"/>
 <circle cx="34" cy="316.0" r="9.5" fill="#0F172A"/>
 <text x="34" y="320.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
@@ -41,7 +41,7 @@
 <circle cx="34" cy="388.0" r="9.5" fill="#0F172A"/>
 <text x="34" y="392.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">4</text>
 <text x="52" y="384" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#3E4C66" text-anchor="start">Model asks to call get_forecast</text>
-<text x="52" y="402" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#3E4C66" text-anchor="start">city: Lagos, day: tomorrow</text>
+<text x="52" y="402" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#3E4C66" text-anchor="start">location: “Lagos”</text>
 <rect x="18" y="434" width="250" height="34" rx="8" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.2"/>
 <circle cx="34" cy="451.0" r="9.5" fill="#0F172A"/>
 <text x="34" y="455.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">5</text>
@@ -54,16 +54,16 @@
 <line x1="290" y1="556" x2="460" y2="556" stroke="#0F172A" stroke-width="2"/>
 <polygon points="470,556 460,551 460,561" fill="#0F172A"/>
 <text x="380.0" y="547" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">tools/call</text>
-<text x="380.0" y="575" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">get_forecast {city, day}</text>
+<text x="380.0" y="575" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">get_forecast {location}</text>
 <rect x="330" y="592" width="218" height="52" rx="8" fill="#EAF7F0" stroke="#0B9F5A" stroke-width="1.2"/>
 <circle cx="346" cy="618.0" r="9.5" fill="#0F172A"/>
 <text x="346" y="622.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">7</text>
-<text x="364" y="614" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#087A45" text-anchor="start">Server asks a weather</text>
-<text x="364" y="632" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#087A45" text-anchor="start">API for the forecast</text>
+<text x="364" y="614" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#087A45" text-anchor="start">Server asks a weather API</text>
+<text x="364" y="632" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#087A45" text-anchor="start">for a 7-day forecast</text>
 <line x1="470" y1="680" x2="300" y2="680" stroke="#0F172A" stroke-width="2"/>
 <polygon points="290,680 300,675 300,685" fill="#0F172A"/>
 <text x="380.0" y="671" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">result</text>
-<text x="380.0" y="699" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">“80% chance of rain”</text>
+<text x="380.0" y="699" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">tomorrow: 80% chance of rain</text>
 <line x1="290" y1="716" x2="102" y2="716" stroke="#0F172A" stroke-width="2"/>
 <polygon points="92,716 102,711 102,721" fill="#0F172A"/>
 <text x="191.0" y="707" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">result</text>

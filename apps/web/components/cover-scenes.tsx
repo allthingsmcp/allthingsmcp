@@ -68,9 +68,7 @@ function ToolCallScene() {
         <span className="call-scene__row call-scene__row--request">
           <b>→ tools/call</b> get_forecast
         </span>
-        <span className="call-scene__args">
-          city: &quot;Lagos&quot; · day: &quot;tomorrow&quot;
-        </span>
+        <span className="call-scene__args">location: &quot;Lagos&quot;</span>
         <span className="call-scene__row call-scene__row--result">
           <b>
             ← <span className="call-scene__method">result</span>
@@ -89,7 +87,38 @@ function ToolCallScene() {
   );
 }
 
+/**
+ * Building a first MCP server: the weather server starts with one tool,
+ * and hover registers the resource and prompt the guide adds next.
+ */
+function ServerBuildScene() {
+  const rows = [
+    { kind: 'tools', name: 'get_forecast', on: true },
+    { kind: 'resources', name: 'city_list', on: false },
+    { kind: 'prompts', name: 'plan_trip', on: false },
+  ];
+  return (
+    <figure className="build-scene">
+      <div className="build-scene__card">
+        <code className="build-scene__head">weather-server</code>
+        {rows.map((row, index) => (
+          <span
+            key={row.kind}
+            className={row.on ? 'build-scene__row is-on' : 'build-scene__row'}
+            style={{ '--i': index } as CSSProperties}
+          >
+            <i aria-hidden="true" />
+            <b>{row.kind}</b>
+            {row.name}
+          </span>
+        ))}
+      </div>
+    </figure>
+  );
+}
+
 export const coverScenes: Record<CoverSceneId, () => React.JSX.Element> = {
   tasks: TasksScene,
   'tool-call': ToolCallScene,
+  'server-build': ServerBuildScene,
 };

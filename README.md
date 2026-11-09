@@ -51,3 +51,4 @@ Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report security issues 
 
 Source code is licensed under [Apache-2.0](LICENSE). Authored content under `apps/web/content/` is licensed under
 [CC BY 4.0](LICENSE-CONTENT). Third-party names, trademarks, and linked materials remain subject to their owners' rights.
+The All Things MCP name, logo, and brand assets are not covered by these licenses; please ask before using them commercially.

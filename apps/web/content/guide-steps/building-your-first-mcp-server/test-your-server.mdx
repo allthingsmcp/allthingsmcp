@@ -1,6 +1,6 @@
 ---
 title: Test Your Server
-description: Invoke a configured weather tool through the ATM client and inspect its request, response, and structured result.
+description: Play the model, call get_forecast through the ATM client, and read the tools/call request, its result and a deliberate failure.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,24 +10,100 @@ authors: [Gbadebo Bello]
 status: published
 tags: [guide-step, interactive, client, tools, testing]
 publishedAt: 2026-08-31
-updatedAt: 2026-09-21
+updatedAt: 2026-11-09
 difficulty: beginner
 estimatedMinutes: 15
 specVersion: 2026-07-28
-lastVerified: 2026-09-21
+lastVerified: 2026-11-09
 ---
 
-A useful test crosses the protocol boundary. Choose a location, invoke the first configured tool, then inspect both the result and the corresponding `tools/call` exchange.
+In a real app, the model would read your tool definitions, decide that `get_forecast` answers the user's question, and ask the host to run it. The host would show the user the call and wait for approval. Here you do both jobs. You choose the tool and its arguments, and pressing the button is your approval.
+
+## 1. Call get_forecast for Lagos
+
+In the **Client** tab, set **Tool** to `get_forecast`, type `Lagos` as the location, and select **Call get_forecast**.
 
 <InteractiveGuideBlock scene="test-server" />
 
+## 2. Read the request
+
+Open the **Protocol** tab and select `tools/call`. The request names the tool and carries the arguments you typed, alongside the same `_meta` you saw in step 6:
+
+```jsonc
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      // clientInfo and clientCapabilities, as before
+    },
+    "name": "get_forecast",
+    "arguments": { "location": "Lagos" },
+  },
+}
+```
+
+Your server checked `arguments` against the tool's input schema before running it. A call without `location` would have been rejected without contacting Open-Meteo.
+
+## 3. Read the result
+
+The response carries the same `id` as the request, which is how the client matches answers to questions. The result holds the forecast twice, shown here trimmed:
+
+```jsonc
+"result": {
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"location\":{\"name\":\"Lagos\",\"country\":\"Nigeria\", ...}",
+    },
+  ],
+  "structuredContent": {
+    "location": { "name": "Lagos", "country": "Nigeria", ... },
+    "daily": {
+      "time": ["2026-11-09", "2026-11-10", ...],
+      "temperature_2m_max": [31, 30, ...],
+      "precipitation_probability_max": [20, 80, ...],
+    },
+    "attribution": { "label": "Weather data by Open-Meteo", ... },
+  },
+  "resultType": "complete",
+},
+```
+
+- `content` is a list of items any client can display or pass to a model. Here it's a single text item containing the forecast as JSON.
+- `structuredContent` is the same data as a JSON object, so code can use it without parsing text. The MCP specification recommends sending both, because older clients only read `content`.
+- `daily` holds seven days of values. A model asked "Do I need an umbrella tomorrow?" would read the second entry of `precipitation_probability_max`.
+
+Your numbers will differ: the data is live, and it changes between requests.
+
+## 4. Make it fail on purpose
+
+Call `get_forecast` again with a location that doesn't exist, such as `Nowhereville`. The **Protocol** tab marks this exchange as an error, but look at the response: it's still a normal `result`, not a JSON-RPC `error`.
+
+```jsonc
+"result": {
+  "content": [{ "type": "text", "text": "No location matched “Nowhereville”." }],
+  "isError": true,
+  "resultType": "complete",
+},
+```
+
+The tool ran and couldn't find the place, so it reports the problem with `isError: true` and a message. A model can read that message and recover, for example by asking the user to check the spelling.
+
+## 5. Try the resource and the prompt
+
+The **Client** tab also has a **Read weather://cities** button and a **Get plan_for_weather** button. Select each one and compare the `resources/read` and `prompts/get` exchanges in the **Protocol** tab with what you saw in steps 4 and 5.
+
 <Checklist
   items={[
-    'The ATM client discovered the server before invoking a tool',
+    'The client discovered the server before calling a tool',
     'The request names a configured tool',
-    'Arguments match the tool input schema',
-    'The response contains both text and structured content',
+    'The arguments match the tool input schema',
+    'The response contains both content and structuredContent',
+    'A failed lookup returns isError: true inside a result',
   ]}
 />
 
-The result comes from Open-Meteo and includes attribution. Live values may change between requests; provider failures are returned as explicit MCP errors.
+**Checkpoint:** the **Protocol** tab shows a successful `tools/call` for `get_forecast` with a seven-day forecast for Lagos, Nigeria, and a second `tools/call` that returned `isError: true`.

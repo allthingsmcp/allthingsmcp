@@ -89,7 +89,7 @@ test('account controls hydrate without changing their initial text', async ({
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Sign in' })).toHaveCount(0);
 
-  await page.goto('/guides/build-a-minimal-mcp-server');
+  await page.goto('/guides/build-mcp-tasks-with-sharp');
   await expect(
     page.getByRole('button', { name: 'Sign in to save progress' }),
   ).toBeVisible();
@@ -136,15 +136,15 @@ test('guides page presents one complete catalog', async ({ page }) => {
 test('guides use a structured overview and temporary anonymous progress', async ({
   page,
 }) => {
-  await page.goto('/guides/build-a-minimal-mcp-server');
+  await page.goto('/guides/build-mcp-tasks-with-sharp');
   await expect(
-    page.getByRole('heading', { name: 'Build a Minimal MCP Server' }),
+    page.getByRole('heading', { name: 'Build Your First MCP Task' }),
   ).toBeVisible();
   await expect(
     page.getByRole('heading', { name: 'Work through the guide' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: 'Who this guide is for' }),
+    page.getByRole('heading', { name: 'What you will build' }),
   ).toBeVisible();
   await expect(
     page.getByRole('progressbar', { name: 'Guide progress' }),
@@ -152,19 +152,19 @@ test('guides use a structured overview and temporary anonymous progress', async 
   await expect(page.getByText('In this article')).toHaveCount(0);
 
   await page
-    .getByRole('link', { name: /Prepare your environment/ })
+    .getByRole('link', { name: /Understand how MCP Tasks work/ })
     .first()
     .click();
   await expect(page).toHaveURL(
-    /\/guides\/build-a-minimal-mcp-server\/prepare-your-environment$/,
+    /\/guides\/build-mcp-tasks-with-sharp\/understand-mcp-tasks$/,
   );
-  await expect(page.getByText('Step 1 of 4')).toBeVisible();
+  await expect(page.getByText('Step 1 of 6')).toBeVisible();
   const reportHref = await page
     .getByRole('link', { name: 'Report outdated content' })
     .getAttribute('href');
   const reportUrl = new URL(reportHref!);
   expect(reportUrl.searchParams.get('page')).toMatch(
-    /\/guides\/build-a-minimal-mcp-server\/prepare-your-environment$/,
+    /\/guides\/build-mcp-tasks-with-sharp\/understand-mcp-tasks$/,
   );
   expect(reportUrl.searchParams.get('issue')).toBe(
     'This content is outdated because...',
@@ -184,16 +184,16 @@ test('guides use a structured overview and temporary anonymous progress', async 
   ).toBeVisible();
 
   await page.getByRole('link', { name: 'Guide overview' }).click();
-  await expect(page.getByText('1 of 4 completed')).toBeVisible();
+  await expect(page.getByText('1 of 6 completed')).toBeVisible();
   await expect(
     page.getByRole('progressbar', { name: 'Guide progress' }),
-  ).toHaveAttribute('aria-valuenow', '25');
+  ).toHaveAttribute('aria-valuenow', '17');
   await expect(
     page.getByRole('button', { name: 'Sign in to save progress' }),
   ).toBeVisible();
 
   await page.reload();
-  await expect(page.getByText('0 of 4 completed')).toBeVisible();
+  await expect(page.getByText('0 of 6 completed')).toBeVisible();
   await expect(
     page.getByRole('progressbar', { name: 'Guide progress' }),
   ).toHaveAttribute('aria-valuenow', '0');

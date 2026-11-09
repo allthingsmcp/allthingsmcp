@@ -1,6 +1,6 @@
 ---
 title: Add Tools
-description: Add callable weather operations and inspect how their descriptions and input fields become tool schemas.
+description: Add weather tools, see how their names, descriptions and inputs become a tool definition, and learn how a tool reports failure.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,18 +10,45 @@ authors: [Gbadebo Bello]
 status: published
 tags: [guide-step, interactive, tools, schemas]
 publishedAt: 2026-08-31
-updatedAt: 2026-09-21
+updatedAt: 2026-11-09
 difficulty: beginner
 estimatedMinutes: 15
 specVersion: 2026-07-28
-lastVerified: 2026-09-21
+lastVerified: 2026-11-09
 ---
 
-Tools are operations a client can ask the server to perform. Their names, descriptions, and schemas should give both people and models enough information to invoke them correctly.
+A **tool** is a function the model can ask the host to run. The model reads each tool's name, description and input schema, then decides whether a tool helps with what the user asked. That makes the definition as important as the code behind it: if the description is vague, the model can't tell when to use the tool.
 
-Start with **Get current weather**. Review its `location` and `unit` fields before adding it, then select another tool from the curated catalog to compare its schema.
+## 1. Add Get current weather
+
+Select **Get current weather** and review its two inputs before adding it. `location` is required. `unit` is optional and only accepts `celsius` or `fahrenheit`.
 
 <InteractiveGuideBlock scene="add-tools" />
+
+## 2. Add Get forecast
+
+Add **Get forecast** as well. It takes a single required `location` and returns the next seven days. You'll call it in step 7.
+
+## How your choices become a tool definition
+
+When a client asks your server what tools it has, each tool you added comes back as a definition like this one:
+
+```jsonc
+{
+  "name": "get_forecast", // what the model asks to call
+  "title": "Get forecast", // what a person sees in the app
+  "description": "Get a seven-day forecast for a location.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "location": { "type": "string" },
+    },
+    "required": ["location"],
+  },
+}
+```
+
+The `inputSchema` is JSON Schema. It tells the model which arguments to send, and it lets your server reject a call with missing or wrong arguments before running anything. In the **Code** tab, the same tool appears as a `server.registerTool` call whose `inputSchema` is written with Zod. The SDK turns that Zod object into the JSON Schema above.
 
 <Checklist
   items={[
@@ -32,4 +59,17 @@ Start with **Get current weather**. Review its `location` and `unit` fields befo
   ]}
 />
 
-Weather operations use live data from [Open-Meteo](https://open-meteo.com/). If the provider is unavailable, the runtime returns an explicit MCP error instead of fabricated data.
+## How a tool reports failure
+
+These tools call [Open-Meteo](https://open-meteo.com/) for live data. When the tool runs but can't do its job, for example because Open-Meteo is down or no place matches the location, your server still returns a normal result. That result has `isError: true` and a message the model can read and explain to the user:
+
+```jsonc
+{
+  "content": [{ "type": "text", "text": "Open-Meteo returned 503." }],
+  "isError": true,
+}
+```
+
+The server never invents data to cover a failure. A request the server can't accept at all, such as one that names a tool that doesn't exist, gets a JSON-RPC `error` instead of a result.
+
+**Checkpoint:** your server offers `get_weather` and `get_forecast`, and the **Code** tab shows a `server.registerTool` call for each.

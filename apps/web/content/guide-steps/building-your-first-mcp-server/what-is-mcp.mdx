@@ -1,6 +1,6 @@
 ---
 title: What Is MCP?
-description: Build a practical mental model of the host, client, server, and the capabilities an MCP server can expose.
+description: See how the host, MCP client and MCP server fit together, who plays each role in this guide, and which part of MCP every later step covers.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,47 +10,91 @@ authors: [Gbadebo Bello]
 status: published
 tags: [guide-step, interactive, fundamentals, architecture]
 publishedAt: 2026-08-31
-updatedAt: 2026-08-31
+updatedAt: 2026-11-09
 difficulty: beginner
 estimatedMinutes: 10
 specVersion: 2026-07-28
-lastVerified: 2026-08-31
+lastVerified: 2026-11-09
 ---
 
-Model Context Protocol gives AI applications and external capability providers a shared protocol boundary. The protocol does not make every API identical. It standardizes how participants discover capabilities and exchange structured messages.
+In this guide you'll build a weather MCP server, connect a client to it and watch the real protocol messages go back and forth. This step shows how the pieces fit before you start, so that every later step has a place in the picture.
 
 ## The three participants
 
-- The **host** owns the user experience, model access, permissions, and client lifecycle.
-- An **MCP client** is created by the host and communicates with one server.
-- An **MCP server** exposes capabilities such as tools, resources, and prompts.
+Every MCP setup has three roles. The **host** is the AI app a person uses. Inside it, an **MCP client** keeps a connection to one **MCP server**, and the server offers capabilities such as tools.
 
-<ProtocolDiagram
-  label="A host contains an MCP client, which connects to one MCP server over the protocol."
-  nodes={['Host', 'MCP client', 'MCP server']}
-/>
+![The host is the AI app you use. It runs the language model integration and decides what the model sees. Inside the host are two MCP clients, one per server. MCP client 1 connects over stdio to a files server running as a local process on the same machine; that server reads files on your computer. MCP client 2 connects over Streamable HTTP to a weather server running as a remote service; that server calls a weather API. Solid dark lines are MCP connections. Grey lines are each server's own access to its data, which is not MCP.](/images/blog/what-is-mcp/architecture.svg)
 
-## What your server will expose
+The model never talks to a server directly. It works inside the host, and the host decides which requests go out. In this guide there is no model and no chat app, so the roles are played like this:
+
+| Role           | In a real app                            | In this guide                                             |
+| -------------- | ---------------------------------------- | --------------------------------------------------------- |
+| **Host**       | A chat or coding assistant               | The ATM learning client in the **Client** tab             |
+| **MCP client** | A component inside the host              | Built into the ATM learning client                        |
+| **MCP server** | A program the host connects to           | Your weather server, running in a Guide Runtime workspace |
+| **Model**      | Chooses which tool to call and with what | You. You pick the tool and type its arguments in step 7.  |
+
+## What your server will offer
+
+An MCP server offers three kinds of capability. The difference that matters most is who decides when each one is used:
 
 <CardGrid
   items={[
     {
-      title: 'Tools',
-      description: 'Callable operations such as looking up current weather.',
-    },
-    {
-      title: 'Resources',
-      description: 'Read-only data that a client can retrieve by URI.',
-    },
-    {
-      title: 'Prompts',
+      title: 'Tools: the model decides',
       description:
-        'Reusable message templates that users can select explicitly.',
+        'Functions the model can ask to run, such as get_forecast for a seven-day forecast. You add them in step 3.',
+    },
+    {
+      title: 'Resources: the app decides',
+      description:
+        'Data the app reads by URI and attaches as context, such as weather://cities. You add them in step 4.',
+    },
+    {
+      title: 'Prompts: the user decides',
+      description:
+        'Templates a person picks, often as a slash command, such as plan_for_weather. You add them in step 5.',
     },
   ]}
 />
 
-<Callout title="Keep the boundary in view">
-  The server exposes capabilities. The host decides how those capabilities are
-  presented, approved, and used within its product.
+## How each step maps to the protocol
+
+<Steps
+  items={[
+    {
+      title: '2. Create your server',
+      description:
+        'Name the server. The name becomes the identity clients see in every response.',
+    },
+    {
+      title: '3–5. Add tools, resources and prompts',
+      description:
+        'Choose what the server offers. Each choice becomes an entry in tools/list, resources/list or prompts/list.',
+    },
+    {
+      title: '6. Connect the ATM client',
+      description:
+        'Discover the server with server/discover and the list requests, and read the real messages.',
+    },
+    {
+      title: '7. Test your server',
+      description:
+        'Play the model: call a tool with tools/call and read the result it returns.',
+    },
+    {
+      title: '8. Review and export',
+      description:
+        'Download the server as a TypeScript project and run it on your own machine.',
+    },
+  ]}
+/>
+
+<Callout title="Want the full explanation first?">
+  [What Is MCP? A Practical Introduction](/blog/what-is-mcp) follows one
+  question through a real host, client and server, including the parts this
+  guide doesn't build, such as user approval and servers that ask questions.
+  This guide stands on its own, so you can also read it afterwards.
 </Callout>
+
+**Checkpoint:** you can say who plays the host and who plays the model in this guide, and which of tools, resources and prompts the model chooses to use. No workspace exists yet. You'll create one in the next step.

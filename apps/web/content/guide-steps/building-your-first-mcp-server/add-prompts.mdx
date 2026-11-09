@@ -1,6 +1,6 @@
 ---
 title: Add Prompts
-description: Add a reusable weather-planning prompt with explicit arguments and inspect the generated registration code.
+description: Add a weather-planning prompt template with arguments, and see how a client fills it in and passes it to the model.
 contentType: guide-step
 section: build
 guideSlug: building-your-first-mcp-server
@@ -10,20 +10,63 @@ authors: [Gbadebo Bello]
 status: published
 tags: [guide-step, interactive, prompts, templates]
 publishedAt: 2026-08-31
-updatedAt: 2026-09-21
+updatedAt: 2026-11-09
 difficulty: beginner
 estimatedMinutes: 10
 specVersion: 2026-07-28
-lastVerified: 2026-09-21
+lastVerified: 2026-11-09
 ---
 
-Prompts are reusable templates that a user can select explicitly. Arguments make one template useful across different places and days without hiding its intent.
+A **prompt** is a ready-made instruction a person chooses to start a task. In a real app, prompts often appear as slash commands or menu items. The user picks one, fills in its arguments, and the app sends the finished text to the model. Tools are chosen by the model, resources by the app, and prompts by the person.
 
-Select **Plan for weather** and inspect its arguments and template text before adding the predefined prompt to your server.
+## 1. Add Plan for weather
+
+Select **Plan for weather**. It has two required arguments, `city` and `day`, and this template:
+
+```text
+Help me plan for the weather in {city} on {day}.
+```
+
+Review it, then add it to your server.
 
 <InteractiveGuideBlock scene="add-prompts" />
 
-<Callout title="Write templates for inspection">
-  Keep the prompt understandable before its arguments are substituted. A host
-  should be able to show users what the template is designed to accomplish.
+## What a client sees
+
+When a client lists your server's prompts, it learns the prompt's name and which arguments it needs:
+
+```jsonc
+{
+  "name": "plan_for_weather",
+  "title": "Plan for weather",
+  "description": "Create a concise planning request for a city and day.",
+  "arguments": [
+    { "name": "city", "required": true },
+    { "name": "day", "required": true },
+  ],
+}
+```
+
+When the user picks the prompt, the client sends `prompts/get` with the arguments filled in. Your server returns the finished message, ready for the model:
+
+```jsonc
+"messages": [
+  {
+    "role": "user",
+    "content": {
+      "type": "text",
+      "text": "Help me plan for the weather in Lagos on Saturday.",
+    },
+  },
+],
+```
+
+The prompt doesn't fetch any weather itself. It gives the model a clear starting request. The model might then decide to call `get_forecast` to answer it, which is how the three capabilities work together.
+
+<Callout title="Write templates people can read">
+  Keep the template understandable before its arguments are filled in. A host
+  should be able to show the user what the prompt will ask for before they run
+  it.
 </Callout>
+
+**Checkpoint:** your server offers `plan_for_weather` with the arguments `city` and `day`, and the **Code** tab shows a `server.registerPrompt` call. Your server now offers all three kinds of capability.

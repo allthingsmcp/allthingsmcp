@@ -18,9 +18,15 @@ const nextConfig = {
   async redirects() {
     return [
       { source: '/all', destination: '/', permanent: true },
+      // The minimal-server guide was removed; keep old links from 404ing.
       {
         source: '/library/tutorials/minimal-server',
-        destination: '/guides/build-a-minimal-mcp-server',
+        destination: '/guides',
+        permanent: true,
+      },
+      {
+        source: '/guides/build-a-minimal-mcp-server/:path*',
+        destination: '/guides',
         permanent: true,
       },
     ];

@@ -14,8 +14,8 @@ export const primaryNav: Array<{
   href: string;
   activePath?: string;
 }> = [
-  { label: 'Guides', href: '/#guides', activePath: '/guides' },
-  { label: 'Blog', href: '/#blog', activePath: '/blog' },
+  { label: 'Guides', href: '/guides', activePath: '/guides' },
+  { label: 'Blog', href: '/blog', activePath: '/blog' },
 ];
 
 export const hubs: Record<
@@ -353,4 +353,10 @@ export const toolFixtures: CardItem[] = [
     icon: 'route',
     badge: 'Planned',
   },
+];
+
+/** Guides written for contributors, not learners. Shown on /contribute. */
+export const contributorGuideSlugs = [
+  'create-an-all-things-mcp-guide',
+  'create-an-all-things-mcp-blog',
 ];

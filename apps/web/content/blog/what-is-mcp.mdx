@@ -54,11 +54,11 @@ Servers can run in two places, shown at the bottom of the diagram. A **local** s
 
 An MCP server offers its abilities as three kinds of building blocks, called primitives. The main difference between them is who decides when they're used:
 
-| Primitive     | Who decides to use it                            | In a weather server                                              | Other examples                           |
-| ------------- | ------------------------------------------------ | ---------------------------------------------------------------- | ---------------------------------------- |
-| **Tools**     | The model, when it decides it needs one          | `get_forecast`, which looks up the forecast for a city and a day | Creating a GitHub issue, running a query |
-| **Resources** | The app, when it decides to attach context       | A list of current weather alerts the app can read and show       | File contents, a database schema         |
-| **Prompts**   | You, when you pick one, often as a slash command | A `/plan-my-week` template that asks for a week of forecasts     | A "review this code" template            |
+| Primitive     | Who decides to use it                            | In a weather server                                             | Other examples                           |
+| ------------- | ------------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------- |
+| **Tools**     | The model, when it decides it needs one          | `get_forecast`, which looks up a seven-day forecast for a place | Creating a GitHub issue, running a query |
+| **Resources** | The app, when it decides to attach context       | A list of current weather alerts the app can read and show      | File contents, a database schema         |
+| **Prompts**   | You, when you pick one, often as a slash command | A `/plan-my-week` template that asks for a week of forecasts    | A "review this code" template            |
 
 Tools are functions the model can ask to run. Resources are data an app can read by an address called a URI, such as `file:///notes/todo.md`. Prompts are ready-made instructions you choose to start a task.
 
@@ -68,7 +68,7 @@ A server doesn't have to offer all three. Many servers start with tools only, an
 
 Here is the umbrella question's whole journey. The numbers in the diagram match the sections below.
 
-![1. The MCP client sends server/discover and the weather server replies with its supported versions and capabilities, including tools. 2. The client sends tools/list and the server replies with get_forecast and its input schema, which takes a city and a day. 3. The host gives the model your question and the tool list. 4. The model asks to call get_forecast for Lagos, tomorrow. 5. You approve the call. 6. The host hands the approved call to the MCP client, which sends tools/call for get_forecast with the city and day. 7. The server fetches the forecast from a weather API and returns a result, 80% chance of rain, which the client passes back to the host. 8. The host gives the result to the model, which answers: yes, take an umbrella.](/images/blog/what-is-mcp/one-question.svg)
+![1. The MCP client sends server/discover and the weather server replies with its supported versions and capabilities, including tools. 2. The client sends tools/list and the server replies with get_forecast and its input schema, which takes a location. 3. The host gives the model your question and the tool list. 4. The model asks to call get_forecast with the location Lagos. 5. You approve the call. 6. The host hands the approved call to the MCP client, which sends tools/call for get_forecast with the location. 7. The server fetches a seven-day forecast from a weather API and returns it, including an 80% chance of rain tomorrow, and the client passes it back to the host. 8. The host gives the result to the model, which reads tomorrow from the seven days and answers: yes, take an umbrella.](/images/blog/what-is-mcp/one-question.svg)
 
 ### The client finds out what the server offers (1–2)
 
@@ -105,14 +105,16 @@ The server says it offers tools, so the client asks which ones with `tools/list`
     "tools": [
       {
         "name": "get_forecast",
-        "description": "Get the weather forecast for a city on a given day.",
+        "description": "Get a seven-day forecast for a location.",
         "inputSchema": {
           "type": "object",
           "properties": {
-            "city": { "type": "string", "description": "City name" },
-            "day": { "type": "string", "description": "today or tomorrow" },
+            "location": {
+              "type": "string",
+              "description": "Place name to forecast",
+            },
           },
-          "required": ["city", "day"],
+          "required": ["location"],
         },
       },
     ],
@@ -126,7 +128,7 @@ Each tool has a name, a description and an `inputSchema`. The description and sc
 
 ### The model chooses a tool and you approve it (3–5)
 
-The host now puts two things in front of the model: your question and the list of available tools (message 3). The model reads "Do I need an umbrella in Lagos tomorrow?", sees that `get_forecast` takes a city and a day, and asks to call it with `city: "Lagos"` and `day: "tomorrow"` (message 4).
+The host now puts two things in front of the model: your question and the list of available tools (message 3). The model reads "Do I need an umbrella in Lagos tomorrow?", sees that `get_forecast` returns a forecast for a location, and asks to call it with `location: "Lagos"` (message 4). The tool returns seven days, so the model will pick out tomorrow when the result comes back.
 
 The model asks. It doesn't act. The host decides whether the call goes ahead, and the MCP specification says there should always be a person able to deny a tool call. A well-built host shows you which tool is about to run and with what arguments, and waits for your approval (message 5). For a weather lookup, some apps let you approve once and remember the choice. For a tool that sends email or deletes files, you'd want to look every time.
 
@@ -141,7 +143,7 @@ With your approval, the host hands the call to its client, which sends `tools/ca
   "method": "tools/call",
   "params": {
     "name": "get_forecast",
-    "arguments": { "city": "Lagos", "day": "tomorrow" },
+    "arguments": { "location": "Lagos" },
     "_meta": {
       "io.modelcontextprotocol/protocolVersion": "2026-07-28",
       "io.modelcontextprotocol/clientInfo": {
@@ -160,7 +162,7 @@ Because every request carries this information, MCP doesn't need a connection-op
 
 ### The result comes back (7–8)
 
-The weather server calls its weather API, which isn't part of MCP, and gets tomorrow's forecast (message 7). It returns the result:
+The weather server calls its weather API, which isn't part of MCP, and gets the next seven days for Lagos, Nigeria (message 7). It returns the result, trimmed here to the first two days:
 
 ```jsonc
 {
@@ -171,15 +173,22 @@ The weather server calls its weather API, which isn't part of MCP, and gets tomo
     "content": [
       {
         "type": "text",
-        "text": "Lagos, tomorrow: 80% chance of rain, 29°C.",
+        "text": "{\"location\":{\"name\":\"Lagos\",\"country\":\"Nigeria\"},\"daily\":{...}}",
       },
     ],
-    "isError": false,
+    "structuredContent": {
+      "location": { "name": "Lagos", "country": "Nigeria" },
+      "daily": {
+        "time": ["2026-11-09", "2026-11-10"],
+        "temperature_2m_max": [31, 30],
+        "precipitation_probability_max": [20, 80],
+      },
+    },
   },
 }
 ```
 
-The `id` matches the request's `id`, which is how the client knows which request this answers. The `content` list holds what the model will read. The client passes the result to the host, the host gives it to the model, and the model answers you: "Yes, take an umbrella tomorrow" (message 8).
+The `id` matches the request's `id`, which is how the client knows which request this answers. The result carries the same forecast twice. `content` is text that any client can show or pass to a model. `structuredContent` is the same data as JSON that code can use directly. Tomorrow's entry says an 80% chance of rain. The client passes the result to the host, the host gives it to the model, and the model answers you: "Yes, take an umbrella tomorrow" (message 8).
 
 <Callout type="note" title="Two kinds of failure">
   If the tool ran but couldn't do its job, for example because the weather API
@@ -191,9 +200,9 @@ The `id` matches the request's `id`, which is how the client knows which request
 
 ## When the server needs to ask you something
 
-Sometimes a server can't finish a request without more information. "Lagos" is a good example: there's a Lagos in Nigeria and another in Portugal. Instead of guessing, the weather server can ask.
+Sometimes a server can't finish a request without more information. "Lagos" is a good example: there's a Lagos in Nigeria and another in Portugal. Many servers just pick the best match. A more careful weather server can ask instead.
 
-![1. The MCP client sends tools/call for get_forecast with city Lagos. 2. The weather server cannot tell which Lagos is meant, so instead of a forecast it returns resultType input_required with an elicitation asking which Lagos. 3. The host shows you the question: Lagos, Nigeria or Lagos, Portugal. 4. You choose Lagos, Nigeria. 5. The client sends tools/call again as a new request, adding your answer in inputResponses. 6. The server returns resultType complete with the forecast for Lagos, Nigeria.](/images/blog/what-is-mcp/which-lagos.svg)
+![1. The MCP client sends tools/call for get_forecast with the location Lagos. 2. The weather server cannot tell which Lagos is meant, so instead of a forecast it returns resultType input_required with an elicitation asking which Lagos. 3. The host shows you the question: Lagos, Nigeria or Lagos, Portugal. 4. You choose Lagos, Nigeria. 5. The client sends tools/call again as a new request, adding your answer in inputResponses. 6. The server returns resultType complete with the forecast for Lagos, Nigeria.](/images/blog/what-is-mcp/which-lagos.svg)
 
 The client sends `tools/call` as before (message 1). This time, instead of a forecast, the server answers with `resultType: "input_required"` and a question for you (message 2):
 
@@ -204,7 +213,7 @@ The client sends `tools/call` as before (message 1). This time, instead of a for
   "result": {
     "resultType": "input_required",
     "inputRequests": {
-      "which_city": {
+      "which_location": {
         "method": "elicitation/create",
         "params": {
           "mode": "form",
@@ -212,7 +221,7 @@ The client sends `tools/call` as before (message 1). This time, instead of a for
           "requestedSchema": {
             "type": "object",
             "properties": {
-              "city": {
+              "location": {
                 "type": "string",
                 "oneOf": [
                   { "const": "lagos-ng", "title": "Lagos, Nigeria" },
@@ -220,7 +229,7 @@ The client sends `tools/call` as before (message 1). This time, instead of a for
                 ],
               },
             },
-            "required": ["city"],
+            "required": ["location"],
           },
         },
       },
