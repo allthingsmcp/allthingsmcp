@@ -9,17 +9,17 @@ test('global search opens in context and returns canonical results', async ({
 
   const dialog = page.getByRole('dialog', { name: 'Search All Things MCP' });
   await expect(dialog).toBeVisible();
-  await dialog.getByRole('searchbox').fill('minimal MCP server');
+  await dialog.getByRole('searchbox').fill('building your first MCP server');
 
   const result = dialog.getByRole('link', {
-    name: /Build a Minimal MCP Server/,
+    name: /Building Your First MCP Server/,
   });
   await expect(result).toHaveAttribute(
     'href',
-    '/guides/build-a-minimal-mcp-server',
+    '/guides/building-your-first-mcp-server',
   );
   await result.click();
-  await expect(page).toHaveURL(/\/guides\/build-a-minimal-mcp-server$/);
+  await expect(page).toHaveURL(/\/guides\/building-your-first-mcp-server$/);
   await expect(dialog).not.toBeVisible();
 });
 
@@ -181,7 +181,7 @@ test('robots and sitemap expose only launch-ready discovery routes', async ({
   const sitemap = await request.get('/sitemap.xml');
   expect(sitemap.ok()).toBe(true);
   const sitemapText = await sitemap.text();
-  expect(sitemapText).toContain('/guides/build-a-minimal-mcp-server');
+  expect(sitemapText).toContain('/guides/building-your-first-mcp-server');
   expect(sitemapText).not.toContain('/privacy');
   expect(sitemapText).not.toContain('/spec-watch');
   expect(sitemapText).not.toContain('/tools');
@@ -191,9 +191,9 @@ test('robots and sitemap expose only launch-ready discovery routes', async ({
 test('guide steps expose specific search metadata and structured data', async ({
   page,
 }) => {
-  await page.goto('/guides/build-a-minimal-mcp-server/add-a-tool');
+  await page.goto('/guides/building-your-first-mcp-server/add-tools');
   await expect(page).toHaveTitle(
-    'Add a Typed Tool | Build a Minimal MCP Server · All Things MCP',
+    'Add Tools | Building Your First MCP Server · All Things MCP',
   );
   const structuredData = await page
     .locator('script[type="application/ld+json"]')
@@ -206,12 +206,12 @@ test('guide steps expose specific search metadata and structured data', async ({
       expect.objectContaining({
         '@type': 'BreadcrumbList',
         itemListElement: expect.arrayContaining([
-          expect.objectContaining({ name: 'Build a Minimal MCP Server' }),
+          expect.objectContaining({ name: 'Building Your First MCP Server' }),
         ]),
       }),
       expect.objectContaining({
         '@type': 'Article',
-        headline: 'Add a Typed Tool',
+        headline: 'Add Tools',
         datePublished: '2026-08-31',
       }),
     ]),
@@ -219,14 +219,14 @@ test('guide steps expose specific search metadata and structured data', async ({
 });
 
 test('guide authors link to a visible profile', async ({ page }) => {
-  await page.goto('/guides/build-a-minimal-mcp-server');
+  await page.goto('/guides/building-your-first-mcp-server');
   await page.getByRole('link', { name: 'Gbadebo Bello', exact: true }).click();
   await expect(page).toHaveURL(/\/authors\/gbadebo-bello$/);
   await expect(
     page.getByRole('heading', { name: 'Gbadebo Bello' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: 'Build a Minimal MCP Server' }),
+    page.getByRole('link', { name: 'Building Your First MCP Server' }),
   ).toBeVisible();
 });
 
@@ -235,7 +235,7 @@ test('content pages can be copied and viewed as Markdown', async ({
   request,
 }) => {
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-  const path = '/guides/build-a-minimal-mcp-server/add-a-tool';
+  const path = '/guides/building-your-first-mcp-server/add-tools';
   await page.goto(path);
 
   const copyPage = page.getByRole('button', { name: 'Copy page' });
@@ -262,8 +262,8 @@ test('content pages can be copied and viewed as Markdown', async ({
     'Page text copied.',
   );
   const plainText = await page.evaluate(() => navigator.clipboard.readText());
-  expect(plainText).toContain('Add a Typed Tool');
-  expect(plainText).not.toContain('# Add a Typed Tool');
+  expect(plainText).toContain('Add Tools');
+  expect(plainText).not.toContain('# Add Tools');
 
   await toggle.click();
   const options = page.getByRole('group', { name: 'More page options' });
@@ -278,10 +278,10 @@ test('content pages can be copied and viewed as Markdown', async ({
   ).toHaveAttribute('href', `/markdown${path}`);
   await expect(
     options.getByRole('link', { name: /Open in ChatGPT/ }),
-  ).toHaveAttribute('href', 'https://chatgpt.com/');
+  ).toHaveAttribute('href', /^https:\/\/chatgpt\.com\/\?hints=search&q=/);
   await expect(
     options.getByRole('link', { name: /Open in Claude/ }),
-  ).toHaveAttribute('href', 'https://claude.ai/new');
+  ).toHaveAttribute('href', /^https:\/\/claude\.ai\/new\?q=/);
 
   await options.getByRole('button', { name: /Copy link/ }).click();
   await expect(shareMenu.getByRole('status')).toContainText(
@@ -299,9 +299,11 @@ test('content pages can be copied and viewed as Markdown', async ({
   const clipboardMarkdown = await page.evaluate(() =>
     navigator.clipboard.readText(),
   );
-  expect(clipboardMarkdown).toContain('# Add a Typed Tool');
-  expect(clipboardMarkdown).toContain('MCP specification: 2025-11-25');
-  expect(clipboardMarkdown).toContain('```python');
+  expect(clipboardMarkdown).toContain('# Add Tools');
+  expect(clipboardMarkdown).toContain('MCP specification: 2026-07-28');
+  expect(clipboardMarkdown).toContain(
+    'Interactive activity: complete this exercise',
+  );
 
   const markdownResponse = await request.get(`/markdown${path}`);
   expect(markdownResponse.ok()).toBe(true);
@@ -310,13 +312,13 @@ test('content pages can be copied and viewed as Markdown', async ({
   expect(await markdownResponse.text()).toBe(clipboardMarkdown);
 
   const overviewResponse = await request.get(
-    '/markdown/guides/build-a-minimal-mcp-server',
+    '/markdown/guides/building-your-first-mcp-server',
   );
   const overviewMarkdown = await overviewResponse.text();
   expect(overviewMarkdown).toContain('## Steps');
   expect(overviewMarkdown).toContain('## Prerequisites');
 
-  await page.goto('/guides/build-a-minimal-mcp-server');
+  await page.goto('/guides/building-your-first-mcp-server');
   await expect(page.getByRole('button', { name: 'Copy page' })).toHaveCount(0);
 
   const interactiveResponse = await request.get(

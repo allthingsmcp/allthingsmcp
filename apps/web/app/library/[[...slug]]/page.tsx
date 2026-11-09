@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import { ContentMeta } from '@/components/content-meta';
+import { ContentContributeLinks, ContentMeta } from '@/components/content-meta';
 import { getMDXComponents } from '@/components/mdx';
 import type { ContentFrontmatter } from '@/lib/content-schema';
 import { isProductionDeployment } from '@/lib/deployment';
@@ -98,11 +98,17 @@ export default async function LibraryPage({
               data={data}
               path={`${slug.join('/')}.mdx`}
               pagePath={`/library/${slug.join('/')}`}
+              showContribute={false}
             />
           </header>
           <div className="prose">
             <MDX components={getMDXComponents()} />
           </div>
+          <ContentContributeLinks
+            data={data}
+            path={`${slug.join('/')}.mdx`}
+            pagePath={`/library/${slug.join('/')}`}
+          />
         </article>
         <aside className="article-toc">
           <p>On this page</p>

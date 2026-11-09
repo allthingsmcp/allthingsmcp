@@ -42,14 +42,12 @@ export function ProtocolVisual({
         <pre>
           <code>
             <span className="code-pink">from</span> mcp.server{' '}
-            <span className="code-pink">import</span> Server{`\n`}
-            <span className="code-pink">from</span> mcp.tools{' '}
-            <span className="code-pink">import</span> tool{`\n\n`}server =
-            Server(<span className="code-yellow">&quot;example&quot;</span>)
-            {`\n\n`}@tool(){`\n`}
+            <span className="code-pink">import</span> MCPServer{`\n\n`}mcp =
+            MCPServer(<span className="code-yellow">&quot;example&quot;</span>)
+            {`\n\n`}@mcp.tool(){`\n`}
             <span className="code-pink">def</span> add(a: int, b: int) -&gt;
             int:{`\n`} <span className="code-pink">return</span> a + b{`\n\n`}
-            server.run(transport=
+            mcp.run(transport=
             <span className="code-yellow">&quot;stdio&quot;</span>)
           </code>
         </pre>

@@ -17,9 +17,9 @@ test('interactive Guide overview is distinct and leaves the original Guide intac
     page.getByRole('progressbar', { name: 'Guide progress' }),
   ).toHaveAttribute('aria-valuenow', '0');
 
-  await page.goto('/guides/build-a-minimal-mcp-server');
+  await page.goto('/guides/build-mcp-tasks-with-sharp');
   await expect(
-    page.getByRole('heading', { name: 'Build a Minimal MCP Server' }),
+    page.getByRole('heading', { name: 'Build Your First MCP Task' }),
   ).toBeVisible();
   await expect(page.getByText('Interactive', { exact: true })).toHaveCount(0);
 });

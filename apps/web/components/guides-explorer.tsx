@@ -1,22 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Icon } from '@/components/ui/icon';
+import { GuideCard, type GuideCardItem } from '@/components/guide-card';
 
-export type GuideCategory = 'learn' | 'build' | 'operate' | 'security';
+export type GuideCategory = GuideCardItem['category'];
 
-export type GuideDirectoryItem = {
-  title: string;
-  description: string;
-  category: GuideCategory;
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
-  estimatedMinutes?: number;
-  steps?: number;
-  contentType: string;
-  href: string;
-};
+export type GuideDirectoryItem = GuideCardItem & { contentType: string };
 
 const filters: Array<{ label: string; value: 'all' | GuideCategory }> = [
   { label: 'All', value: 'all' },
@@ -99,47 +89,9 @@ export function GuidesExplorer({ guides }: { guides: GuideDirectoryItem[] }) {
               )}
             </div>
             {visibleGuides.length ? (
-              <div className="guide-list" aria-live="polite">
+              <div className="guide-card-grid" aria-live="polite">
                 {visibleGuides.map((guide) => (
-                  <Link
-                    className="guide-list-item"
-                    href={guide.href}
-                    key={guide.href}
-                  >
-                    <span className={`guide-list-icon is-${guide.category}`}>
-                      <Icon
-                        name={
-                          guide.category === 'security'
-                            ? 'shield'
-                            : guide.category === 'operate'
-                              ? 'server'
-                              : guide.category === 'build'
-                                ? 'code'
-                                : 'book'
-                        }
-                      />
-                    </span>
-                    <span className="guide-list-copy">
-                      <strong>{guide.title}</strong>
-                      <small>{guide.description}</small>
-                    </span>
-                    <span
-                      className={`guide-category guide-category--${guide.category}`}
-                    >
-                      {formatLabel(guide.category)}
-                    </span>
-                    <span className="guide-list-meta">
-                      {guide.difficulty && formatLabel(guide.difficulty)}
-                      {guide.difficulty && guide.estimatedMinutes && ' · '}
-                      {guide.estimatedMinutes &&
-                        `${guide.estimatedMinutes} min`}
-                      {guide.estimatedMinutes && guide.steps && ' · '}
-                      {guide.steps &&
-                        `${guide.steps} ${guide.steps === 1 ? 'step' : 'steps'}`}
-                      {!guide.difficulty && formatLabel(guide.contentType)}
-                    </span>
-                    <ArrowRight aria-hidden="true" />
-                  </Link>
+                  <GuideCard guide={guide} key={guide.href} />
                 ))}
               </div>
             ) : (

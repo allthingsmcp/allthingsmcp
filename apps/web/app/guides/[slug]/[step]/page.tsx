@@ -128,6 +128,8 @@ export default async function GuideStepPage({
         authors={<ContentAuthors names={data.authors} label="Step authors" />}
         share={
           <ContentShareMenu
+            title={data.title}
+            description={data.description}
             pathname={pathname}
             markdown={markdown}
             variant="inline"

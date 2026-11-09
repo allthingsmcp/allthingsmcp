@@ -53,6 +53,25 @@
   font-size: 0.875rem;
 }
 
+.viewAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+  color: var(--blue);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.viewAll:hover {
+  text-decoration: underline;
+}
+
+.viewAll svg {
+  width: 16px;
+  height: 16px;
+}
+
 .guides,
 .posts {
   display: grid;

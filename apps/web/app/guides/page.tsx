@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import {
   GuidesExplorer,
@@ -41,7 +40,11 @@ export default function GuidesPage() {
         difficulty: data.difficulty,
         estimatedMinutes: data.estimatedMinutes,
         contentType: data.contentType,
-        steps: data.guideSteps?.length,
+        steps: data.guideSteps?.map((step) => ({
+          title: step.title,
+          minutes: step.estimatedMinutes,
+        })),
+        coverScene: data.coverScene,
         href: `/guides/${page.slugs.at(-1)}`,
       } as GuideDirectoryItem;
     })
@@ -71,11 +74,6 @@ export default function GuidesPage() {
               Contribute a guide
             </Button>
           </div>
-          <p className="guides-hero__note">
-            Every technical guide records its specification version and latest
-            verification date.{' '}
-            <Link href="/contribute">Contribute on GitHub</Link>.
-          </p>
         </div>
         <GuidesOverviewVisual />
       </section>

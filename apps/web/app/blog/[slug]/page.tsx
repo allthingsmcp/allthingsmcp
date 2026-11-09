@@ -5,7 +5,7 @@ import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { ArticleToc } from '@/components/article-toc';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ContentAuthors } from '@/components/content-authors';
-import { ContentMeta } from '@/components/content-meta';
+import { ContentContributeLinks, ContentMeta } from '@/components/content-meta';
 import { getMDXComponents } from '@/components/mdx';
 import type { ContentFrontmatter } from '@/lib/content-schema';
 import { socialCardMetadata } from '@/lib/social-card';
@@ -107,8 +107,11 @@ export default async function BlogPostPage({
               path={`${page.slugs.join('/')}.mdx`}
               pagePath={`/blog/${slug}`}
               showAuthors={false}
+              showContribute={false}
               share={
                 <ContentShareMenu
+                  title={data.title}
+                  description={data.description}
                   pathname={pathname}
                   markdown={markdown}
                   variant="inline"
@@ -125,6 +128,11 @@ export default async function BlogPostPage({
           <div className="prose" id="article-content">
             <MDX components={getMDXComponents()} />
           </div>
+          <ContentContributeLinks
+            data={data}
+            path={`${page.slugs.join('/')}.mdx`}
+            pagePath={`/blog/${slug}`}
+          />
           <Link className="blog-back-link" href="/blog">
             <ArrowLeft aria-hidden="true" /> Back to the blog
           </Link>
