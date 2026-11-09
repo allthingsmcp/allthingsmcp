@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="560" height="520" viewBox="0 0 560 520" role="img" aria-labelledby="t d">
 <title id="t">When a server needs more input, it returns input_required and the client retries with your answer</title>
-<desc id="d">1. The MCP client sends tools/call for get_forecast with city Lagos. 2. The weather server cannot tell which Lagos is meant, so instead of a forecast it returns resultType input_required with an elicitation asking which Lagos. 3. The host shows you the question: Lagos, Nigeria or Lagos, Portugal. 4. You choose Lagos, Nigeria. 5. The client sends tools/call again as a new request, adding your answer in inputResponses. 6. The server returns resultType complete with the forecast for Lagos, Nigeria.</desc>
+<desc id="d">1. The MCP client sends tools/call for get_forecast with the location Lagos. 2. The weather server cannot tell which Lagos is meant, so instead of a forecast it returns resultType input_required with an elicitation asking which Lagos. 3. The host shows you the question: Lagos, Nigeria or Lagos, Portugal. 4. You choose Lagos, Nigeria. 5. The client sends tools/call again as a new request, adding your answer in inputResponses. 6. The server returns resultType complete with the forecast for Lagos, Nigeria.</desc>
 <rect width="560" height="520" fill="#FFFFFF"/>
 <rect x="18" y="16" width="160" height="48" rx="9" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5"/>
 <g fill="none" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round"><circle cx="40" cy="29.0" r="4"/><path d="M33 42.0 a7 6 0 0 1 14 0"/></g>
@@ -18,7 +18,7 @@
 <line x1="290" y1="108" x2="460" y2="108" stroke="#0F172A" stroke-width="2"/>
 <polygon points="470,108 460,103 460,113" fill="#0F172A"/>
 <text x="380.0" y="99" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="500" fill="#0F172A" text-anchor="middle">tools/call</text>
-<text x="380.0" y="127" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">get_forecast {city: “Lagos”}</text>
+<text x="380.0" y="127" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#53657B" text-anchor="middle">get_forecast {location: “Lagos”}</text>
 <circle cx="268" cy="103" r="9.5" fill="#0F172A"/>
 <text x="268" y="107.5" font-family="Inter, 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
 <line x1="470" y1="172" x2="300" y2="172" stroke="#0F172A" stroke-width="2"/>

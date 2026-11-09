@@ -68,9 +68,7 @@ function ToolCallScene() {
         <span className="call-scene__row call-scene__row--request">
           <b>→ tools/call</b> get_forecast
         </span>
-        <span className="call-scene__args">
-          city: &quot;Lagos&quot; · day: &quot;tomorrow&quot;
-        </span>
+        <span className="call-scene__args">location: &quot;Lagos&quot;</span>
         <span className="call-scene__row call-scene__row--result">
           <b>
             ← <span className="call-scene__method">result</span>
