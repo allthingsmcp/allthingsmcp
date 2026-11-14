@@ -132,12 +132,7 @@ export default function HomePage() {
                 difficulty: data.difficulty,
                 estimatedMinutes: data.estimatedMinutes,
                 coverScene: data.coverScene,
-                badge:
-                  data.status === 'draft'
-                    ? 'Draft preview'
-                    : recommended
-                      ? 'Start here'
-                      : undefined,
+                badge: data.status === 'draft' ? 'Draft preview' : undefined,
                 steps: data.guideSteps?.map((step) => ({
                   title: step.title,
                   minutes: step.estimatedMinutes,
