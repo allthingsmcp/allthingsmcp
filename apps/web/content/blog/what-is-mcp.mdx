@@ -1,6 +1,6 @@
 ---
 title: 'What Is MCP? A Practical Introduction'
-description: Learn what the Model Context Protocol is by following one question through an AI app, an MCP client and an MCP server, from your prompt to the model's answer.
+description: "MCP is how AI apps reach the tools and data they need. Here's how it works, from the problem it solves to the messages it sends."
 contentType: article
 section: blog
 blogTopic: concepts
@@ -9,22 +9,22 @@ authors: [Gbadebo Bello]
 status: published
 publishedAt: 2026-11-08
 tags: [fundamentals, architecture, protocol, tools]
-updatedAt: 2026-11-08
+updatedAt: 2026-11-14
 difficulty: beginner
 estimatedMinutes: 15
 specVersion: 2026-07-28
 lastVerified: 2026-11-08
 ---
 
-A language model only knows what's in front of it: your message, the conversation so far, and whatever the app it runs in decides to add. Ask an AI assistant "Do I need an umbrella in Lagos tomorrow?" and the model alone can't answer. It doesn't know tomorrow's forecast. Something has to fetch the forecast from a weather service, and the app has to let that happen safely.
+A language model only knows what was provided to it. This can include your message, the conversation so far, and whatever the app it runs in decides to add. If you ask an AI assistant: "Do I need an umbrella in Lagos tomorrow?", the model alone can't answer this question. It doesn't know tomorrow's forecast. Something has to fetch the forecast from a weather service, and the app it runs in has to let that happen safely.
 
 **The Model Context Protocol (MCP) is an open standard for connecting AI applications to the tools and data they need.** An AI app that speaks MCP can use any MCP server, and a service that offers an MCP server works with every AI app that speaks MCP.
 
-This article follows that umbrella question from the moment you type it to the moment the answer appears, and introduces each part of MCP as the question reaches it. You don't need to write code to follow along. The JSON snippets show what actually travels between the pieces, so you can recognize it when you see it later.
+This article uses that question to explain how MCP works. It follows what happens from the moment you ask it to the moment the answer appears, and introduces each part of MCP as the question reaches it. You don't need to write code to follow along.
 
 ## The problem MCP solves
 
-Before a shared protocol, every AI app had to build its own integration for every service it wanted to reach. A chat app wrote custom code to talk to a weather API, then different custom code for GitHub, then more for your files. A code editor that wanted the same three services wrote all three again, its own way.
+Before a shared protocol, every AI app had to build its own integration for every service it wanted to reach. A chat app wrote custom code to talk to a weather API, then different custom code for GitHub, then more for your files. A code editor that wanted to use the same three services had to write all three integrations again in its own way.
 
 ![Top: without MCP, three AI apps (chat app, code editor, agent) and three services (weather API, GitHub, your files) need nine custom integrations, one for every pair. Bottom: with MCP, each app contains an MCP client and each service is wrapped by one MCP server. All of them speak the same protocol, so three clients and three servers are enough and any app can use any server.](/images/blog/what-is-mcp/why-mcp.svg)
 
@@ -57,22 +57,29 @@ An MCP server offers its abilities as three kinds of building blocks, called pri
 | Primitive     | Who decides to use it                            | In a weather server                                             | Other examples                           |
 | ------------- | ------------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------- |
 | **Tools**     | The model, when it decides it needs one          | `get_forecast`, which looks up a seven-day forecast for a place | Creating a GitHub issue, running a query |
-| **Resources** | The app, when it decides to attach context       | A list of current weather alerts the app can read and show      | File contents, a database schema         |
+| **Resources** | The app, when it decides to attach context       | A list of example cities at `weather://cities`                  | File contents, a database schema         |
 | **Prompts**   | You, when you pick one, often as a slash command | A `/plan-my-week` template that asks for a week of forecasts    | A "review this code" template            |
 
 Tools are functions the model can ask to run. Resources are data an app can read by an address called a URI, such as `file:///notes/todo.md`. Prompts are ready-made instructions you choose to start a task.
+
+Each primitive comes with its own protocol methods, in two kinds:
+
+- **Discovery** methods list what the server has: `tools/list`, `resources/list` and `prompts/list`.
+- **Execution and retrieval** methods use one item from that list. `tools/call` runs a tool, `resources/read` reads a resource, and `prompts/get` fetches a prompt.
+
+A client always discovers first, then calls, reads or gets by name.
 
 A server doesn't have to offer all three. Many servers start with tools only, and the umbrella question only needs one: `get_forecast`.
 
 ## Following one question from prompt to answer
 
-Here is the umbrella question's whole journey. The numbers in the diagram match the sections below.
+Here is the umbrella question's whole journey. The numbers in the diagram match the sections below. Only steps 1, 2, 6 and 7 are MCP messages between the client and the server. The others happen inside the host, which is why the model never talks to the server.
 
 ![1. The MCP client sends server/discover and the weather server replies with its supported versions and capabilities, including tools. 2. The client sends tools/list and the server replies with get_forecast and its input schema, which takes a location. 3. The host gives the model your question and the tool list. 4. The model asks to call get_forecast with the location Lagos. 5. You approve the call. 6. The host hands the approved call to the MCP client, which sends tools/call for get_forecast with the location. 7. The server fetches a seven-day forecast from a weather API and returns it, including an 80% chance of rain tomorrow, and the client passes it back to the host. 8. The host gives the result to the model, which reads tomorrow from the seven days and answers: yes, take an umbrella.](/images/blog/what-is-mcp/one-question.svg)
 
 ### The client finds out what the server offers (1–2)
 
-Before the model can use the weather server, the host needs to know what the server can do. The client can ask with `server/discover` (message 1). The server replies with the protocol versions it supports and its capabilities, which says which primitives it offers:
+Before the model can use the weather server, the host needs to know what the server can do. The client can ask with `server/discover` (step 1). The server replies with the protocol versions it supports and its capabilities, which say which primitives it offers:
 
 ```jsonc
 {
@@ -94,7 +101,7 @@ Before the model can use the weather server, the host needs to know what the ser
 }
 ```
 
-The server says it offers tools, so the client asks which ones with `tools/list` (message 2):
+The server says it offers tools, so the client asks which ones with `tools/list` (step 2):
 
 ```jsonc
 {
@@ -128,13 +135,13 @@ Each tool has a name, a description and an `inputSchema`. The description and sc
 
 ### The model chooses a tool and you approve it (3–5)
 
-The host now puts two things in front of the model: your question and the list of available tools (message 3). The model reads "Do I need an umbrella in Lagos tomorrow?", sees that `get_forecast` returns a forecast for a location, and asks to call it with `location: "Lagos"` (message 4). The tool returns seven days, so the model will pick out tomorrow when the result comes back.
+The host now puts two things in front of the model: your question and the list of available tools (step 3). The model reads "Do I need an umbrella in Lagos tomorrow?", sees that `get_forecast` returns a forecast for a location, and asks to call it with `location: "Lagos"` (step 4). The tool returns seven days, so the model will pick out tomorrow when the result comes back.
 
-The model asks. It doesn't act. The host decides whether the call goes ahead, and the MCP specification says there should always be a person able to deny a tool call. A well-built host shows you which tool is about to run and with what arguments, and waits for your approval (message 5). For a weather lookup, some apps let you approve once and remember the choice. For a tool that sends email or deletes files, you'd want to look every time.
+The model asks. It doesn't act. The host decides whether the call goes ahead, and the MCP specification says there should always be a person able to deny a tool call. A well-built host shows you which tool is about to run and with what arguments, and waits for your approval (step 5). For a weather lookup, some apps let you approve once and remember the choice. For a tool that sends email or deletes files, you'd want to look every time.
 
 ### The client calls the tool (6)
 
-With your approval, the host hands the call to its client, which sends `tools/call` to the weather server (message 6):
+With your approval, the host hands the call to its client, which sends `tools/call` to the weather server (step 6):
 
 ```jsonc
 {
@@ -158,11 +165,11 @@ With your approval, the host hands the call to its client, which sends `tools/ca
 
 The `_meta` block appears on every request, not only this one. It says which protocol version the client is using, identifies the client, and lists what the client can handle. Here, `elicitation` means "I can ask the user a question if you need me to". You'll see why that matters in the next section.
 
-Because every request carries this information, MCP doesn't need a connection-opening handshake or a session. Each request stands on its own, and the server can answer it without remembering anything from earlier requests. That's also why `server/discover` in message 1 is optional: a client that already knows the server can go straight to `tools/call`.
+Because every request carries this information, MCP doesn't need a connection-opening handshake or a session. Each request stands on its own, and the server can answer it without remembering anything from earlier requests. That's also why `server/discover` in step 1 is optional: a client that already knows the server can go straight to `tools/call`.
 
 ### The result comes back (7–8)
 
-The weather server calls its weather API, which isn't part of MCP, and gets the next seven days for Lagos, Nigeria (message 7). It returns the result, trimmed here to the first two days:
+The weather server calls its weather API, which isn't part of MCP, and gets the next seven days for Lagos, Nigeria (step 7). It returns the result, trimmed here to the first two days:
 
 ```jsonc
 {
@@ -188,7 +195,7 @@ The weather server calls its weather API, which isn't part of MCP, and gets the 
 }
 ```
 
-The `id` matches the request's `id`, which is how the client knows which request this answers. The result carries the same forecast twice. `content` is text that any client can show or pass to a model. `structuredContent` is the same data as JSON that code can use directly. Tomorrow's entry says an 80% chance of rain. The client passes the result to the host, the host gives it to the model, and the model answers you: "Yes, take an umbrella tomorrow" (message 8).
+The `id` matches the request's `id`, which is how the client knows which request this answers. The result carries the same forecast twice. `content` is text that any client can show or pass to a model. `structuredContent` is the same data as JSON that code can use directly. Tomorrow's entry says an 80% chance of rain. The client passes the result to the host, the host gives it to the model, and the model answers you: "Yes, take an umbrella tomorrow" (step 8).
 
 <Callout type="note" title="Two kinds of failure">
   If the tool ran but couldn't do its job, for example because the weather API
@@ -204,7 +211,7 @@ Sometimes a server can't finish a request without more information. "Lagos" is a
 
 ![1. The MCP client sends tools/call for get_forecast with the location Lagos. 2. The weather server cannot tell which Lagos is meant, so instead of a forecast it returns resultType input_required with an elicitation asking which Lagos. 3. The host shows you the question: Lagos, Nigeria or Lagos, Portugal. 4. You choose Lagos, Nigeria. 5. The client sends tools/call again as a new request, adding your answer in inputResponses. 6. The server returns resultType complete with the forecast for Lagos, Nigeria.](/images/blog/what-is-mcp/which-lagos.svg)
 
-The client sends `tools/call` as before (message 1). This time, instead of a forecast, the server answers with `resultType: "input_required"` and a question for you (message 2):
+The client sends `tools/call` as before (step 1). This time, instead of a forecast, the server answers with `resultType: "input_required"` and a question for you (step 2):
 
 ```jsonc
 {
@@ -238,9 +245,9 @@ The client sends `tools/call` as before (message 1). This time, instead of a for
 }
 ```
 
-This is called **elicitation**: the server asks the user for input through the client. The server could only ask because the client declared `elicitation` in its `_meta` earlier. The host shows you the question, usually as a small form that names the server asking (message 3). You pick Lagos, Nigeria (message 4).
+This is called **elicitation**: the server asks the user for input through the client. The server could only ask because the client declared `elicitation` in its `_meta` earlier. The host shows you the question, usually as a small form that names the server asking (step 3). You pick Lagos, Nigeria (step 4).
 
-The client then sends the original `tools/call` again as a new request with a new `id`, adding your answer in `inputResponses` (message 5). Now the server has what it needs and returns the forecast with `resultType: "complete"` (message 6). You can always decline or dismiss the question instead, and the server has to handle that too.
+The client then sends the original `tools/call` again as a new request with a new `id`, adding your answer in `inputResponses` (step 5). Now the server has what it needs and returns the forecast with `resultType: "complete"` (step 6). You can always decline or dismiss the question instead, and the server has to handle that too.
 
 <Callout type="note" title="Older material">
   Earlier versions of MCP let servers send their own requests to the client,
@@ -260,12 +267,14 @@ Every message in this article is **JSON-RPC 2.0**, a small, widely used format f
 | **Response**     | Answers one request. Carries the same `id` and a `result` or `error`. | The forecast result             |
 | **Notification** | A one-way message that expects no reply, so it has no `id`.           | "The list of tools has changed" |
 
+Because there's no session, a server can't send a notification whenever it likes. A client that wants them opens a long-lived `subscriptions/listen` request, and the server sends notifications on that stream.
+
 How those messages get from client to server is the job of a **transport**. MCP defines two:
 
 ![Top: stdio. On your computer, the MCP client launches the server as a subprocess and they exchange newline-delimited JSON-RPC messages over standard input and output. Bottom: Streamable HTTP. The MCP client on your computer sends each message as an HTTP POST to one MCP endpoint on a server on the internet. The reply comes back as a JSON object or as a stream of events for that request. The messages are the same on both transports.](/images/blog/what-is-mcp/transports.svg)
 
 - **stdio** is for local servers. The client starts the server as a program on your computer and they exchange messages through its standard input and output. This is the files server from the architecture diagram. Desktop AI apps usually set these up from a configuration file that names the program to run.
-- **Streamable HTTP** is for remote servers. The client sends each message as an HTTP POST to the server's MCP endpoint, a single URL such as `https://weather.example.com/mcp`. The reply comes back as plain JSON, or as a stream of events if the server has several messages to send for that request. This is the weather server. Remote servers often ask you to sign in before you can use them.
+- **Streamable HTTP** is for remote servers. The client sends each message as an HTTP POST to the server's MCP endpoint, a single URL such as `https://weather.example.com/mcp`. The reply comes back as plain JSON, or as a stream of events if the server has several messages to send for that request. This is the weather server. Remote servers often ask you to sign in before you can use them. MCP's authorization rules define how that sign-in works, so the host can get access on your behalf without the server seeing your password.
 
 The messages are the same on both transports. A `tools/call` for `get_forecast` looks identical whether it travels over stdio or HTTP. Only the delivery changes.
 
@@ -274,24 +283,29 @@ The messages are the same on both transports. A `tools/call` for `get_forecast` 
 It helps to know where the protocol stops:
 
 - **It isn't a model or an agent.** MCP doesn't decide what to do or generate answers. The model inside the host does that, and MCP only gives it a standard way to reach tools and data.
-- **It doesn't make a server trustworthy.** An MCP server can do anything its code allows. Connect only to servers you trust, and treat a tool's description as a claim from the server, not a guarantee.
+- **It doesn't make a server trustworthy.** An MCP server can do anything its code allows. Connect only to servers you trust, and treat a tool's description as a claim from the server, not a guarantee. Tool descriptions and results are text the model reads, so a malicious server can try to steer the model with instructions hidden in them. This is called prompt injection, and it's one reason the host asks you before a tool runs.
 - **It doesn't decide what the model may do.** Approvals, permissions and what the model sees are the host's job. MCP gives the host the information it needs to make those decisions.
 - **It doesn't replace the service's API.** The weather server still uses the weather API behind the scenes. MCP is the layer that lets AI apps use the server.
 
-## Words to know
+## Key terms
 
-| Term             | Meaning                                                                                |
-| ---------------- | -------------------------------------------------------------------------------------- |
-| **Host**         | The AI app you use, which contains one MCP client per server it connects to.           |
-| **MCP client**   | The part of the host that talks to one MCP server.                                     |
-| **MCP server**   | A program that offers tools, resources or prompts to AI apps through MCP.              |
-| **Tool**         | A function the model can ask to run, such as `get_forecast`.                           |
-| **Resource**     | Data an app can read by URI, such as a file or a list of alerts.                       |
-| **Prompt**       | A ready-made instruction template you choose, often as a slash command.                |
-| **Capabilities** | What each side says it supports, such as tools on a server or elicitation on a client. |
-| **Elicitation**  | A server asking you for input through the client, such as "Which Lagos?".              |
-| **Transport**    | How messages travel: stdio for local servers, Streamable HTTP for remote ones.         |
-| **JSON-RPC**     | The message format MCP uses for requests, responses and notifications.                 |
+| Term                 | Meaning                                                                                |
+| -------------------- | -------------------------------------------------------------------------------------- |
+| **Host**             | The AI app you use, which contains one MCP client per server it connects to.           |
+| **MCP client**       | The part of the host that talks to one MCP server.                                     |
+| **MCP server**       | A program that offers tools, resources or prompts to AI apps through MCP.              |
+| **Primitive**        | One of the three kinds of things a server offers: tools, resources and prompts.        |
+| **Discovery**        | Asking a server what it offers, with `server/discover` and the `*/list` methods.       |
+| **Tool**             | A function the model can ask to run, such as `get_forecast`.                           |
+| **Resource**         | Data an app can read by URI, such as a file or a list of cities.                       |
+| **Prompt**           | A ready-made instruction template you choose, often as a slash command.                |
+| **`inputSchema`**    | The JSON Schema that describes a tool's arguments, written for the model.              |
+| **`_meta`**          | The block on every request with the protocol version, client info and capabilities.    |
+| **Capabilities**     | What each side says it supports, such as tools on a server or elicitation on a client. |
+| **Elicitation**      | A server asking you for input through the client, such as "Which Lagos?".              |
+| **`input_required`** | The result a server returns when it needs more information before it can finish.       |
+| **Transport**        | How messages travel: stdio for local servers, Streamable HTTP for remote ones.         |
+| **JSON-RPC**         | The message format MCP uses for requests, responses and notifications.                 |
 
 ## What to remember
 
@@ -301,11 +315,10 @@ It helps to know where the protocol stops:
 - A tool call goes: discover the server, list its tools, let the model choose, get your approval, `tools/call`, then hand the result back to the model.
 - Every request carries its own version and capabilities in `_meta`, so there's no session to set up.
 - When a server needs more information, it returns `input_required` and the client retries with your answer.
-
-If you want to build a server like the weather server yourself, [Building Your First MCP Server](/guides/building-your-first-mcp-server) walks through it step by step. For tool calls that take minutes rather than seconds, [What Are MCP Tasks? A Practical Introduction](/blog/how-mcp-tasks-work) shows how a server can answer right away and report progress until the work is done.
+- A tool that ran but failed returns a result with `isError: true` that the model can explain. A request that was wrong returns a JSON-RPC `error`.
 
 <MetadataPanel>
 
-Verified against MCP protocol revision `2026-07-28` on 2026-11-08. Primary sources: [architecture](https://modelcontextprotocol.io/specification/2026-07-28/architecture), [server primitives](https://modelcontextprotocol.io/specification/2026-07-28/server), [tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools), [server/discover](https://modelcontextprotocol.io/specification/2026-07-28/server/discover), [elicitation](https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation), [transports](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports) and the [changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog).
+This article follows the `2026-07-28` version of the MCP specification. To go deeper, start with its pages on [architecture](https://modelcontextprotocol.io/specification/2026-07-28/architecture), [server primitives](https://modelcontextprotocol.io/specification/2026-07-28/server), [tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools), [server/discover](https://modelcontextprotocol.io/specification/2026-07-28/server/discover), [elicitation](https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation), [transports](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports) and the [changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog), which lists what changed in this version.
 
 </MetadataPanel>
