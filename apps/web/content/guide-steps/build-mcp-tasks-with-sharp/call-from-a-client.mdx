@@ -17,9 +17,10 @@ specVersion: 2026-07-28
 lastVerified: 2026-10-31
 ---
 
-The MCP server can now return a task. Your MCP client must declare that it knows
-how to handle one, then distinguish a task handle from an ordinary result.
-Keep the MCP server running in terminal A.
+Your MCP server can now return a task, so the next job is to write an MCP client
+that can work with one. The client has to declare that it knows how to handle
+tasks, and then tell a task handle apart from an ordinary result. Keep the MCP
+server running in terminal A.
 
 <ProtocolDiagram
   label="The MCP client side of a task: declare Tasks support, call the tool, branch on resultType, poll tasks/get at the suggested interval, and read the final result when the status is completed."
@@ -75,20 +76,22 @@ try {
 }
 ```
 
-The `capabilities` object opts this MCP client into Tasks. The supplied `connect()`
-helper creates an SDK `Client`, connects over Streamable HTTP, and includes those
-capabilities in every request's metadata. Open `src/connection.ts` to see where
-`io.modelcontextprotocol/clientCapabilities` is attached.
+The `capabilities` object opts this MCP client into Tasks. The supplied
+`connect()` helper creates an SDK `Client`, connects over Streamable HTTP, and
+puts those capabilities in the metadata of every request. You can open
+`src/connection.ts` to see where `io.modelcontextprotocol/clientCapabilities` is
+attached.
 
-The `resultType` branch is essential even when Tasks support is declared: the
-MCP server may return either a task handle or an ordinary result. Both paths end
-with a tool result, which this MCP client validates before printing.
+The `resultType` branch is essential even though the client declares Tasks
+support, because the MCP server may return either a task handle or an ordinary
+result. Both paths end with a tool result, which this MCP client validates before
+it prints anything.
 
-`connect()`, `callTool()` on its returned object, and `watchTask()` are local
-helpers. The connection code uses the extension's V2 schemas for the supplied
-MCP server's JSON responses. For a broader application, the official
-[Tasks client API](https://tasks.extensions.modelcontextprotocol.io/typescript/getting-started)
-provides lifecycle helpers; its current V2 integration also requires a
+`connect()`, the `callTool()` method on the object it returns, and `watchTask()`
+are all local helpers. The connection code uses the extension's V2 schemas to read
+the JSON responses from the supplied MCP server. For a broader application, the
+official [Tasks client API](https://tasks.extensions.modelcontextprotocol.io/typescript/getting-started)
+provides lifecycle helpers, although its current V2 integration also needs a
 [raw request adapter](https://tasks.extensions.modelcontextprotocol.io/typescript/adapters-and-schemas).
 
 ## 2. Follow the task to its result
@@ -128,8 +131,8 @@ export async function watchTask(
 }
 ```
 
-Each loop calls `tasks/get` through `connection.getTask()`, using the same ID,
-and handles the statuses from the step 1 table:
+On each pass, the loop calls `tasks/get` through `connection.getTask()` with the
+same ID, and it handles the statuses from the step 1 table like this:
 
 | Status           | What `watchTask()` does                                                         |
 | ---------------- | ------------------------------------------------------------------------------- |
@@ -139,13 +142,16 @@ and handles the statuses from the step 1 table:
 | `cancelled`      | Returns `undefined`, so the caller prints nothing.                              |
 | `input_required` | Throws, because this image tool never asks for input.                           |
 
-The two-minute deadline stops this MCP client from waiting forever. It does not
-cancel image processing. This image tool never asks for input, so the example
-reports `input_required` as unsupported. A general MCP client would handle the
-requests and send answers via `tasks/update`.
+The two-minute deadline stops this MCP client from waiting forever, but it does
+not cancel the image processing. And because this image tool never asks for
+input, the example simply reports `input_required` as unsupported. A
+general-purpose MCP client would handle those requests and send its answers with
+`tasks/update`.
 
-In this extension version, **`tasks/get` includes the final result**. There is
-no separate `tasks/result` request. See [task polling](https://tasks.extensions.modelcontextprotocol.io/specification/2026-07-28/tasks#task-polling).
+In this version of the extension, **`tasks/get` includes the final result**, so
+there is no separate `tasks/result` request. The
+[task polling](https://tasks.extensions.modelcontextprotocol.io/specification/2026-07-28/tasks#task-polling)
+section of the specification describes this.
 
 ## 3. Run your MCP client
 
@@ -156,8 +162,8 @@ pnpm run tasks-client
 pnpm run verify --output
 ```
 
-The beginning and end should look like this. Your task ID and folder will differ;
-polling may skip intermediate counts:
+The start and end of the output should look like this. Your task ID and folder
+will differ, and polling may skip some of the intermediate counts:
 
 ```text
 Task ID: <task-id>
@@ -170,18 +176,21 @@ Output: <your-project>/output/<batch-id>
 Verified 18 WebP files against manifest.json.
 ```
 
-Open the output folder and one WebP file. `manifest.json` lists each filename,
-width, height and file size. The result points to local files shared by your MCP
-server and MCP client; it does not transfer image files over MCP.
+Open the output folder and look at one of the WebP files. `manifest.json` lists
+each file's name, width, height and size. The result only points to local files
+that your MCP server and MCP client both have access to. It does not transfer the
+image files over MCP.
 
-If the connection is refused, check that terminal A is running. For another
-port, use `pnpm run tasks-client http://127.0.0.1:3002/mcp`. A `TODO` error means
-one of this step's files still needs to be saved. Regenerate fixtures if an input
-image is missing.
+If the connection is refused, check that terminal A is still running. If you
+started the server on another port, pass its URL, for example
+`pnpm run tasks-client http://127.0.0.1:3002/mcp`. A `TODO` error means that one
+of this step's files has not been saved yet. If an input image is missing,
+regenerate the fixtures.
 
 **Checkpoint:** your own MCP client declares Tasks support, receives a task ID,
-checks its state and retrieves a result describing eighteen verified images.
-The progress lines are stored task messages, not image-processing speed measurements.
+checks the task's state, and retrieves a result that describes eighteen verified
+images. The progress lines are messages stored on the task, so don't read them as
+a measure of how fast the images are processed.
 
 [Recover to the end of step 4](/downloads/mcp-tasks-thumbnails/step-4.zip).
 Restart the MCP server from that folder if you switch projects.

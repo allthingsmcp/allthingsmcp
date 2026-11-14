@@ -48,18 +48,19 @@ guideSteps:
     estimatedMinutes: 5
 ---
 
-Some `tools/call` requests take longer than a request should stay open. A large
-image batch, a deployment, a step that waits for approval. **Tasks is the MCP
-extension that lets an MCP server answer such a call immediately with a task
-handle, then report progress and the final result through short follow-up
-requests.** The MCP client can disconnect, come back with the task ID and pick
-up the same work.
+Some `tools/call` requests take longer than a request should stay open. Think
+of a test suite, a deployment, a data export, or a step that waits for a person
+to approve something. **Tasks is the MCP extension that lets an MCP server
+answer such a call immediately with a task handle, then report progress and the
+final result through short follow-up requests.** The MCP client can disconnect,
+come back later with the task ID, and pick up the same work.
 
 This guide is for developers who have built an MCP server and are new to Tasks.
-The first step explains how Tasks work with diagrams of the full exchange. The remaining
-steps guide you through implementing the extension on both an MCP server and an MCP
-client, using a batch image resize as the example. For the concepts on their own,
-without the build, read [How MCP Tasks Work](/blog/how-mcp-tasks-work).
+The first step explains how Tasks work with diagrams of the full exchange. The
+remaining steps guide you through implementing the extension on both an MCP
+server and an MCP client, using a batch of image resizes as the example. For
+the concepts on their own, without the build, read
+[How MCP Tasks Work](/blog/how-mcp-tasks-work).
 
 ## What you will build
 
