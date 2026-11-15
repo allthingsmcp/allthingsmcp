@@ -43,6 +43,18 @@ export async function GET(
     );
   });
   if (!page) return new Response('Not found', { status: 404 });
+  // A step of a draft Guide is hidden along with its Guide.
+  if (production && slug.length === 3) {
+    const guide = source
+      .getPages()
+      .find(
+        (candidate) =>
+          (candidate.data as ContentFrontmatter).contentType === 'guide' &&
+          candidate.slugs.at(-1) === slug[1],
+      );
+    if ((guide?.data as ContentFrontmatter | undefined)?.status !== 'published')
+      return new Response('Not found', { status: 404 });
+  }
 
   const data = page.data as ContentFrontmatter;
   const guide =

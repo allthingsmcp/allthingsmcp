@@ -71,13 +71,27 @@ function structure(...content: string[]) {
   };
 }
 
+// Steps inherit their Guide's status: a draft Guide hides all its steps.
+const unpublishedGuides = new Set(
+  source
+    .getPages()
+    .filter((page) => {
+      const data = page.data as ContentFrontmatter;
+      return data.contentType === 'guide' && data.status !== 'published';
+    })
+    .map((page) => page.slugs.at(-1)),
+);
+
 const contentRecords: SearchRecord[] = source
   .getPages()
   .filter((page) => {
     const data = page.data as ContentFrontmatter;
+    const guidePublished =
+      data.contentType !== 'guide-step' ||
+      !unpublishedGuides.has(data.guideSlug);
     return (
       categoryFor(data) !== undefined &&
-      (!production || data.status === 'published')
+      (!production || (data.status === 'published' && guidePublished))
     );
   })
   .map((page) => {
