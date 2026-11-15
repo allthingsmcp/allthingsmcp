@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { NextProvider } from 'fumadocs-core/framework/next';
+import { FirstPartyAnalytics } from '@/components/first-party-analytics';
 import { PrivacyAnalytics } from '@/components/privacy-analytics';
 import { AuthDialogProvider } from '@/components/auth-dialog';
 import { AuthReturnRestorer } from '@/components/auth-return-restorer';
@@ -11,6 +12,7 @@ import { SiteHeader } from '@/components/site-header';
 import { GuideProgressProvider } from '@/components/use-guide-progress';
 import { AuthSessionProvider } from '@/lib/auth-client';
 import { siteConfig } from '@/lib/config';
+import { isProductionDeployment } from '@/lib/deployment';
 import { brandAssets, brandIdentity } from '@/lib/brand';
 import { JsonLd, siteStructuredData } from '@/components/json-ld';
 import './globals.css';
@@ -93,6 +95,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   {children}
                   <SiteFooter />
                   <PrivacyAnalytics />
+                  <FirstPartyAnalytics
+                    enabled={
+                      isProductionDeployment() ||
+                      process.env.ANALYTICS_ENABLED === 'true'
+                    }
+                  />
                   <AuthReturnRestorer />
                 </SearchDialogProvider>
               </GuideProgressProvider>

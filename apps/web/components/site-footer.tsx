@@ -33,7 +33,6 @@ const groups = [
     links: [
       ['About', '/about'],
       ['Contribute', '/contribute'],
-      ['Independence', '/independence'],
     ],
   },
 ] as const;

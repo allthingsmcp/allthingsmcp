@@ -65,12 +65,12 @@ test('desktop navigation reflects the focused content model', async ({
     page
       .getByRole('navigation', { name: 'Primary navigation' })
       .getByRole('link', { name: 'Guides', exact: true }),
-  ).toHaveAttribute('href', '/#guides');
+  ).toHaveAttribute('href', '/guides');
   await expect(
     page
       .getByRole('navigation', { name: 'Primary navigation' })
       .getByRole('link', { name: 'Blog', exact: true }),
-  ).toHaveAttribute('href', '/#blog');
+  ).toHaveAttribute('href', '/blog');
 });
 
 test('account controls hydrate without changing their initial text', async ({
@@ -158,7 +158,7 @@ test('guides use a structured overview and temporary anonymous progress', async 
   await expect(page).toHaveURL(
     /\/guides\/build-mcp-tasks-with-sharp\/understand-mcp-tasks$/,
   );
-  await expect(page.getByText('Step 1 of 6')).toBeVisible();
+  await expect(page.getByText('Step 1 of 7')).toBeVisible();
   const reportHref = await page
     .getByRole('link', { name: 'Report outdated content' })
     .getAttribute('href');
@@ -184,16 +184,16 @@ test('guides use a structured overview and temporary anonymous progress', async 
   ).toBeVisible();
 
   await page.getByRole('link', { name: 'Guide overview' }).click();
-  await expect(page.getByText('1 of 6 completed')).toBeVisible();
+  await expect(page.getByText('1 of 7 completed')).toBeVisible();
   await expect(
     page.getByRole('progressbar', { name: 'Guide progress' }),
-  ).toHaveAttribute('aria-valuenow', '17');
+  ).toHaveAttribute('aria-valuenow', '14');
   await expect(
     page.getByRole('button', { name: 'Sign in to save progress' }),
   ).toBeVisible();
 
   await page.reload();
-  await expect(page.getByText('0 of 6 completed')).toBeVisible();
+  await expect(page.getByText('0 of 7 completed')).toBeVisible();
   await expect(
     page.getByRole('progressbar', { name: 'Guide progress' }),
   ).toHaveAttribute('aria-valuenow', '0');

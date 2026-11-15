@@ -46,6 +46,8 @@ Authentication is optional locally. With it disabled, anonymous reading, seven-d
 
 Without `DATABASE_URL`, the runtime uses memory storage and loses workspaces on restart. Apply the Supabase migrations before using the database-backed runtime; startup checks report connection failures or missing tables.
 
+First-party analytics is off locally. To try it, apply the migrations, then set `SUPABASE_SECRET_KEY`, `ANALYTICS_SECRET`, `ANALYTICS_ADMIN_EMAILS` (your GitHub email), `ANALYTICS_HOSTNAMES=localhost` and `ANALYTICS_ENABLED=true` in `apps/web/.env.local`. Sign in with GitHub and open `/admin/analytics`. Opening the dashboard stops counting your own browser; the toggle on the page turns it back on.
+
 Behind a reverse proxy, set `TRUSTED_PROXY_COUNT` in the runtime so per-IP rate limits use the real client address.
 
 ## Memory

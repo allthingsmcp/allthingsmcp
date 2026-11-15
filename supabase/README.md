@@ -19,6 +19,12 @@ database used by Guide Runtime.
    `welcome-email` Edge Function and add
    `Authorization: Bearer <WELCOME_EMAIL_WEBHOOK_SECRET>`.
 
+7. For first-party analytics, set `SUPABASE_SECRET_KEY` (the project's secret
+   or service role key), `ANALYTICS_SECRET` and `ANALYTICS_ADMIN_EMAILS` on the
+   website's Vercel production environment. The analytics migration creates
+   `public.analytics_events` and its reporting functions; browser roles have no
+   access to either.
+
 The profile trigger is intentionally small because a failing `auth.users`
 trigger can block account creation. Email delivery is asynchronous through the
 Database Webhook and does not block sign-in.
