@@ -273,6 +273,10 @@ export function LinkBuilder({
                   press ⌘C or Ctrl+C to copy it.
                 </p>
               )}
+              <p className="link-builder__hint">
+                To test it yourself, open it in a private window. Visits from a
+                browser that has opened the dashboard are not counted.
+              </p>
               {link.external && (
                 <p className="link-builder__warning">
                   This link points to another site, so its visits will not
