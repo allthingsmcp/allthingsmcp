@@ -3486,6 +3486,26 @@ a:is(:hover, :focus-visible) .call-scene__node--server {
 .prose ol {
   margin: 14px 0;
 }
+/* Markdown lists; component lists (Steps, Checklist) carry a class. */
+.prose ul:not([class]),
+.prose ol:not([class]) {
+  padding-left: 1.4em;
+}
+.prose ul:not([class]) {
+  list-style: disc;
+}
+.prose ol:not([class]) {
+  list-style: decimal;
+}
+.prose :is(ul, ol):not([class]) li + li {
+  margin-top: 6px;
+}
+.prose :is(ul, ol):not([class]) li::marker {
+  color: var(--muted);
+}
+.prose :is(ul, ol):not([class]) :is(ul, ol) {
+  margin: 6px 0;
+}
 .prose blockquote {
   margin: 22px 0;
   padding: 4px 0 4px 18px;
@@ -3793,11 +3813,6 @@ a:is(:hover, :focus-visible) .call-scene__node--server {
   border: 1px solid var(--border);
   border-radius: 9px;
   background: var(--surface);
-}
-.mdx-diagram figcaption {
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 0.68rem;
 }
 .mdx-diagram__canvas {
   display: flex;
