@@ -181,7 +181,9 @@ test('robots and sitemap expose only launch-ready discovery routes', async ({
   const sitemap = await request.get('/sitemap.xml');
   expect(sitemap.ok()).toBe(true);
   const sitemapText = await sitemap.text();
-  expect(sitemapText).toContain('/guides/building-your-first-mcp-server');
+  expect(sitemapText).toContain('/guides/build-mcp-tasks-with-sharp');
+  // A draft Guide and its steps stay out of the sitemap.
+  expect(sitemapText).not.toContain('/guides/building-your-first-mcp-server');
   expect(sitemapText).not.toContain('/privacy');
   expect(sitemapText).not.toContain('/spec-watch');
   expect(sitemapText).not.toContain('/tools');
@@ -191,9 +193,9 @@ test('robots and sitemap expose only launch-ready discovery routes', async ({
 test('guide steps expose specific search metadata and structured data', async ({
   page,
 }) => {
-  await page.goto('/guides/building-your-first-mcp-server/add-tools');
+  await page.goto('/guides/build-mcp-tasks-with-sharp/understand-mcp-tasks');
   await expect(page).toHaveTitle(
-    'Add Tools | Building Your First MCP Server · All Things MCP',
+    'Understand how MCP Tasks work | Build Your First MCP Task · All Things MCP',
   );
   const structuredData = await page
     .locator('script[type="application/ld+json"]')
@@ -206,27 +208,27 @@ test('guide steps expose specific search metadata and structured data', async ({
       expect.objectContaining({
         '@type': 'BreadcrumbList',
         itemListElement: expect.arrayContaining([
-          expect.objectContaining({ name: 'Building Your First MCP Server' }),
+          expect.objectContaining({ name: 'Build Your First MCP Task' }),
         ]),
       }),
       expect.objectContaining({
         '@type': 'Article',
-        headline: 'Add Tools',
-        datePublished: '2026-08-31',
+        headline: 'Understand how MCP Tasks work',
+        datePublished: '2026-11-08',
       }),
     ]),
   );
 });
 
 test('guide authors link to a visible profile', async ({ page }) => {
-  await page.goto('/guides/building-your-first-mcp-server');
+  await page.goto('/guides/build-mcp-tasks-with-sharp');
   await page.getByRole('link', { name: 'Gbadebo Bello', exact: true }).click();
   await expect(page).toHaveURL(/\/authors\/gbadebo-bello$/);
   await expect(
     page.getByRole('heading', { name: 'Gbadebo Bello' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: 'Building Your First MCP Server' }),
+    page.getByRole('link', { name: 'Build Your First MCP Task' }),
   ).toBeVisible();
 });
 

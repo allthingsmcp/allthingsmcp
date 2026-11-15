@@ -29,37 +29,50 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.4,
     }));
 
-  const contentRoutes: MetadataRoute.Sitemap = source
-    .getPages()
-    .flatMap((page) => {
-      const data = page.data as ContentFrontmatter;
-      if (data.status !== 'published' || data.section === 'spec-watch') {
-        return [];
-      }
+  const pages = source.getPages();
+  // Steps inherit their Guide's status: a draft Guide hides all its steps.
+  const unpublishedGuides = new Set(
+    pages
+      .filter((page) => {
+        const data = page.data as ContentFrontmatter;
+        return data.contentType === 'guide' && data.status !== 'published';
+      })
+      .map((page) => page.slugs.at(-1)),
+  );
+  const contentRoutes: MetadataRoute.Sitemap = pages.flatMap((page) => {
+    const data = page.data as ContentFrontmatter;
+    if (
+      data.status !== 'published' ||
+      data.section === 'spec-watch' ||
+      (data.contentType === 'guide-step' &&
+        unpublishedGuides.has(data.guideSlug))
+    ) {
+      return [];
+    }
 
-      let pathname: string | undefined;
-      if (data.contentType === 'guide') {
-        pathname = `/guides/${page.slugs.at(-1)}`;
-      } else if (
-        data.contentType === 'guide-step' &&
-        data.guideSlug &&
-        data.guideStepId
-      ) {
-        pathname = `/guides/${data.guideSlug}/${data.guideStepId}`;
-      } else if (data.contentType === 'article') {
-        pathname = `/blog/${page.slugs.at(-1)}`;
-      }
+    let pathname: string | undefined;
+    if (data.contentType === 'guide') {
+      pathname = `/guides/${page.slugs.at(-1)}`;
+    } else if (
+      data.contentType === 'guide-step' &&
+      data.guideSlug &&
+      data.guideStepId
+    ) {
+      pathname = `/guides/${data.guideSlug}/${data.guideStepId}`;
+    } else if (data.contentType === 'article') {
+      pathname = `/blog/${page.slugs.at(-1)}`;
+    }
 
-      if (!pathname) return [];
-      return [
-        {
-          url: absoluteUrl(pathname),
-          lastModified: new Date(data.updatedAt),
-          changeFrequency: 'monthly' as const,
-          priority: data.contentType === 'guide' ? 0.8 : 0.7,
-        },
-      ];
-    });
+    if (!pathname) return [];
+    return [
+      {
+        url: absoluteUrl(pathname),
+        lastModified: new Date(data.updatedAt),
+        changeFrequency: 'monthly' as const,
+        priority: data.contentType === 'guide' ? 0.8 : 0.7,
+      },
+    ];
+  });
 
   return [...staticRoutes, ...authorRoutes, ...contentRoutes];
 }
