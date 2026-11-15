@@ -176,13 +176,6 @@ const pageRecords: SearchRecord[] = [
       'contribute edit write guide article GitHub pull request community',
   },
   {
-    title: 'Independence and editorial policy',
-    description:
-      'How ATM preserves trust, attributes sources, and separates evidence from opinion.',
-    url: '/independence',
-    content: 'independence editorial policy corrections sponsorship disclosure',
-  },
-  {
     title: 'ATM newsletter',
     description:
       'Subscribe for new MCP guides, technical analysis, and specification updates.',

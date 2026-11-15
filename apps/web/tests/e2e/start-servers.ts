@@ -163,6 +163,8 @@ launch(
     NODE_ENV: 'development',
     NEXT_DIST_DIR: '.next-e2e',
     NEXT_PUBLIC_SUPABASE_ENABLED: 'false',
+    // Turns the first-party tracker on; without a secret the collector stores nothing.
+    ANALYTICS_ENABLED: 'true',
     GUIDE_RUNTIME_URL: 'http://localhost:8887',
     GUIDE_RUNTIME_SHARED_SECRET: sharedSecret,
   },

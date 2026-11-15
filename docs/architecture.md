@@ -14,7 +14,15 @@
   The website uses `apps/web` as its Vercel project root; `main` is production
   and pull requests receive previews.
 - Newsletter: branded wrapper around a configurable official Substack embed with a direct link fallback.
-- Analytics: Vercel Web Analytics may be enabled by environment; event payloads must contain no user text or PII.
+- Analytics: Vercel Web Analytics runs alongside first-party analytics. The
+  first-party tracker (`components/first-party-analytics.tsx`) sends page views
+  and named events to `/api/e`, which stores them in `public.analytics_events`
+  with the service role. It sets no cookies and stores no IP address: a visitor
+  is a salted hash that changes every UTC day. Only the path is kept, never the
+  query string, and event properties must be fixed values, never user text or
+  PII. It skips admin pages, Global Privacy Control and Do Not Track. Reports
+  come from SQL functions in the analytics migration and are shown at
+  `/admin/analytics` to emails in `ANALYTICS_ADMIN_EMAILS` only.
 - Authentication: Supabase Auth provides GitHub OAuth with SSR cookie sessions.
   First-time GitHub sign-in creates an ATM account automatically. The website
   validates the Supabase user before exchanging the session for a short-lived
