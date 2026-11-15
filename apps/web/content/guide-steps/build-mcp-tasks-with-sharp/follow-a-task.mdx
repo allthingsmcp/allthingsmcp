@@ -23,7 +23,7 @@ running. These are two different actions, and they end differently:
 
 ![Two flows side by side. Detach: the MCP client saves the taskId and exits without sending a message; the server keeps working and finishes all 18 images; a later tasks/get from a new connection returns completed with the same batch and result. Cancel: the MCP client sends tasks/cancel and the server replies with an empty acknowledgement; the worker checks for cancellation between images, so the current image may finish; tasks/get then reads the actual outcome, cancelled, or completed if the batch had already finished.](/images/guides/mcp-tasks/detach-vs-cancel.svg)
 
-The starter includes a command-line wrapper, `src/client.ts`, with `run`,
+The project you copied includes a command-line wrapper, `src/client.ts`, with `run`,
 `watch` and `cancel` commands. It uses the same connection helper and polling
 loop that you just wrote, and it saves task IDs in `output/last-task.json`.
 
@@ -108,6 +108,3 @@ keeps detaching and cancelling separate as well.
 **Checkpoint:** you retrieved the same batch after the MCP client had exited, and
 you saw the task's final state after asking for cancellation. The acknowledgement
 on its own is not proof that processing stopped.
-
-[Recover to the end of step 5](/downloads/mcp-tasks-thumbnails/step-5.zip).
-A recovery download contains code only, not your existing `.tasks/` records.

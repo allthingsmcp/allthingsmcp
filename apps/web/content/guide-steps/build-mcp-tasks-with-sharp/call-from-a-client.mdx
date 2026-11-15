@@ -76,23 +76,16 @@ try {
 }
 ```
 
-The `capabilities` object opts this MCP client into Tasks. The supplied
-`connect()` helper creates an SDK `Client`, connects over Streamable HTTP, and
-puts those capabilities in the metadata of every request. You can open
-`src/connection.ts` to see where `io.modelcontextprotocol/clientCapabilities` is
-attached.
+The `capabilities` object tells the server that this client supports Tasks.
+The supplied `connect()` helper attaches it to every request.
 
-The `resultType` branch is essential even though the client declares Tasks
-support, because the MCP server may return either a task handle or an ordinary
-result. Both paths end with a tool result, which this MCP client validates before
-it prints anything.
+The `resultType` check matters because the server can answer with either a task
+handle or an ordinary result. Both paths end with a tool result, which the
+client validates before printing it.
 
-`connect()`, the `callTool()` method on the object it returns, and `watchTask()`
-are all local helpers. The connection code uses the extension's V2 schemas to read
-the JSON responses from the supplied MCP server. For a broader application, the
-official [Tasks client API](https://tasks.extensions.modelcontextprotocol.io/typescript/getting-started)
-provides lifecycle helpers, although its current V2 integration also needs a
-[raw request adapter](https://tasks.extensions.modelcontextprotocol.io/typescript/adapters-and-schemas).
+`connect()`, `callTool()` and `watchTask()` are helpers from this project, not
+SDK functions. For a larger application, see the official
+[Tasks client API](https://tasks.extensions.modelcontextprotocol.io/typescript/getting-started).
 
 ## 2. Follow the task to its result
 
@@ -132,7 +125,7 @@ export async function watchTask(
 ```
 
 On each pass, the loop calls `tasks/get` through `connection.getTask()` with the
-same ID, and it handles the statuses from the step 1 table like this:
+same ID, and it handles each status like this:
 
 | Status           | What `watchTask()` does                                                         |
 | ---------------- | ------------------------------------------------------------------------------- |
@@ -191,6 +184,3 @@ regenerate the fixtures.
 checks the task's state, and retrieves a result that describes eighteen verified
 images. The progress lines are messages stored on the task, so don't read them as
 a measure of how fast the images are processed.
-
-[Recover to the end of step 4](/downloads/mcp-tasks-thumbnails/step-4.zip).
-Restart the MCP server from that folder if you switch projects.

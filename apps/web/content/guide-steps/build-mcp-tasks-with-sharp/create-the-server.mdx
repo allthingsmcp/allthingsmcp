@@ -126,15 +126,14 @@ export function registerTaskHandlers(server: McpServer, worker: TaskWorker) {
 }
 ```
 
-The extension adds four responsibilities to your server, and each one matches a
-part of the step 1 diagrams:
+The extension adds four responsibilities to your server:
 
-| Code                     | What it does                                                                                                                        | Step 1 reference          |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `registerCapabilities()` | Advertises `io.modelcontextprotocol/tasks` in discovery. `tasksExtension` is defined in `src/config.ts`.                            | Who decides               |
-| `tools/call` handler     | Checks this request's capabilities. Declaring clients get a task handle from `worker.start()`; others wait for the ordinary result. | Who decides; exchange 1–3 |
-| `tasks/get` handler      | Returns the stored record. Once the task is completed, the record also holds the tool result.                                       | Exchange 5 and 7          |
-| `tasks/cancel` handler   | Records a request to stop and returns an empty acknowledgement. The worker checks it between images.                                | Lifecycle: cancelled      |
+| Code                     | What it does                                                                                                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `registerCapabilities()` | Advertises `io.modelcontextprotocol/tasks` in discovery. `tasksExtension` is defined in `src/config.ts`.                            |
+| `tools/call` handler     | Checks this request's capabilities. Declaring clients get a task handle from `worker.start()`; others wait for the ordinary result. |
+| `tasks/get` handler      | Returns the stored record. Once the task is completed, the record also holds the tool result.                                       |
+| `tasks/cancel` handler   | Records a request to stop and returns an empty acknowledgement. The worker checks it between images.                                |
 
 Both `tasks/*` handlers call `requireTasks()` first, so a request that does not
 declare the extension gets error `-32021`, as the specification requires.
@@ -162,7 +161,7 @@ async start(input: ThumbnailInput) {
 }
 ```
 
-This is exchange steps 2 and 3 from step 1: save the task, then return it.
+The server saves the task first and returns its handle second.
 `store.create()` writes the record to `.tasks/` first. Then `setImmediate`
 schedules `run()` for after the current turn of the event loop, so the response
 goes out with the saved record and `resultType: 'task'` while the batch starts
@@ -215,14 +214,15 @@ finish before the check. Look in `output/` while terminal A is running: the
 batch carries on after the probe exits. In the next step you will write your own
 MCP client to follow it.
 
-If the probe gets an ordinary result, save both edited files and restart
-terminal A without `--ordinary`. If port 3001 is already in use, start the MCP
-server with `--port 3002` and run `pnpm run probe http://127.0.0.1:3002/mcp`.
-Make sure you type `pnpm run server`, including `run`, because `pnpm server` is
-a different command.
+If something goes wrong, check these two cases:
+
+- **The probe prints an ordinary result instead of a task handle.** Terminal A
+  is probably running in the wrong mode. Save both edited files, stop the
+  server, and start it again with `pnpm run server --demo-delay-ms 1000`. Do not
+  add `--ordinary`.
+- **The server says port 3001 is already in use.** Start it on another port with
+  `pnpm run server --port 3002`, then point the probe at that port:
+  `pnpm run probe http://127.0.0.1:3002/mcp`.
 
 **Checkpoint:** your MCP server returns a task ID that you can look up straight
 away, while the image work carries on in the background.
-
-[Recover to the end of step 3](/downloads/mcp-tasks-thumbnails/step-3.zip).
-Stop the old MCP server before starting the recovered copy.

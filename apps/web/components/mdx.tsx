@@ -136,7 +136,6 @@ export function ProtocolDiagram({
         ))}
         {!nodes && children}
       </div>
-      <figcaption>{label}</figcaption>
     </figure>
   );
 }

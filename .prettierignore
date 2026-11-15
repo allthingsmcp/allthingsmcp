@@ -13,6 +13,4 @@ apps/web
 **/.tasks
 apps/web/public
 skills
-examples/**/node_modules
-examples/mcp-tasks-thumbnails/pnpm-lock.yaml
 supabase/migrations

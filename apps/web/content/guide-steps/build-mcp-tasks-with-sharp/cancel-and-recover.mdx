@@ -17,7 +17,7 @@ specVersion: 2026-07-28
 lastVerified: 2026-10-31
 ---
 
-In this last step you will handle an image operation that fails, and then change
+In this step you will handle an image operation that fails, and then change
 the input without changing anything about the task workflow.
 
 ## 1. Try an invalid image
@@ -35,12 +35,11 @@ completed: Batch returned a tool error.
 Cannot process broken.png: Input buffer contains unsupported image format
 ```
 
-The command exits with a nonzero status, yet the task says `completed`. That is
-because the tool returned a result that describes its failure, with
-`isError: true`. This is the "also when the tool result has `isError: true`" path
-in the step 1 lifecycle diagram, and it is different from the `failed` state,
-which is used for a JSON-RPC execution error. Your MCP client therefore has to
-check the tool result as well as the task status.
+The command exits with a nonzero status even though the task says `completed`.
+The task itself finished normally. What failed was the tool, which returned a
+result with `isError: true`. A task only shows `failed` when the request itself
+errors, so your MCP client has to check the tool result as well as the task
+status.
 
 Run it again with valid input:
 
@@ -66,7 +65,7 @@ stays at the smaller size, because the resize function avoids enlarging images.
 Give your file a new name, since `pnpm run fixtures` overwrites the supplied
 sample names.
 
-The README in the [completed project](/downloads/mcp-tasks-thumbnails/completed.zip)
+The README in the [finished project](https://github.com/allthingsmcp/all-things-mcp-examples/tree/main/build-your-first-mcp-task/finished)
 has this command under “Try your own image.”
 
 ## 3. Verify the implementation
@@ -112,5 +111,5 @@ is the place to start, and the
 [Tasks overview](https://modelcontextprotocol.io/extensions/tasks/overview)
 covers other use cases.
 
-[Download the completed project](/downloads/mcp-tasks-thumbnails/completed.zip)
-for all source files and tests.
+The [finished project](https://github.com/allthingsmcp/all-things-mcp-examples/tree/main/build-your-first-mcp-task/finished)
+has all source files and tests.

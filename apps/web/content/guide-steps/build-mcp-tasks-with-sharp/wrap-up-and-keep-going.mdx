@@ -1,0 +1,48 @@
+---
+title: Wrap up and keep going
+description: Review what you built and find the resources for taking Tasks further.
+contentType: guide-step
+section: build
+guideSlug: build-mcp-tasks-with-sharp
+guideStepId: wrap-up-and-keep-going
+guideStepOrder: 7
+authors: [Gbadebo Bello]
+status: published
+publishedAt: 2026-11-08
+tags: [guide-step, tasks, typescript, sharp]
+updatedAt: 2026-11-14
+difficulty: intermediate
+estimatedMinutes: 3
+specVersion: 2026-07-28
+lastVerified: 2026-10-31
+---
+
+You now have both halves of a working Tasks setup. Your MCP server answers a
+long `tools/call` with a task handle instead of making the client wait, and your
+MCP client follows that handle until the result arrives. Because the server
+saves each task before it returns the handle, a new connection can pick the task
+up by its ID, and the worker keeps going after the original request has ended.
+You also saw that a tool error arrives inside a `completed` task, so a client has
+to check both the task status and the tool result.
+
+Nothing in that design is specific to images. To use it for report generation, a
+data export or any other slow tool, replace the batch operation and its input and
+result schemas. The capability declaration, the saved task and the polling loop
+stay the same.
+
+## Keep going
+
+- [The finished project](https://github.com/allthingsmcp/all-things-mcp-examples/tree/main/build-your-first-mcp-task/finished) has
+  every source file and test, so you can compare it with your own or use it as a
+  starting point.
+- [How MCP Tasks Work](/blog/how-mcp-tasks-work) explains the same lifecycle
+  without the build, which is useful for sharing with teammates.
+- The [Tasks overview](https://modelcontextprotocol.io/extensions/tasks/overview)
+  covers the situations Tasks is designed for.
+- The [Tasks extension specification](https://tasks.extensions.modelcontextprotocol.io/specification/2026-07-28/tasks)
+  is the reference for every message and status.
+- The [input handling guide](https://tasks.extensions.modelcontextprotocol.io/typescript/client/input-and-recovery)
+  shows how to support tasks that need a person's answer partway through, which
+  this example does not.
+- The [Tasks TypeScript API](https://tasks.extensions.modelcontextprotocol.io/typescript/)
+  documents the lifecycle helpers for building a larger application.

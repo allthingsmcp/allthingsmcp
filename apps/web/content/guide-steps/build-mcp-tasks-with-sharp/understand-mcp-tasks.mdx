@@ -189,7 +189,7 @@ lists more use cases. The statuses, methods and rules in this step come from the
     {
       title: '2. Prepare the project',
       description:
-        'Install the starter. The image resizing, HTTP wiring and file-based task store are supplied.',
+        'Copy the project and install it. The image resizing, HTTP wiring and file-based task store are supplied.',
     },
     {
       title: '3. Build the MCP server',
@@ -214,9 +214,14 @@ lists more use cases. The statuses, methods and rules in this step come from the
   ]}
 />
 
-**Checkpoint:** before moving on, you should be able to answer three questions.
-What does the MCP server return in place of the tool result? _A task handle with
-a `taskId`._ How does an MCP client get the result after reconnecting? _It calls
-`tasks/get` with the saved ID, not `tools/call`._ Which status does a tool error
-produce? _`completed`, with `isError: true` in the result._ No local files change
-in this step.
+**Checkpoint:** before moving on, you should be able to answer these three
+questions.
+
+1. **What does the MCP server return in place of the tool result?** A task
+   handle with a `taskId`.
+2. **How does an MCP client get the result after reconnecting?** It calls
+   `tasks/get` with the saved ID, not `tools/call`.
+3. **Which status does a tool error produce?** `completed`, with
+   `isError: true` in the result.
+
+No local files change in this step.

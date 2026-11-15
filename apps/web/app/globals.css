@@ -3814,11 +3814,6 @@ a:is(:hover, :focus-visible) .call-scene__node--server {
   border-radius: 9px;
   background: var(--surface);
 }
-.mdx-diagram figcaption {
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 0.68rem;
-}
 .mdx-diagram__canvas {
   display: flex;
   align-items: center;

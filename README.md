@@ -24,7 +24,6 @@ Authentication and the database-backed runtime are optional for local work. See 
 | `apps/guide-runtime`     | Independently deployable service for multi-tenant MCP workspaces and Guide runs |
 | `packages/contracts`     | Versioned schemas shared by the website and runtime                             |
 | `packages/mcp-templates` | Declarative capability manifests for runtime workspaces                         |
-| `examples/`              | Runnable projects that accompany Guides                                         |
 | `brand/`                 | Approved logo masters and identity data                                         |
 | `docs/`                  | Contributor documentation ([index](docs/README.md))                             |
 | `skills/`                | Instructions for AI coding assistants (optional)                                |
@@ -33,6 +32,8 @@ Authentication and the database-backed runtime are optional for local work. See 
 The website and runtime share a repository but deploy separately. Supabase Auth owns browser sessions; the website
 calls the runtime with short-lived internal bearer tokens, so runtime credentials are never exposed to browsers. See
 [architecture](docs/architecture.md).
+
+Runnable code for Guides lives in a separate repository, [all-things-mcp-examples](https://github.com/allthingsmcp/all-things-mcp-examples).
 
 ## Contributing
 

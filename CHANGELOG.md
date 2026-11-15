@@ -8,7 +8,7 @@ grouped by date rather than by version until tagged releases begin.
 
 ### Added
 
-- Guide: build MCP Tasks with Sharp, with a runnable example in `examples/mcp-tasks-thumbnails`.
+- Guide: build MCP Tasks with Sharp, with a runnable starter and completed project in the [all-things-mcp-examples](https://github.com/allthingsmcp/all-things-mcp-examples) repository.
 - Contributor model: author profiles with `slug`, `kind`, and `affiliation`; profile pages at `/authors/[slug]`.
 - `SECURITY.md`, `SUPPORT.md`, `.editorconfig`, `.gitattributes`, Dependabot, CodeQL, and dependency review.
 - Content validation enforces one folder per `contentType`.
